@@ -54,10 +54,182 @@ export const RACE_PACING = [
   { type: 'run', label: 'FINAL RUN → FINISH 🏁', pace: '5:00/km', note: 'EMPTY THE TANK' },
 ];
 
+// ── SWAP COMPATIBILITY ──
+// Categories that should NOT be placed back-to-back
+export const CONFLICT_PAIRS = {
+  lower: ['lower', 'hybrid', 'long-run'],   // legs need recovery from legs/hybrid/long runs
+  hybrid: ['lower', 'hybrid'],               // hybrid is hard on legs too
+  'long-run': ['lower', 'long-run', 'hybrid'], // don't run long after legs
+  upper: ['upper'],                           // don't double upper
+  running: ['running', 'long-run'],           // don't stack running days
+};
+
+// ── IT BAND PROTOCOL ──
+// How each IT band status affects workout categories
+export const IT_BAND_RULES = {
+  green: {}, // No modifications
+  yellow: {
+    lower:      { action: 'suggest-B', message: 'IT Band caution → Lighter variant recommended', icon: '⚠️' },
+    running:    { action: 'warn', message: 'Reduce distance 20%, skip intervals if sharp pain', icon: '⚠️' },
+    'long-run': { action: 'warn', message: 'Cap distance, add walk breaks every 2km', icon: '⚠️' },
+    hybrid:     { action: 'warn', message: 'Reduce running segments, focus on stations', icon: '⚠️' },
+  },
+  red: {
+    lower:      { action: 'force-B', message: 'IT Band protect → Switched to mobility variant', icon: '🛑' },
+    running:    { action: 'replace', message: 'Running replaced with bike/row (IT Band protect)', icon: '🛑' },
+    'long-run': { action: 'replace', message: 'Long run replaced with steady-state bike (IT Band protect)', icon: '🛑' },
+    hybrid:     { action: 'modify', message: 'Compromised running removed, stations only', icon: '🛑' },
+  },
+};
+
+// Red Protocol — Running Replacement workouts
+export const RED_PROTOCOL_RUNNING = {
+  day: 'FLEX', type: '🛑 Cardio: Bike/Row (IT Band Protocol)', duration: '60 min',
+  dotClass: 'recovery', intensity: 'Moderate', variant: 'R',
+  category: 'recovery',
+  blocks: [
+    { title: 'Low-Impact Cardio · 40 min', exercises: [
+      { name: 'Stationary Bike (moderate)', detail: 'RPE 5-6, steady cadence 80-90rpm', sets: '25 min' },
+      { name: 'Rowing Machine', detail: 'Smooth strokes, RPE 5. Focus on pull, not push', sets: '15 min' },
+    ]},
+    { title: 'IT Band Rehab · 20 min', exercises: [
+      { name: 'Lateral Band Walks', detail: 'Glute med activation', sets: '3×15/side' },
+      { name: 'Clamshells (banded)', detail: 'Slow, controlled', sets: '3×12/side' },
+      { name: 'Single-Leg Glute Bridge', detail: 'Address imbalance', sets: '3×10/side' },
+      { name: 'Foam Roll Quads & TFL', detail: 'NOT directly on IT band', sets: '5 min' },
+      { name: 'Pigeon Pose', detail: 'Deep hip opener', sets: '2×45s/side' },
+    ]},
+  ]
+};
+
+export const RED_PROTOCOL_LONG_RUN = {
+  day: 'FLEX', type: '🛑 Steady-State Bike (IT Band Protocol)', duration: '60-70 min',
+  dotClass: 'recovery', intensity: 'Low-Moderate', variant: 'R',
+  category: 'recovery',
+  blocks: [
+    { title: 'Steady-State Bike · 45 min', exercises: [
+      { name: 'Zone 2 Bike', detail: 'Conversational pace, 70-80rpm', sets: '45 min' },
+    ]},
+    { title: 'Station Practice (non-impact) · 15 min', exercises: [
+      { name: 'Wall Balls (light)', detail: 'Technique only, no jumping', sets: '50 reps' },
+      { name: 'Farmer\'s Carry', detail: 'Grip endurance', sets: '3×40m', weight: '2×24kg' },
+    ]},
+    { title: 'IT Band Rehab · 10 min', exercises: [
+      { name: 'Monster Walks', detail: 'Banded', sets: '3×12/dir' },
+      { name: 'Hip 90/90 Rotations', detail: 'Mobility', sets: '2×8/side' },
+    ]},
+  ]
+};
+
+// ── B-VARIANT WORKOUTS ──
+// Lighter alternatives for when you already trained that body part recently
+
+const P1_MON_B = {
+  day: 'Monday', type: 'Glutes, Mobility & Core Focus', duration: '75 min',
+  dotClass: 'strength', intensity: 'Moderate', variant: 'B',
+  category: 'lower',
+  blocks: [
+    { title: 'Warm-Up · 10 min', exercises: [
+      { name: 'Easy Bike', detail: '5 minutes', sets: '' },
+      { name: 'Hip 90/90 Rotations', detail: 'Hip mobility', sets: '2×8/side' },
+      { name: 'World\'s Greatest Stretch', detail: 'Full body opener', sets: '2×5/side' },
+    ]},
+    { title: 'Glute & Posterior Chain · 30 min', exercises: [
+      { name: 'Hip Thrust (Barbell)', detail: 'Glute focus, not quad-heavy', sets: '4×12', weight: '60kg' },
+      { name: 'Cable Pull-Through', detail: 'Hinge pattern, low impact', sets: '3×15', weight: 'Moderate' },
+      { name: 'Single-Leg Hip Thrust', detail: 'Address imbalance', sets: '3×10/leg', weight: 'BW' },
+      { name: 'Banded Good Morning', detail: 'Hamstring activation', sets: '3×12' },
+      { name: 'Calf Raises (slow)', detail: '3-second eccentric', sets: '3×12', weight: 'BW+' },
+    ]},
+    { title: 'Core & IT Band Rehab · 25 min', exercises: [
+      { name: 'Side Plank + Hip Dip', detail: 'Obliques + hip stability', sets: '3×10/side' },
+      { name: 'Bird Dog', detail: 'Anti-extension + balance', sets: '3×8/side' },
+      { name: 'Lateral Band Walks', detail: 'IT band rehab', sets: '3×15/side' },
+      { name: 'Copenhagen Side Plank', detail: 'Adductor work', sets: '3×20s/side' },
+      { name: 'Pigeon Pose Hold', detail: 'Deep hip opening', sets: '2×45s/side' },
+      { name: 'Foam Roll Quads & Glutes', detail: 'NOT the IT band directly', sets: '5 min' },
+    ]},
+  ]
+};
+
+const P1_FRI_B = {
+  day: 'Friday', type: 'Push Focus + Grip & Carry', duration: '80 min',
+  dotClass: 'upper', intensity: 'Moderate', variant: 'B',
+  category: 'upper',
+  blocks: [
+    { title: 'Plyometrics · 10 min', exercises: [
+      { name: 'Medicine Ball Chest Pass', detail: 'Power output, wall target', sets: '3×8' },
+      { name: 'Clap Push-Ups (or explosive push-up)', detail: 'Upper body power', sets: '3×5' },
+    ]},
+    { title: 'Push Emphasis · 35 min', exercises: [
+      { name: 'Incline DB Press', detail: 'Upper chest emphasis', sets: '4×10', weight: '28kg/hand' },
+      { name: 'Landmine Press', detail: 'Shoulder-safe pressing', sets: '3×12/arm', weight: 'Moderate' },
+      { name: 'Dips', detail: 'Bodyweight or weighted', sets: '3×10' },
+      { name: 'Cable Fly (low-to-high)', detail: 'Chest isolation', sets: '3×15', weight: 'Light' },
+      { name: 'Lateral Raises', detail: 'Shoulder endurance', sets: '3×15', weight: 'Light' },
+    ]},
+    { title: 'Grip & Carry Circuit · 20 min', exercises: [
+      { name: 'Farmer\'s Walk', detail: 'HYROX station practice', sets: '4×50m', weight: '2×28kg' },
+      { name: 'Plate Pinch Walk', detail: 'Grip endurance', sets: '3×30m' },
+      { name: 'Towel Hang from Bar', detail: 'Sled pull grip prep', sets: '3×20s' },
+      { name: 'Ab Wheel Rollouts', detail: 'Core finish', sets: '3×10' },
+    ]},
+  ]
+};
+
+const P2_MON_B = {
+  day: 'Monday', type: 'Posterior Chain & Hinge Focus', duration: '80 min',
+  dotClass: 'strength', intensity: 'Moderate', variant: 'B',
+  category: 'lower',
+  blocks: [
+    { title: 'Activation · 10 min', exercises: [
+      { name: 'Glute Band Circuit', detail: 'Clamshells + bridges + walks', sets: '2 rounds' },
+      { name: 'Ankle Mobility Drill', detail: 'Wall stretch', sets: '2×30s/side' },
+    ]},
+    { title: 'Posterior Chain · 35 min', exercises: [
+      { name: 'Trap Bar Deadlift (or DB)', detail: 'Hip-dominant, less quad stress', sets: '4×8', weight: '2×34kg' },
+      { name: 'Glute Ham Raise / Nordic Curl', detail: 'Eccentric hamstring', sets: '3×6', weight: 'BW' },
+      { name: 'Cable Romanian Deadlift', detail: 'Constant tension', sets: '3×12', weight: 'Moderate' },
+      { name: 'Reverse Lunge (light)', detail: 'Less knee stress than forward', sets: '3×10/leg', weight: '16kg' },
+      { name: 'Seated Calf Raise', detail: 'Soleus focus', sets: '3×15', weight: 'Moderate' },
+    ]},
+    { title: 'Core + Stability · 20 min', exercises: [
+      { name: 'Suitcase Carry', detail: 'Anti-lateral flexion', sets: '3×40m/side', weight: '24kg' },
+      { name: 'Dead Bug (banded)', detail: 'Enhanced core stability', sets: '3×8/side' },
+      { name: 'Monster Walks', detail: 'Glute medius', sets: '3×15/dir' },
+    ]},
+  ]
+};
+
+const P2_FRI_B = {
+  day: 'Friday', type: 'Pull Focus + SkiErg Simulation', duration: '80 min',
+  dotClass: 'upper', intensity: 'Moderate', variant: 'B',
+  category: 'upper',
+  blocks: [
+    { title: 'Plyometrics · 10 min', exercises: [
+      { name: 'Medicine Ball Slams', detail: 'SkiErg pattern', sets: '4×10', weight: '8kg' },
+      { name: 'Banded Broad Jump', detail: 'Resisted BBJ practice', sets: '3×5' },
+    ]},
+    { title: 'Pull Emphasis · 35 min', exercises: [
+      { name: 'Chin-Ups (weighted if possible)', detail: 'Bicep + lat power', sets: '4×8' },
+      { name: 'Seated Cable Row (wide)', detail: 'Upper back endurance', sets: '4×15', weight: 'Moderate' },
+      { name: 'Single-Arm DB Row', detail: 'Anti-rotation + pull', sets: '3×12/arm', weight: '30kg' },
+      { name: 'Cable Straight-Arm Pulldown', detail: 'SkiErg mechanics', sets: '4×20', weight: 'Mod' },
+      { name: 'Reverse Fly (cable)', detail: 'Rear delt + posture', sets: '3×15', weight: 'Light' },
+    ]},
+    { title: 'Grip + Core · 15 min', exercises: [
+      { name: 'Rope Cable Pull (seated)', detail: 'Sled pull simulation', sets: '4×15' },
+      { name: 'Hanging Knee Raise', detail: 'Core + grip combo', sets: '3×12' },
+      { name: 'Farmer\'s Hold', detail: 'Static grip', sets: '3×30s', weight: '2×32kg' },
+    ]},
+  ]
+};
+
 // ── WEEK SCHEDULES ──
 const P1_MON = {
   day: 'Monday', type: 'Lower Strength-Endurance + Core', duration: '90 min',
-  dotClass: 'strength', intensity: 'High',
+  dotClass: 'strength', intensity: 'High', variant: 'A',
+  category: 'lower',
   blocks: [
     { title: 'Warm-Up · 10 min', exercises: [
       { name: 'Easy Bike or Row', detail: '5 minutes', sets: '' },
@@ -84,7 +256,8 @@ const P1_MON = {
 
 const P1_TUE = {
   day: 'Tuesday', type: 'Running: Easy + Intervals', duration: '60-75 min',
-  dotClass: 'running', intensity: 'High',
+  dotClass: 'running', intensity: 'High', variant: 'A',
+  category: 'running',
   blocks: [
     { title: 'Warm-Up · 10 min', exercises: [
       { name: 'Easy Jog', detail: 'Z1 pace 6:30-7:00/km', sets: '10 min' },
@@ -99,7 +272,8 @@ const P1_TUE = {
 
 const P1_WED = {
   day: 'Wednesday', type: 'Active Recovery / Mobility', duration: '45-60 min',
-  dotClass: 'recovery', intensity: 'Low',
+  dotClass: 'recovery', intensity: 'Low', variant: 'A',
+  category: 'recovery',
   blocks: [
     { title: 'Recovery Session', exercises: [
       { name: 'Easy Bike or Walk', detail: 'Light movement', sets: '20 min' },
@@ -112,7 +286,8 @@ const P1_WED = {
 
 const P1_THU = {
   day: 'Thursday', type: 'Hybrid Conditioning: Stations + Run', duration: '90 min',
-  dotClass: 'hybrid', intensity: 'High',
+  dotClass: 'hybrid', intensity: 'High', variant: 'A',
+  category: 'hybrid',
   blocks: [
     { title: 'Warm-Up · 10 min', exercises: [
       { name: 'Row 500m Easy', detail: 'Get the engine running', sets: '' },
@@ -130,7 +305,8 @@ const P1_THU = {
 
 const P1_FRI = {
   day: 'Friday', type: 'Upper Body + Plyometrics', duration: '90 min',
-  dotClass: 'upper', intensity: 'Moderate-High',
+  dotClass: 'upper', intensity: 'Moderate-High', variant: 'A',
+  category: 'upper',
   blocks: [
     { title: 'Plyometrics (FIRST — Fresh) · 15 min', exercises: [
       { name: 'Pogo Hops', detail: 'Ankle stiffness, minimal ground time', sets: '3×10' },
@@ -156,7 +332,8 @@ const P1_FRI = {
 
 const P1_SAT = {
   day: 'Saturday', type: 'REST DAY', duration: '—',
-  dotClass: 'rest', intensity: 'Rest',
+  dotClass: 'rest', intensity: 'Rest', variant: 'A',
+  category: 'rest',
   blocks: [
     { title: 'Full Recovery', exercises: [
       { name: 'Sleep 8+ Hours', detail: 'Non-negotiable', sets: '' },
@@ -168,7 +345,8 @@ const P1_SAT = {
 
 const P1_SUN = {
   day: 'Sunday', type: 'Long Run + Station Practice', duration: '90 min',
-  dotClass: 'long-run', intensity: 'Moderate',
+  dotClass: 'long-run', intensity: 'Moderate', variant: 'A',
+  category: 'long-run',
   blocks: [
     { title: 'Long Run', exercises: [
       { name: 'Zone 2 Run', detail: '@ 6:00-6:15/km', sets: '8K→10K' },
@@ -183,7 +361,8 @@ const P1_SUN = {
 // Phase 2 adjustments
 const P2_MON = {
   day: 'Monday', type: 'Lower Body Power + Endurance', duration: '90 min',
-  dotClass: 'strength', intensity: 'High',
+  dotClass: 'strength', intensity: 'High', variant: 'A',
+  category: 'lower',
   blocks: [
     { title: 'Plyometrics · 15 min', exercises: [
       { name: 'Box Jumps (45cm)', detail: 'Step down after landing', sets: '4×5' },
@@ -208,7 +387,8 @@ const P2_MON = {
 
 const P2_TUE = {
   day: 'Tuesday', type: 'Running: Threshold + Speed', duration: '75 min',
-  dotClass: 'running', intensity: 'High',
+  dotClass: 'running', intensity: 'High', variant: 'A',
+  category: 'running',
   blocks: [
     { title: 'Main Session', exercises: [
       { name: 'Z2 Warm-Up', detail: 'Easy conversational pace', sets: '10 min' },
@@ -222,7 +402,8 @@ const P2_TUE = {
 
 const P2_THU = {
   day: 'Thursday', type: '⚡ Compromised Running Megablock', duration: '90 min',
-  dotClass: 'hybrid', intensity: 'Very High',
+  dotClass: 'hybrid', intensity: 'Very High', variant: 'A',
+  category: 'hybrid',
   blocks: [
     { title: 'Half-Race Simulation', exercises: [
       { name: '1km Run', detail: '@ 5:30/km', sets: 'Run 1' },
@@ -240,7 +421,8 @@ const P2_THU = {
 
 const P2_FRI = {
   day: 'Friday', type: 'Upper Body Endurance + Plyo', duration: '90 min',
-  dotClass: 'upper', intensity: 'Moderate-High',
+  dotClass: 'upper', intensity: 'Moderate-High', variant: 'A',
+  category: 'upper',
   blocks: [
     { title: 'Plyometrics · 15 min', exercises: [
       { name: 'Medicine Ball Slams', detail: 'SkiErg simulation', sets: '4×10' },
@@ -266,7 +448,8 @@ const P2_FRI = {
 
 const P2_SUN = {
   day: 'Sunday', type: 'Long Run + Station Stacking', duration: '90-100 min',
-  dotClass: 'long-run', intensity: 'Moderate',
+  dotClass: 'long-run', intensity: 'Moderate', variant: 'A',
+  category: 'long-run',
   blocks: [
     { title: 'Long Run', exercises: [
       { name: 'Zone 2 Run', detail: '@ 5:45-6:00/km', sets: '10K→12K' },
@@ -282,7 +465,8 @@ const P2_SUN = {
 // Phase 3
 const P3_MON = {
   day: 'Monday', type: 'Light Lower Body + Core', duration: '60 min',
-  dotClass: 'strength', intensity: 'Moderate',
+  dotClass: 'strength', intensity: 'Moderate', variant: 'A',
+  category: 'lower',
   blocks: [
     { title: 'Maintenance Strength', exercises: [
       { name: 'Barbell Back Squat', detail: 'Reduced — maintain don\'t build', sets: '3×8', weight: '60%' },
@@ -296,7 +480,8 @@ const P3_MON = {
 
 const P3_TUE = {
   day: 'Tuesday', type: 'Running: Race Pace Sharpening', duration: '60 min',
-  dotClass: 'running', intensity: 'Moderate-High',
+  dotClass: 'running', intensity: 'Moderate-High', variant: 'A',
+  category: 'running',
   blocks: [
     { title: 'Sharpening Session', exercises: [
       { name: 'Z2 Warm-Up', detail: 'Easy', sets: '10 min' },
@@ -308,7 +493,8 @@ const P3_TUE = {
 
 const P3_THU = {
   day: 'Thursday', type: '🏁 Half-Race Simulation', duration: '60-75 min',
-  dotClass: 'hybrid', intensity: 'High',
+  dotClass: 'hybrid', intensity: 'High', variant: 'A',
+  category: 'hybrid',
   blocks: [
     { title: 'Reduced Race Sim (4 stations + 4 runs)', exercises: [
       { name: '1km Run', detail: 'Race pace', sets: '' },
@@ -324,7 +510,8 @@ const P3_THU = {
 
 const P3_SUN = {
   day: 'Sunday', type: 'Easy Z2 Run + Light Station', duration: '60 min',
-  dotClass: 'long-run', intensity: 'Low-Moderate',
+  dotClass: 'long-run', intensity: 'Low-Moderate', variant: 'A',
+  category: 'long-run',
   blocks: [
     { title: 'Recovery Volume', exercises: [
       { name: 'Zone 2 Run', detail: 'Comfortable', sets: '8K' },
@@ -334,12 +521,12 @@ const P3_SUN = {
 };
 
 // Taper week
-const TAPER_MON = { day: 'Monday', type: 'Easy Jog + Mobility', duration: '40 min', dotClass: 'recovery', intensity: 'Low', blocks: [{ title: 'Taper Session', exercises: [{ name: 'Easy Z2 Jog', detail: 'Very comfortable', sets: '30 min' }, { name: 'Full Mobility Flow', detail: 'Every joint', sets: '10 min' }]}] };
-const TAPER_TUE = { day: 'Tuesday', type: 'Strides + Shake Out', duration: '30 min', dotClass: 'running', intensity: 'Low', blocks: [{ title: 'Shake Out', exercises: [{ name: '200m Strides', detail: 'Smooth, 85% effort', sets: '4 reps' }, { name: 'Wall Balls', detail: 'Technique only', sets: '20 reps' }]}] };
-const TAPER_WED = { day: 'Wednesday', type: 'FULL REST', duration: '—', dotClass: 'rest', intensity: 'Rest', blocks: [{ title: 'Rest & Prepare', exercises: [{ name: 'Full Rest', detail: 'Walk only if needed', sets: '' }, { name: 'Prep Gear', detail: 'Shoes, orthotics, gloves, nutrition', sets: '' }]}] };
-const TAPER_THU = { day: 'Thursday', type: 'Light Jog + Feel Machines', duration: '25 min', dotClass: 'recovery', intensity: 'Very Low', blocks: [{ title: 'Activation', exercises: [{ name: 'Easy Jog', detail: 'Barely above walking', sets: '20 min' }, { name: 'Row', detail: 'Feel the rhythm', sets: '5 min' }]}] };
-const TAPER_FRI = { day: 'Friday', type: '🏁 FULL REST — Race Eve', duration: '—', dotClass: 'rest', intensity: 'Rest', blocks: [{ title: 'Pre-Race', exercises: [{ name: 'Full REST', detail: 'Sleep 9 hours', sets: '' }, { name: 'Carb Load', detail: 'Pasta, rice, bread with honey', sets: '' }, { name: 'Mental Rehearsal', detail: 'Visualize pacing plan', sets: '' }]}] };
-const TAPER_SAT = { day: 'Saturday', type: '🔥 RACE DAY', duration: '~1:30', dotClass: 'strength', intensity: 'RACE', blocks: [{ title: 'HYROX Buenos Aires', exercises: [{ name: 'Warm-Up', detail: '20 min light jog + dynamic stretches', sets: '' }, { name: '🏁 RACE', detail: 'Trust the process. Enjoy every second.', sets: '~1:30' }, { name: 'Cool-Down & Celebrate', detail: 'You earned this! 🏅', sets: '' }]}] };
+const TAPER_MON = { day: 'Monday', type: 'Easy Jog + Mobility', duration: '40 min', dotClass: 'recovery', intensity: 'Low', variant: 'A', category: 'recovery', blocks: [{ title: 'Taper Session', exercises: [{ name: 'Easy Z2 Jog', detail: 'Very comfortable', sets: '30 min' }, { name: 'Full Mobility Flow', detail: 'Every joint', sets: '10 min' }]}] };
+const TAPER_TUE = { day: 'Tuesday', type: 'Strides + Shake Out', duration: '30 min', dotClass: 'running', intensity: 'Low', variant: 'A', category: 'running', blocks: [{ title: 'Shake Out', exercises: [{ name: '200m Strides', detail: 'Smooth, 85% effort', sets: '4 reps' }, { name: 'Wall Balls', detail: 'Technique only', sets: '20 reps' }]}] };
+const TAPER_WED = { day: 'Wednesday', type: 'FULL REST', duration: '—', dotClass: 'rest', intensity: 'Rest', variant: 'A', category: 'rest', blocks: [{ title: 'Rest & Prepare', exercises: [{ name: 'Full Rest', detail: 'Walk only if needed', sets: '' }, { name: 'Prep Gear', detail: 'Shoes, orthotics, gloves, nutrition', sets: '' }]}] };
+const TAPER_THU = { day: 'Thursday', type: 'Light Jog + Feel Machines', duration: '25 min', dotClass: 'recovery', intensity: 'Very Low', variant: 'A', category: 'recovery', blocks: [{ title: 'Activation', exercises: [{ name: 'Easy Jog', detail: 'Barely above walking', sets: '20 min' }, { name: 'Row', detail: 'Feel the rhythm', sets: '5 min' }]}] };
+const TAPER_FRI = { day: 'Friday', type: '🏁 FULL REST — Race Eve', duration: '—', dotClass: 'rest', intensity: 'Rest', variant: 'A', category: 'rest', blocks: [{ title: 'Pre-Race', exercises: [{ name: 'Full REST', detail: 'Sleep 9 hours', sets: '' }, { name: 'Carb Load', detail: 'Pasta, rice, bread with honey', sets: '' }, { name: 'Mental Rehearsal', detail: 'Visualize pacing plan', sets: '' }]}] };
+const TAPER_SAT = { day: 'Saturday', type: '🔥 RACE DAY', duration: '~1:30', dotClass: 'strength', intensity: 'RACE', variant: 'A', category: 'rest', blocks: [{ title: 'HYROX Buenos Aires', exercises: [{ name: 'Warm-Up', detail: '20 min light jog + dynamic stretches', sets: '' }, { name: '🏁 RACE', detail: 'Trust the process. Enjoy every second.', sets: '~1:30' }, { name: 'Cool-Down & Celebrate', detail: 'You earned this! 🏅', sets: '' }]}] };
 
 export const WEEKS = [
   { week: 1, phase: 1, days: [P1_MON, P1_TUE, P1_WED, P1_THU, P1_FRI, P1_SAT, P1_SUN] },
@@ -353,3 +540,12 @@ export const WEEKS = [
   { week: 9, phase: 3, days: [P3_MON, P3_TUE, P1_WED, P3_THU, P1_FRI, P1_SAT, P3_SUN] },
   { week: 10, phase: 3, taper: true, days: [TAPER_MON, TAPER_TUE, TAPER_WED, TAPER_THU, TAPER_FRI, TAPER_SAT, P1_SUN] },
 ];
+
+// Alt variant lookup — maps original day objects to their B-variant
+export const ALT_VARIANTS = new Map([
+  [P1_MON, P1_MON_B],
+  [P1_FRI, P1_FRI_B],
+  [P2_MON, P2_MON_B],
+  [P2_FRI, P2_FRI_B],
+  // Phase 3 and taper: no variants (too close to race, stick to plan)
+]);

@@ -4,7 +4,7 @@
    ═══════════════════════════════════════════════════════════ */
 
 import './style.css';
-import { RACE_DATE, ATHLETE, PHASES, STATIONS, RACE_PACING, WEEKS } from './data.js';
+import { RACE_DATE, ATHLETE, PHASES, STATIONS, RACE_PACING, WEEKS, CONFLICT_PAIRS, ALT_VARIANTS, IT_BAND_RULES, RED_PROTOCOL_RUNNING, RED_PROTOCOL_LONG_RUN } from './data.js';
 
 // ── STATE ──
 const state = {
@@ -13,13 +13,101 @@ const state = {
   expandedDay: null,
   checkedExercises: JSON.parse(localStorage.getItem('hyrox-checks') || '{}'),
   itBandStatus: localStorage.getItem('hyrox-itband') || 'green',
+  weekSwaps: JSON.parse(localStorage.getItem('hyrox-swaps') || '{}'),     // { "w1": [0,1,2,3,4,5,6] } — reordered day indices
+  weekVariants: JSON.parse(localStorage.getItem('hyrox-variants') || '{}'), // { "w1-d0": "B" }
+  showSwapModal: false,
+  swapSourceDay: null,  // index of the day being swapped
+  showVariantModal: false,
+  variantDay: null,     // index of the day switching variant
 };
 
 function saveChecks() {
   localStorage.setItem('hyrox-checks', JSON.stringify(state.checkedExercises));
 }
 
-// ── HELPERS ──
+function saveSwaps() {
+  localStorage.setItem('hyrox-swaps', JSON.stringify(state.weekSwaps));
+}
+
+function saveVariants() {
+  localStorage.setItem('hyrox-variants', JSON.stringify(state.weekVariants));
+}
+
+// Get the swapped day order for a given week (default = [0,1,2,3,4,5,6])
+function getSwappedOrder(weekNum) {
+  return state.weekSwaps[`w${weekNum}`] || [0, 1, 2, 3, 4, 5, 6];
+}
+
+// Get resolved days for a week (with swaps + variants + IT band applied)
+function getResolvedDays(weekNum) {
+  const weekData = WEEKS.find(w => w.week === weekNum);
+  if (!weekData) return [];
+  const order = getSwappedOrder(weekNum);
+  const rules = IT_BAND_RULES[state.itBandStatus] || {};
+
+  return order.map((origIdx, displayIdx) => {
+    const originalDay = weekData.days[origIdx];
+    const variantKey = `w${weekNum}-d${origIdx}`;
+    const category = originalDay.category;
+    const rule = rules[category];
+
+    // Check if user manually selected a variant
+    if (state.weekVariants[variantKey] === 'B') {
+      const altDay = ALT_VARIANTS.get(originalDay);
+      return altDay || originalDay;
+    }
+
+    // IT Band protocol overrides
+    if (rule) {
+      if (rule.action === 'force-B') {
+        // Red: force B-variant for lower body
+        const altDay = ALT_VARIANTS.get(originalDay);
+        if (altDay) return altDay;
+      }
+      if (rule.action === 'replace' && category === 'running') {
+        return { ...RED_PROTOCOL_RUNNING, day: originalDay.day };
+      }
+      if (rule.action === 'replace' && category === 'long-run') {
+        return { ...RED_PROTOCOL_LONG_RUN, day: originalDay.day };
+      }
+    }
+
+    return originalDay;
+  });
+}
+
+// Get IT band rule for a specific day category
+function getITBandRule(category) {
+  const rules = IT_BAND_RULES[state.itBandStatus] || {};
+  return rules[category] || null;
+}
+
+// Check if swapping two days creates a conflict
+function checkSwapSafety(weekNum, sourceIdx, targetIdx) {
+  const weekData = WEEKS.find(w => w.week === weekNum);
+  if (!weekData) return { safe: true, message: '' };
+
+  // Simulate the swap
+  const order = [...getSwappedOrder(weekNum)];
+  [order[sourceIdx], order[targetIdx]] = [order[targetIdx], order[sourceIdx]];
+
+  // Check adjacency after swap
+  const warnings = [];
+  for (let i = 0; i < order.length - 1; i++) {
+    const dayA = weekData.days[order[i]];
+    const dayB = weekData.days[order[i + 1]];
+    const catA = dayA.category;
+    const catB = dayB.category;
+    if (catA && catB && CONFLICT_PAIRS[catA]?.includes(catB)) {
+      warnings.push(`${dayA.type} → ${dayB.type} are back-to-back (recovery risk)`);
+    }
+  }
+
+  return {
+    safe: warnings.length === 0,
+    message: warnings.length > 0 ? warnings[0] : '✅ Good recovery spacing'
+  };
+}
 function getDaysUntilRace() {
   const now = new Date();
   const diff = RACE_DATE - now;
@@ -78,6 +166,10 @@ const icons = {
   profile: `<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
   chevron: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>`,
   check: `<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+  swap: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>`,
+  variant: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M12 22v-8.3a4 4 0 0 0-1.172-2.872L3 3"/><path d="m15 9 6-6"/></svg>`,
+  close: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+  reset: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 2v6h6M2.66 15.57a10 10 0 1 0 .57-8.38"/></svg>`,
 };
 
 // ── RENDER ──
@@ -87,6 +179,8 @@ function render() {
     ${renderHeader()}
     ${renderPage()}
     ${renderNav()}
+    ${state.showSwapModal ? renderSwapModal() : ''}
+    ${state.showVariantModal ? renderVariantModal() : ''}
   `;
   bindEvents();
 }
@@ -149,6 +243,7 @@ function renderTrainingPage() {
   const phase = getPhaseForWeek(state.selectedWeek);
   const progress = getWeekProgress(state.selectedWeek);
   const overall = getOverallProgress();
+  const resolvedDays = getResolvedDays(state.selectedWeek);
 
   return `
     <div class="page">
@@ -164,7 +259,36 @@ function renderTrainingPage() {
           <span class="caption">Overall Progress</span>
           <span class="caption fw-600">${overall}%</span>
         </div>
+
+        <!-- IT Band Status (inline) -->
+        <div class="itband-inline">
+          <div class="itband-label">IT Band</div>
+          <div class="itband-pills">
+            <button class="itband-pill ${state.itBandStatus === 'green' ? 'active green' : ''}" data-itband="green">
+              <span class="itband-dot green-dot"></span>Go
+            </button>
+            <button class="itband-pill ${state.itBandStatus === 'yellow' ? 'active yellow' : ''}" data-itband="yellow">
+              <span class="itband-dot yellow-dot"></span>Caution
+            </button>
+            <button class="itband-pill ${state.itBandStatus === 'red' ? 'active red' : ''}" data-itband="red">
+              <span class="itband-dot red-dot"></span>Stop
+            </button>
+          </div>
+        </div>
       </div>
+
+      ${state.itBandStatus !== 'green' ? `
+        <div class="itband-banner ${state.itBandStatus}">
+          <div class="itband-banner-icon">${state.itBandStatus === 'yellow' ? '⚠️' : '🛑'}</div>
+          <div class="itband-banner-content">
+            <div class="itband-banner-title">${state.itBandStatus === 'yellow' ? 'IT Band Caution Active' : 'IT Band Protect Mode'}</div>
+            <div class="itband-banner-desc">${state.itBandStatus === 'yellow'
+              ? 'Lower body → B-variant suggested. Running → reduced volume.'
+              : 'Running → bike/row. Lower body → mobility variant. Hybrid → stations only.'
+            }</div>
+          </div>
+        </div>
+      ` : ''}
 
       <!-- Week Selector -->
       <div class="section">
@@ -191,8 +315,10 @@ function renderTrainingPage() {
       <div class="section">
         <div class="section-header">
           <span class="section-title">Daily Schedule</span>
+          ${state.weekSwaps[`w${state.selectedWeek}`] || Object.keys(state.weekVariants).some(k => k.startsWith(`w${state.selectedWeek}-`))
+            ? `<button class="reset-week-btn" data-resetweek="${state.selectedWeek}">${icons.reset} Reset Week</button>` : ''}
         </div>
-        ${weekData.days.map((day, di) => renderDayCard(day, di, state.selectedWeek)).join('')}
+        ${resolvedDays.map((day, di) => renderDayCard(day, di, state.selectedWeek)).join('')}
       </div>
     </div>
   `;
@@ -200,19 +326,53 @@ function renderTrainingPage() {
 
 function renderDayCard(day, dayIndex, weekNum) {
   const isExpanded = state.expandedDay === `${weekNum}-${dayIndex}`;
+  const weekData = WEEKS.find(w => w.week === weekNum);
+  const order = getSwappedOrder(weekNum);
+  const origIdx = order[dayIndex];
+  const originalDay = weekData.days[origIdx];
+  const hasAlt = ALT_VARIANTS.has(originalDay);
+  const variantKey = `w${weekNum}-d${origIdx}`;
+  const currentVariant = state.weekVariants[variantKey] || 'A';
+  const isSwapped = order[dayIndex] !== dayIndex;
+  const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+  // IT Band rule for this day
+  const itRule = getITBandRule(originalDay.category);
+  const isITBandModified = itRule && (itRule.action === 'force-B' || itRule.action === 'replace');
+  const variantDisplay = day.variant === 'R' ? 'R' : (currentVariant === 'B' || isITBandModified) ? 'B' : null;
+
   return `
-    <div class="day-card ${isExpanded ? 'expanded' : ''}" data-day="${weekNum}-${dayIndex}">
+    <div class="day-card ${isExpanded ? 'expanded' : ''} ${isSwapped ? 'swapped' : ''} ${itRule ? 'itband-affected' : ''}" data-day="${weekNum}-${dayIndex}">
       <div class="day-card-header">
         <div class="day-dot ${day.dotClass}"></div>
         <div class="day-info">
-          <div class="day-name">${day.day}</div>
-          <div class="day-type">${day.type}</div>
+          <div class="day-name">${dayNames[dayIndex]}${isSwapped ? ` <span class="swap-badge">↔ from ${day.day}</span>` : ''}${itRule ? ` <span class="itband-day-badge ${state.itBandStatus}">${itRule.icon}</span>` : ''}</div>
+          <div class="day-type">${day.type}${variantDisplay ? ` <span class="variant-badge ${variantDisplay === 'R' ? 'red-protocol' : ''}">${variantDisplay}</span>` : ''}</div>
         </div>
         <div class="day-duration">${day.duration}</div>
         <div class="day-chevron">${icons.chevron}</div>
       </div>
       <div class="day-card-body">
         <div class="day-exercises">
+          ${itRule ? `
+            <div class="itband-day-alert ${state.itBandStatus}">
+              <span class="itband-day-alert-icon">${itRule.icon}</span>
+              <span class="itband-day-alert-text">${itRule.message}</span>
+            </div>
+          ` : ''}
+
+          <!-- Action Buttons -->
+          <div class="day-actions">
+            <button class="day-action-btn" data-swapday="${dayIndex}" title="Swap this day">
+              ${icons.swap} <span>Swap Day</span>
+            </button>
+            ${hasAlt && !isITBandModified ? `
+              <button class="day-action-btn ${currentVariant === 'B' ? 'active' : ''}" data-variantday="${dayIndex}" title="Switch variant">
+                ${icons.variant} <span>${currentVariant === 'A' ? 'Alt Workout' : 'Standard'}</span>
+              </button>
+            ` : ''}
+          </div>
+
           ${day.blocks.map((block, bi) => `
             <div class="exercise-group">
               <div class="exercise-group-title">${block.title}</div>
@@ -237,6 +397,85 @@ function renderDayCard(day, dayIndex, weekNum) {
               }).join('')}
             </div>
           `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ── SWAP MODAL ──
+function renderSwapModal() {
+  const weekNum = state.selectedWeek;
+  const weekData = WEEKS.find(w => w.week === weekNum);
+  const order = getSwappedOrder(weekNum);
+  const sourceIdx = state.swapSourceDay;
+  const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+  return `
+    <div class="modal-overlay" data-closemodal>
+      <div class="modal-container">
+        <div class="modal-header">
+          <div class="modal-title">Swap ${dayNames[sourceIdx]}</div>
+          <button class="modal-close" data-closemodal>${icons.close}</button>
+        </div>
+        <div class="modal-subtitle">Choose a day to swap with</div>
+        <div class="swap-options">
+          ${order.map((origIdx, displayIdx) => {
+            if (displayIdx === sourceIdx) return '';
+            const day = weekData.days[origIdx];
+            const safety = checkSwapSafety(weekNum, sourceIdx, displayIdx);
+            return `
+              <button class="swap-option ${!safety.safe ? 'warning' : ''}" data-swaptarget="${displayIdx}">
+                <div class="swap-option-header">
+                  <div class="day-dot ${day.dotClass}" style="width:8px;height:8px"></div>
+                  <span class="swap-option-day">${dayNames[displayIdx]}</span>
+                  <span class="swap-option-type">${day.type}</span>
+                </div>
+                <div class="swap-safety ${safety.safe ? 'safe' : 'warn'}">
+                  ${safety.message}
+                </div>
+              </button>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ── VARIANT MODAL ──
+function renderVariantModal() {
+  const weekNum = state.selectedWeek;
+  const weekData = WEEKS.find(w => w.week === weekNum);
+  const order = getSwappedOrder(weekNum);
+  const displayIdx = state.variantDay;
+  const origIdx = order[displayIdx];
+  const originalDay = weekData.days[origIdx];
+  const altDay = ALT_VARIANTS.get(originalDay);
+  const variantKey = `w${weekNum}-d${origIdx}`;
+  const currentVariant = state.weekVariants[variantKey] || 'A';
+
+  if (!altDay) return '';
+
+  return `
+    <div class="modal-overlay" data-closemodal>
+      <div class="modal-container">
+        <div class="modal-header">
+          <div class="modal-title">Choose Workout Variant</div>
+          <button class="modal-close" data-closemodal>${icons.close}</button>
+        </div>
+        <div class="modal-subtitle">Same focus area, different exercise selection</div>
+        <div class="variant-options">
+          <button class="variant-option ${currentVariant === 'A' ? 'selected' : ''}" data-selectvariant="A">
+            <div class="variant-option-label">A — Standard</div>
+            <div class="variant-option-desc">${originalDay.type}</div>
+            <div class="variant-option-intensity">${originalDay.intensity} · ${originalDay.duration}</div>
+          </button>
+          <button class="variant-option ${currentVariant === 'B' ? 'selected' : ''}" data-selectvariant="B">
+            <div class="variant-option-label">B — Alternative</div>
+            <div class="variant-option-desc">${altDay.type}</div>
+            <div class="variant-option-intensity">${altDay.intensity} · ${altDay.duration}</div>
+          </button>
         </div>
       </div>
     </div>
@@ -526,8 +765,8 @@ function bindEvents() {
     });
   });
 
-  // IT band selector
-  document.querySelectorAll('.traffic-item').forEach(item => {
+  // IT band selector (both Race Day traffic-item and Training inline pills)
+  document.querySelectorAll('.traffic-item, .itband-pill').forEach(item => {
     item.addEventListener('click', () => {
       state.itBandStatus = item.dataset.itband;
       localStorage.setItem('hyrox-itband', state.itBandStatus);
@@ -535,13 +774,97 @@ function bindEvents() {
     });
   });
 
-  // Reset button
+  // ── SWAP / VARIANT BUTTONS ──
+  document.querySelectorAll('[data-swapday]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      state.swapSourceDay = parseInt(btn.dataset.swapday);
+      state.showSwapModal = true;
+      render();
+    });
+  });
+
+  document.querySelectorAll('[data-variantday]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const dayIdx = parseInt(btn.dataset.variantday);
+      const weekNum = state.selectedWeek;
+      const order = getSwappedOrder(weekNum);
+      const origIdx = order[dayIdx];
+      const variantKey = `w${weekNum}-d${origIdx}`;
+      const current = state.weekVariants[variantKey] || 'A';
+      // Quick toggle A/B
+      if (current === 'A') {
+        state.weekVariants[variantKey] = 'B';
+      } else {
+        delete state.weekVariants[variantKey];
+      }
+      saveVariants();
+      render();
+    });
+  });
+
+  // Swap modal — target selection
+  document.querySelectorAll('[data-swaptarget]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetIdx = parseInt(btn.dataset.swaptarget);
+      const weekNum = state.selectedWeek;
+      const order = [...getSwappedOrder(weekNum)];
+      const sourceIdx = state.swapSourceDay;
+
+      // Perform the swap
+      [order[sourceIdx], order[targetIdx]] = [order[targetIdx], order[sourceIdx]];
+      state.weekSwaps[`w${weekNum}`] = order;
+      saveSwaps();
+
+      // Close modal
+      state.showSwapModal = false;
+      state.swapSourceDay = null;
+      state.expandedDay = null;
+      render();
+    });
+  });
+
+  // Modal close
+  document.querySelectorAll('[data-closemodal]').forEach(el => {
+    el.addEventListener('click', (e) => {
+      if (e.target === el) {
+        state.showSwapModal = false;
+        state.showVariantModal = false;
+        state.swapSourceDay = null;
+        state.variantDay = null;
+        render();
+      }
+    });
+  });
+
+  // Reset week customizations
+  document.querySelectorAll('[data-resetweek]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const weekNum = parseInt(btn.dataset.resetweek);
+      delete state.weekSwaps[`w${weekNum}`];
+      // Clear variants for this week
+      Object.keys(state.weekVariants).forEach(k => {
+        if (k.startsWith(`w${weekNum}-`)) delete state.weekVariants[k];
+      });
+      saveSwaps();
+      saveVariants();
+      render();
+    });
+  });
+
+  // Reset all progress button
   const resetBtn = document.getElementById('resetBtn');
   if (resetBtn) {
     resetBtn.addEventListener('click', () => {
       if (confirm('Reset all training progress? This cannot be undone.')) {
         state.checkedExercises = {};
+        state.weekSwaps = {};
+        state.weekVariants = {};
         saveChecks();
+        saveSwaps();
+        saveVariants();
         render();
       }
     });
