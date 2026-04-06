@@ -1,0 +1,14 @@
+{
+  "name": "HYROX PREP — Buenos Aires 2026",
+  "short_name": "HYROX PREP",
+  "description": "10-Week Training Plan for HYROX Open Singles",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0D0D0D",
+  "theme_color": "#0D0D0D",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
