@@ -54,6 +54,13 @@ export const RACE_PACING = [
   { type: 'run', label: 'FINAL RUN → FINISH 🏁', pace: '5:00/km', note: 'EMPTY THE TANK' },
 ];
 
+// ── SLED PULL OPTION ──
+// If your sled push machine supports rope attachment for sled pull:
+// → Replace Walking Lunges in Thursday sims with Sled Pull 50m
+// → Start at ~70-80kg, progress to race weight 103kg
+// → Hand-over-hand rope technique, stay low, use hips
+// → This would give you Stations 2, 3, 6, 8 in simulations
+
 // ── SWAP COMPATIBILITY ──
 // Categories that should NOT be placed back-to-back
 export const CONFLICT_PAIRS = {
@@ -294,7 +301,7 @@ const P1_THU = {
       { name: 'Dynamic Stretches', detail: 'Full body', sets: '' },
     ]},
     { title: 'Station Circuit · 4 Rounds (60 min)', exercises: [
-      { name: 'Rowing Machine', detail: 'Moderate effort, find rhythm', sets: '500m' },
+      { name: 'Sled Push', detail: 'Low angle, 45° lean, short explosive pushes', sets: '50m', weight: '~100kg' },
       { name: 'Farmer\'s Carry (DBs)', detail: '2×24kg dumbbells', sets: '100m', weight: '2×24kg' },
       { name: 'Walking Lunges', detail: 'BW or 10kg DB like sandbag', sets: '50m' },
       { name: 'Wall Balls / MB Thrusters', detail: '6kg med ball, hit target', sets: '20 reps', weight: '6kg' },
@@ -407,7 +414,7 @@ const P2_THU = {
   blocks: [
     { title: 'Half-Race Simulation', exercises: [
       { name: '1km Run', detail: '@ 5:30/km', sets: 'Run 1' },
-      { name: 'Row 500m', detail: 'Hard effort', sets: 'Station' },
+      { name: 'Sled Push 50m', detail: '45° lean, short explosive pushes, 5-10s planned rests', sets: 'Station', weight: '120-140kg' },
       { name: '1km Run (COMPROMISED)', detail: '@ 5:30-5:45/km — legs heavy!', sets: 'Run 2' },
       { name: 'Farmer\'s Carry 200m', detail: '2×24kg', sets: 'Station', weight: '2×24kg' },
       { name: '1km Run (COMPROMISED)', detail: '@ 5:45-6:00/km', sets: 'Run 3' },
@@ -498,7 +505,7 @@ const P3_THU = {
   blocks: [
     { title: 'Reduced Race Sim (4 stations + 4 runs)', exercises: [
       { name: '1km Run', detail: 'Race pace', sets: '' },
-      { name: 'Row 1,000m', detail: 'Race effort', sets: '' },
+      { name: 'Sled Push 50m', detail: 'Race weight! Low angle, controlled explosive pushes', sets: '', weight: '140-152kg' },
       { name: '1km Run (compromised)', detail: 'Target pace', sets: '' },
       { name: 'Farmer\'s Carry 200m', detail: '2×24kg', sets: '', weight: '2×24kg' },
       { name: '1km Run (compromised)', detail: 'Steady', sets: '' },
