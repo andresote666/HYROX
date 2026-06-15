@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>HYROX Workout Uploader</title>
+    <style>
+        body { font-family: monospace; background: #1a1a2e; color: #0ff; padding: 20px; }
+        h1 { color: #ff6b6b; }
+        .log { background: #0d0d1a; padding: 15px; border-radius: 8px; max-height: 600px; overflow-y: auto; white-space: pre-wrap; }
+        .ok { color: #4ecdc4; }
+        .fail { color: #ff6b6b; }
+        .info { color: #ffa62b; }
+        button { background: #ff6b6b; color: white; border: none; padding: 12px 24px; font-size: 16px; cursor: pointer; border-radius: 8px; margin: 10px 5px; }
+        button:hover { background: #ee5a5a; }
+        button:disabled { background: #555; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+    <h1>🏋️ HYROX → Garmin Connect Uploader</h1>
+    <p class="info">Open this file while logged into <a href="https://connect.garmin.com" target="_blank" style="color:#ffa62b">connect.garmin.com</a> in the same browser.</p>
+    
+    <button onclick="testConnection()">1. Test Connection</button>
+    <button onclick="uploadAll()" id="uploadBtn" disabled>2. Upload All 21 Workouts</button>
+    
+    <div class="log" id="log"></div>
+
+<script>
+const BASE = "https://connect.garmin.com/proxy/workout-service";
+const log = document.getElementById("log");
+
+function addLog(msg, cls = "") {
+    const span = document.createElement("span");
+    span.className = cls;
+    span.textContent = msg + "\n";
+    log.appendChild(span);
+    log.scrollTop = log.scrollHeight;
+}
+
+// ===================== STEP BUILDERS =====================
+const SPORT_RUNNING = {sportTypeId: 1, sportTypeKey: "running"};
+const SPORT_STRENGTH = {sportTypeId: 5, sportTypeKey: "strength_training"};
+const SPORT_CARDIO = {sportTypeId: 10, sportTypeKey: "cardio_training"};
+
+const STEP_WARMUP = {stepTypeId: 1, stepTypeKey: "warmup"};
+const STEP_COOLDOWN = {stepTypeId: 2, stepTypeKey: "cooldown"};
+const STEP_INTERVAL = {stepTypeId: 3, stepTypeKey: "interval"};
+const STEP_REST = {stepTypeId: 4, stepTypeKey: "rest"};
+
+const END_LAP = {conditionTypeId: 1, conditionTypeKey: "lap.button"};
+const END_TIME = {conditionTypeId: 2, conditionTypeKey: "time"};
+const END_DIST = {conditionTypeId: 3, conditionTypeKey: "distance"};
+const END_REPS = {conditionTypeId: 10, conditionTypeKey: "reps"};
+
+const NO_TARGET = {workoutTargetTypeId: 1, workoutTargetTypeKey: "no.target"};
+
+function step(order, type, endCond, endVal, exCat, exName, desc) {
+    const s = { type: "ExecutableStepDTO", stepOrder: order, stepType: type, endCondition: endCond, targetType: NO_TARGET };
+    if (endVal != null) s.endConditionValue = endVal;
+    if (exCat) s.exerciseCategory = {exerciseCategoryKey: exCat};
+    if (exName) s.exerciseName = exName;
+    if (desc) s.description = desc;
+    return s;
+}
+
+function wu(o,sec,desc,cat,name) { return step(o, STEP_WARMUP, sec?END_TIME:END_LAP, sec, cat, name, desc); }
+function act(o,{reps,sec,dist,cat,name,desc}={}) {
+    if (reps) return step(o, STEP_INTERVAL, END_REPS, reps, cat, name, desc);
+    if (sec) return step(o, STEP_INTERVAL, END_TIME, sec, cat, name, desc);
+    if (dist) return step(o, STEP_INTERVAL, END_DIST, dist, cat, name, desc);
+    return step(o, STEP_INTERVAL, END_LAP, null, cat, name, desc);
+}
+function rest(o,sec,desc) { return step(o, STEP_REST, sec?END_TIME:END_LAP, sec, null, null, desc); }
+function cd(o,sec,desc,cat,name) { return step(o, STEP_COOLDOWN, sec?END_TIME:END_LAP, sec, cat, name, desc); }
+
+function workout(name, sport, steps) {
+    return { workoutName: name, sportType: sport, workoutSegments: [{ segmentOrder: 1, sportType: sport, workoutSteps: steps }] };
+}
+
+// ===================== WORKOUT DEFINITIONS =====================
+function genMonday(w) {
+    return workout(`W${w}D1 Lower Strength`, SPORT_STRENGTH, [
+        wu(1,300,"Easy Bike 5min"), wu(2,null,"Lateral Band Walks"),
+        wu(3,null,"Glute Bridges 2x15","hip_raise","Weighted Glute Bridge"),
+        wu(4,null,"BW Squats 2x10","squat","Air Squat"),
+        act(5,{desc:"Goblet Squat 4x12",cat:"squat",name:"Goblet Squat"}),
+        act(6,{desc:"RDL (DB) 4x12",cat:"deadlift",name:"Dumbbell Deadlift"}),
+        act(7,{desc:"Walking Lunges 3x20",cat:"lunge",name:"Walking Lunge"}),
+        act(8,{desc:"Leg Press 3x15",cat:"squat",name:"Leg Press"}),
+        act(9,{desc:"Calf Raises 3x15",cat:"calf_raise",name:"Standing Calf Raise"}),
+        act(10,{desc:"Clamshells 3x15",cat:"hip_stability"}),
+        act(11,{desc:"Copenhagen Side Plank",cat:"plank",name:"Side Plank"}),
+        act(12,{desc:"Dead Bug 3x10",cat:"core",name:"Dead Bug"}),
+        act(13,{desc:"Pallof Press 3x12",cat:"core"}),
+        cd(14,null,"SL Glute Bridge 3x12","hip_raise"),
+    ]);
+}
+function genTuesday(w) {
+    return workout(`W${w}D2 Run+Intervals`, SPORT_RUNNING, [
+        wu(1,600,"Easy Jog Warmup"), wu(2,null,"Dynamic Stretches"),
+        act(3,{sec:1800,desc:"Z2 Steady Run 30min"}),
+        act(4,{dist:100,desc:"100m Stride #1"}), rest(5,null,"Walk Back"),
+        act(6,{dist:100,desc:"100m Stride #2"}), rest(7,null,"Walk Back"),
+        act(8,{dist:100,desc:"100m Stride #3"}), rest(9,null,"Walk Back"),
+        act(10,{dist:100,desc:"100m Stride #4"}),
+        cd(11,300,"Cool Down Jog"),
+    ]);
+}
+function genWednesday(w) {
+    return workout(`W${w}D3 Recovery`, SPORT_CARDIO, [
+        wu(1,1200,"Easy Bike/Walk 20min"),
+        act(2,{sec:900,desc:"Mobility Flow 15min"}),
+        act(3,{sec:600,desc:"Foam Rolling 10min"}),
+        cd(4,600,"IT Band Work 10min"),
+    ]);
+}
+function genThursday(w) {
+    const steps = [wu(1,null,"Row 500m Easy"), wu(2,null,"Dynamic Stretches")];
+    let s = 3;
+    for (let r = 1; r <= 4; r++) {
+        steps.push(act(s++,{dist:500,desc:`R${r}: Row 500m`}));
+        steps.push(act(s++,{dist:100,desc:`R${r}: Farmers Carry 100m`,cat:"carry",name:"Farmers Walk"}));
+        steps.push(act(s++,{dist:50,desc:`R${r}: Walking Lunges 50m`,cat:"lunge",name:"Walking Lunge"}));
+        steps.push(act(s++,{reps:20,desc:`R${r}: Wall Balls x20`,cat:"squat",name:"Wall Ball"}));
+        steps.push(act(s++,{dist:400,desc:`R${r}: RUN 400m!`}));
+    }
+    steps.push(cd(s,300,"Cool Down"));
+    return workout(`W${w}D4 Hybrid Stations`, SPORT_CARDIO, steps);
+}
+function genFriday(w) {
+    return workout(`W${w}D5 Upper+Plyo`, SPORT_STRENGTH, [
+        wu(1,null,"Pogo Hops 3x10","plyo"),
+        wu(2,null,"Box Step-Up+Jump 3x6","squat","Box Step Squat"),
+        wu(3,null,"Squat Jumps 3x5","plyo","Squat Jump"),
+        wu(4,null,"Med Ball Slams 3x8","plyo","Medicine Ball Slam"),
+        act(5,{desc:"Bench Press 4x10",cat:"bench_press",name:"Barbell Bench Press"}),
+        act(6,{desc:"DB OH Press 3x12",cat:"shoulder_press",name:"Overhead Dumbbell Press"}),
+        act(7,{desc:"Barbell Row 4x12",cat:"row",name:"Barbell Row"}),
+        act(8,{desc:"Cable Pulldown 3x15",cat:"pull_up"}),
+        act(9,{desc:"Pull-Ups 3x8-10",cat:"pull_up",name:"Pull Up"}),
+        act(10,{desc:"Face Pulls 3x15",cat:"row",name:"Face Pull"}),
+        act(11,{desc:"Hanging Leg Raise 3x10",cat:"leg_raise",name:"Hanging Leg Raise"}),
+        act(12,{desc:"Cable Crunches 3x15",cat:"crunch"}),
+        cd(13,30,"Farmers Hold 3x30s","carry","Farmers Walk"),
+    ]);
+}
+function genSaturday(w) {
+    return workout(`W${w}D6 REST DAY`, SPORT_CARDIO, [
+        wu(1,300,"REST DAY - Light Walk"),
+        act(2,{sec:1800,desc:"Walk/Stretch (optional)"}),
+        cd(3,null,"Done!"),
+    ]);
+}
+function genSunday(w) {
+    return workout(`W${w}D7 Long Run+Stations`, SPORT_RUNNING, [
+        act(1,{dist:8000,desc:"Zone 2 Run 8-10K"}),
+        act(2,{reps:30,desc:"Wall Balls 30 reps",cat:"squat",name:"Wall Ball"}),
+        rest(3,60,"Rest 60s"),
+        act(4,{reps:30,desc:"Wall Balls Set 2",cat:"squat",name:"Wall Ball"}),
+        rest(5,60,"Rest 60s"),
+        act(6,{reps:30,desc:"Wall Balls Set 3",cat:"squat",name:"Wall Ball"}),
+        act(7,{dist:30,desc:"Burpee Broad Jump 30m"}),
+        cd(8,300,"Cool Down"),
+    ]);
+}
+
+// ===================== API CALLS =====================
+async function apiPost(url, data) {
+    const resp = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "NK": "NT" },
+        credentials: "include",
+        body: JSON.stringify(data)
+    });
+    const text = await resp.text();
+    return { status: resp.status, body: text, ok: resp.ok };
+}
+
+async function apiGet(url) {
+    const resp = await fetch(url, {
+        headers: { "Accept": "application/json", "NK": "NT" },
+        credentials: "include"
+    });
+    const text = await resp.text();
+    return { status: resp.status, body: text, ok: resp.ok };
+}
+
+async function testConnection() {
+    addLog("Testing connection to Garmin Connect...", "info");
+    try {
+        const r = await apiGet(`${BASE}/workouts?start=0&limit=5`);
+        addLog(`Status: ${r.status}`, r.ok ? "ok" : "fail");
+        addLog(`Response: ${r.body.substring(0, 500)}`);
+        if (r.ok) {
+            document.getElementById("uploadBtn").disabled = false;
+            addLog("✅ Connection OK! Click 'Upload All' to proceed.", "ok");
+        }
+    } catch(e) {
+        addLog(`❌ Error: ${e.message}`, "fail");
+        addLog("Make sure you're logged into connect.garmin.com in this browser!", "info");
+    }
+}
+
+async function uploadAll() {
+    const btn = document.getElementById("uploadBtn");
+    btn.disabled = true;
+    
+    const generators = [
+        ["Monday", genMonday], ["Tuesday", genTuesday], ["Wednesday", genWednesday],
+        ["Thursday", genThursday], ["Friday", genFriday], ["Saturday", genSaturday], ["Sunday", genSunday]
+    ];
+    
+    let ok = 0, fail = 0;
+    
+    for (let week = 1; week <= 3; week++) {
+        addLog(`\n--- Week ${week} ---`, "info");
+        for (const [dayName, genFn] of generators) {
+            const w = genFn(week);
+            try {
+                const r = await apiPost(`${BASE}/workout`, w);
+                if (r.ok && r.body.length > 5) {
+                    const data = JSON.parse(r.body);
+                    addLog(`  ✅ ${w.workoutName} (id: ${data.workoutId || '?'})`, "ok");
+                    ok++;
+                } else if (r.ok) {
+                    addLog(`  ⚠️ ${w.workoutName} - 200 but empty response (may need CORS)`, "info");
+                    ok++;
+                } else {
+                    addLog(`  ❌ ${w.workoutName} - HTTP ${r.status}: ${r.body.substring(0,200)}`, "fail");
+                    fail++;
+                }
+                await new Promise(r => setTimeout(r, 500));
+            } catch(e) {
+                addLog(`  ❌ ${w.workoutName} - ${e.message}`, "fail");
+                fail++;
+            }
+        }
+    }
+    
+    addLog(`\n${"=".repeat(50)}`, "info");
+    addLog(`DONE! Uploaded: ${ok} | Failed: ${fail}`, ok > 0 ? "ok" : "fail");
+    if (ok > 0) {
+        addLog("Open Garmin Connect app on your phone and sync! 🎯", "ok");
+    }
+    btn.disabled = false;
+}
+</script>
+</body>
+</html>

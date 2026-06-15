@@ -4,7 +4,7 @@
    ═══════════════════════════════════════════════════════════ */
 
 import './style.css';
-import { RACE_DATE, ATHLETE, PHASES, STATIONS, RACE_PACING, WEEKS, CONFLICT_PAIRS, ALT_VARIANTS, IT_BAND_RULES, RED_PROTOCOL_RUNNING, RED_PROTOCOL_LONG_RUN } from './data.js';
+import { RACE_DATE, ATHLETE, HR_ZONES, PHASES, STATIONS, RACE_PACING, WEEKS, CONFLICT_PAIRS, ALT_VARIANTS, IT_BAND_RULES, RED_PROTOCOL_RUNNING, RED_PROTOCOL_LONG_RUN } from './data.js';
 
 // ── STATE ──
 const state = {
@@ -115,11 +115,11 @@ function getDaysUntilRace() {
 }
 
 function getCurrentWeek() {
-  const start = new Date('2026-04-07');
+  const start = new Date('2026-06-15');
   const now = new Date();
   const diff = now - start;
   const week = Math.floor(diff / (7 * 24 * 60 * 60 * 1000)) + 1;
-  return Math.max(1, Math.min(10, week));
+  return Math.max(1, Math.min(23, week));
 }
 
 function getPhaseForWeek(w) {
@@ -194,7 +194,7 @@ function renderHeader() {
           <div class="logo-mark">H</div>
           <div class="logo-text">
             <span class="logo-title">HYROX PREP</span>
-            <span class="logo-subtitle">Buenos Aires 2026</span>
+            <span class="logo-subtitle">${ATHLETE.race}</span>
           </div>
         </div>
         <div class="header-countdown">
@@ -237,6 +237,92 @@ function renderPage() {
   }
 }
 
+// Helper: Calculate sets per muscle group for a selected week
+function getWeeklyMuscleVolume(weekNum) {
+  const resolvedDays = getResolvedDays(weekNum);
+  const volume = { chest: 0, back: 0, legs: 0, shoulders: 0, arms: 0 };
+  
+  resolvedDays.forEach(day => {
+    // Only count strength workouts
+    if (day.dotClass !== 'strength') return;
+    
+    day.blocks.forEach(block => {
+      block.exercises.forEach(ex => {
+        const match = ex.sets ? ex.sets.match(/^(\d+)×/) : null;
+        if (match) {
+          const sets = parseInt(match[1]);
+          const name = ex.name.toLowerCase();
+          
+          if (name.includes('bench press') || name.includes('db press') || name.includes('chest press') || name.includes('dips') || name.includes('cable fly')) {
+            volume.chest += sets;
+          } else if (name.includes('pull-up') || name.includes('pulldown') || name.includes('row') || name.includes('deadlift') && !name.includes('romanian') && !name.includes('trap bar')) {
+            volume.back += sets;
+          } else if (name.includes('squat') || name.includes('leg press') || name.includes('leg extension') || name.includes('leg curl') || name.includes('lunge') || name.includes('hip thrust') || name.includes('romanian') || name.includes('trap bar')) {
+            volume.legs += sets;
+            // RDLs and Trap Bar DL count for legs (posterior chain)
+          } else if (name.includes('overhead press') || name.includes('shoulder press') || name.includes('lateral raise') || name.includes('front raise') || name.includes('face pulls')) {
+            volume.shoulders += sets;
+          } else if (name.includes('curl') || name.includes('pushdown') || name.includes('extension') || name.includes('tricep') || name.includes('bicep') || name.includes('arm')) {
+            volume.arms += sets;
+          }
+        }
+      });
+    });
+  });
+  
+  return volume;
+}
+
+// Helper: Render the weekly muscle sets progress
+function renderMuscleVolumeTracker(weekNum) {
+  const volume = getWeeklyMuscleVolume(weekNum);
+  if (!volume) return '';
+  const totalSets = volume.chest + volume.back + volume.legs + volume.shoulders + volume.arms;
+  if (totalSets === 0) return '';
+  
+  const isMaintenance = weekNum >= 17 && weekNum <= 21;
+  const isTaper = weekNum >= 22;
+  
+  const muscleGroups = [
+    { label: 'Chest', sets: volume.chest, target: 10 },
+    { label: 'Back', sets: volume.back, target: 10 },
+    { label: 'Legs', sets: volume.legs, target: 10 },
+    { label: 'Shoulders', sets: volume.shoulders, target: 8 },
+    { label: 'Arms', sets: volume.arms, target: 6 }
+  ];
+
+  return `
+    <div class="muscle-tracker-card mt-md mb-md">
+      <div class="flex justify-between items-center mb-md">
+        <span class="caption-bold">Weekly Muscle sets</span>
+        <span class="caption text-secondary font-semibold">${isTaper ? 'Taper Mode' : isMaintenance ? 'Maintenance Mode' : 'Hypertrophy Mode'} · ${totalSets} sets</span>
+      </div>
+      <div class="muscle-grid">
+        ${muscleGroups.map(m => {
+          const reqTarget = isTaper ? 2 : isMaintenance ? Math.round(m.target * 0.6) : m.target;
+          const pct = Math.min(100, Math.round((m.sets / reqTarget) * 100));
+          
+          let barColor = 'var(--ember)'; // default red/orange
+          if (pct >= 100) barColor = 'var(--success)'; // completed green
+          else if (isTaper) barColor = '#6B7280'; // gray
+          
+          return `
+            <div class="muscle-item">
+              <div class="flex justify-between items-center mb-sm">
+                <span class="muscle-label">${m.label}</span>
+                <span class="muscle-sets">${m.sets} / ${reqTarget} sets</span>
+              </div>
+              <div class="muscle-bar-bg">
+                <div class="muscle-bar-fill" style="width:${pct}%; background-color:${barColor}"></div>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
 // ── TRAINING PAGE ──
 function renderTrainingPage() {
   const weekData = WEEKS.find(w => w.week === state.selectedWeek);
@@ -250,7 +336,7 @@ function renderTrainingPage() {
       <!-- Hero -->
       <div class="hero-banner">
         <div class="hero-phase" style="color:${phase.color}">Phase ${phase.id} — ${phase.name}${weekData.deload ? ' · DELOAD' : ''}${weekData.taper ? ' · TAPER' : ''}</div>
-        <div class="hero-title">Week ${state.selectedWeek} of 10</div>
+        <div class="hero-title">Week ${state.selectedWeek} of 23</div>
         <div class="hero-desc">${phase.description}</div>
         <div class="progress-bar mt-md">
           <div class="progress-fill" style="width:${overall}%"></div>
@@ -289,6 +375,9 @@ function renderTrainingPage() {
           </div>
         </div>
       ` : ''}
+
+      <!-- Muscle sets volume tracker (Phase 2, 3, 4, 5) -->
+      ${renderMuscleVolumeTracker(state.selectedWeek)}
 
       <!-- Week Selector -->
       <div class="section">
@@ -341,13 +430,26 @@ function renderDayCard(day, dayIndex, weekNum) {
   const isITBandModified = itRule && (itRule.action === 'force-B' || itRule.action === 'replace');
   const variantDisplay = day.variant === 'R' ? 'R' : (currentVariant === 'B' || isITBandModified) ? 'B' : null;
 
+  // Garmin target zone check
+  let hrBadgeHtml = '';
+  const dayTypeLower = day.type.toLowerCase();
+  if (dayTypeLower.includes('running') || dayTypeLower.includes('jog') || dayTypeLower.includes('run')) {
+    if (dayTypeLower.includes('recovery') || dayTypeLower.includes('easy')) {
+      hrBadgeHtml = `<span class="hr-badge z2" style="background-color:rgba(34,197,94,0.12);color:#22C55E">Garmin Z2 (144-159)</span>`;
+    } else if (dayTypeLower.includes('aerobic') || dayTypeLower.includes('long run') || dayTypeLower.includes('long jog')) {
+      hrBadgeHtml = `<span class="hr-badge z3" style="background-color:rgba(59,130,246,0.12);color:#3B82F6">Garmin Z3 (160-170)</span>`;
+    } else if (dayTypeLower.includes('threshold') || dayTypeLower.includes('intervals') || dayTypeLower.includes('sharpening')) {
+      hrBadgeHtml = `<span class="hr-badge z4" style="background-color:rgba(245,158,11,0.12);color:#F59E0B">Garmin Z4 (171-180)</span>`;
+    }
+  }
+
   return `
     <div class="day-card ${isExpanded ? 'expanded' : ''} ${isSwapped ? 'swapped' : ''} ${itRule ? 'itband-affected' : ''}" data-day="${weekNum}-${dayIndex}">
       <div class="day-card-header">
         <div class="day-dot ${day.dotClass}"></div>
         <div class="day-info">
           <div class="day-name">${dayNames[dayIndex]}${isSwapped ? ` <span class="swap-badge">↔ from ${day.day}</span>` : ''}${itRule ? ` <span class="itband-day-badge ${state.itBandStatus}">${itRule.icon}</span>` : ''}</div>
-          <div class="day-type">${day.type}${variantDisplay ? ` <span class="variant-badge ${variantDisplay === 'R' ? 'red-protocol' : ''}">${variantDisplay}</span>` : ''}</div>
+          <div class="day-type">${day.type}${variantDisplay ? ` <span class="variant-badge ${variantDisplay === 'R' ? 'red-protocol' : ''}">${variantDisplay}</span>` : ''}${hrBadgeHtml}</div>
         </div>
         <div class="day-duration">${day.duration}</div>
         <div class="day-chevron">${icons.chevron}</div>
@@ -483,20 +585,119 @@ function renderVariantModal() {
 }
 
 // ── RACE PAGE ──
+// Helper to convert MM:SS to seconds
+function timeToSeconds(timeStr) {
+  const parts = timeStr.split(':');
+  if (parts.length === 2) {
+    return parseInt(parts[0]) * 60 + parseInt(parts[1]);
+  }
+  return 0;
+}
+
+// Helper to format seconds as M:SS
+function formatSeconds(totalSec) {
+  const m = Math.floor(totalSec / 60);
+  const s = totalSec % 60;
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
+// Render the comparison table of Buenos Aires vs. Rio targets
+function renderRacePacingTable() {
+  const splits = ATHLETE.previousRace.splits;
+  return `
+    <div class="card p-0 overflow-x-auto">
+      <table class="pacing-table">
+        <thead>
+          <tr>
+            <th>Segment</th>
+            <th class="text-right">Buenos Aires</th>
+            <th class="text-right">Rio Target</th>
+            <th class="text-right">Difference</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${splits.map(s => {
+            const secBA = timeToSeconds(s.time);
+            const secRio = timeToSeconds(s.target);
+            const diffSec = secBA - secRio; // Positive is time saved
+            
+            let diffText = '0:00';
+            let diffClass = '';
+            if (diffSec > 0) {
+              diffText = `-${formatSeconds(diffSec)}`;
+              diffClass = 'text-green';
+            } else if (diffSec < 0) {
+              diffText = `+${formatSeconds(Math.abs(diffSec))}`;
+              diffClass = 'text-red';
+            }
+            
+            return `
+              <tr>
+                <td class="fw-600">${s.name}</td>
+                <td class="text-right text-secondary">${s.time}</td>
+                <td class="text-right text-primary fw-700">${s.target}</td>
+                <td class="text-right ${diffClass} fw-700">${diffText}</td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+// ── RACE PAGE ──
 function renderRacePage() {
   return `
     <div class="page">
       <div class="hero-banner">
         <div class="hero-phase">Race Day Strategy</div>
-        <div class="hero-title">HYROX Buenos Aires</div>
-        <div class="hero-desc">June 13, 2026 · Open Singles · Target: Sub 1:30–1:40</div>
+        <div class="hero-title">${ATHLETE.race}</div>
+        <div class="hero-desc">November 21, 2026 · ${ATHLETE.division} · Target: ${ATHLETE.goal}</div>
+      </div>
+
+      <!-- Buenos Aires vs Rio Comparison -->
+      <div class="section">
+        <div class="section-header">
+          <span class="section-title">Pacing Comparison</span>
+          <span class="caption">Buenos Aires vs. Rio Targets</span>
+        </div>
+        ${renderRacePacingTable()}
+      </div>
+
+      <!-- Garmin Heart Rate Zones -->
+      <div class="section">
+        <div class="section-header">
+          <span class="section-title">Garmin HR Zones</span>
+          <span class="caption">Max HR: ${ATHLETE.maxHR} bpm</span>
+        </div>
+        <div class="card p-0">
+          <table class="pacing-table">
+            <thead>
+              <tr>
+                <th>Zone</th>
+                <th>Garmin Level</th>
+                <th class="text-right">BPM Range</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${HR_ZONES.map(z => `
+                <tr>
+                  <td class="fw-700" style="color:${z.color}">${z.name.split(' — ')[0]}</td>
+                  <td class="text-secondary">${z.name.split(' — ')[1]}</td>
+                  <td class="text-right fw-600">${z.range}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <!-- Pacing Plan -->
       <div class="section">
         <div class="section-header">
-          <span class="section-title">Pacing Plan</span>
-          <span class="caption">~1:28 target</span>
+          <span class="section-title">Running & Station Strategy</span>
+          <span class="caption">Target exit HR &lt; 180 bpm</span>
         </div>
         <div class="race-flow">
           ${RACE_PACING.map(item => `
@@ -697,17 +898,17 @@ function renderProfilePage() {
       <!-- Equipment -->
       <div class="section">
         <div class="section-header">
-          <span class="section-title">Equipment Alternatives</span>
+          <span class="section-title">Equipment & Gym Strategy</span>
         </div>
         <div class="card">
-          <div class="exercise-group-title" style="margin-bottom:8px">Missing Equipment → Gym Alternative</div>
+          <div class="exercise-group-title" style="margin-bottom:8px">Gym Availability & Setup</div>
           ${[
-            { missing: 'SkiErg', alt: 'Med ball slams + Cable pulldowns + Band skiing' },
-            { missing: 'Sled Push', alt: 'Treadmill push (off) + Heavy lunges + Band sprints' },
-            { missing: 'Sled Pull', alt: 'Cable rope pulls + Towel rows + Heavy DB rows' },
+            { equipment: 'Sled Push & Pull', status: '✅ Sled Available', alt: 'Use on Sundays (gym clear). Use treadmill push (off) and cable rope pulls on busy weekdays.' },
+            { equipment: 'SkiErg', status: '❌ SkiErg Missing', alt: 'Simulate with medicine ball slams, straight-arm pulldowns, and band pull/ski movements.' },
+            { equipment: 'RowErg & Running', status: '✅ Cardio Machines', alt: 'Use for Tuesday intervals and Thursday/Sunday hybrid simulations.' },
           ].map(e => `
             <div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.03)">
-              <div class="fw-600 text-ember" style="font-size:13px">❌ ${e.missing}</div>
+              <div class="fw-600 ${e.status.includes('❌') ? 'text-ember' : 'text-green'}" style="font-size:13px">${e.status}</div>
               <div class="text-secondary" style="font-size:13px;margin-top:2px">→ ${e.alt}</div>
             </div>
           `).join('')}
