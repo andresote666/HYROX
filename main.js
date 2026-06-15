@@ -21,6 +21,8 @@ const state = {
   variantDay: null,     // index of the day switching variant
 };
 
+let lastRenderedWeek = null;
+
 function saveChecks() {
   localStorage.setItem('hyrox-checks', JSON.stringify(state.checkedExercises));
 }
@@ -174,6 +176,9 @@ const icons = {
 
 // ── RENDER ──
 function render() {
+  const weekScroll = document.querySelector('.week-scroll');
+  const scrollLeft = weekScroll ? weekScroll.scrollLeft : null;
+
   const app = document.getElementById('app');
   app.innerHTML = `
     ${renderHeader()}
@@ -183,6 +188,23 @@ function render() {
     ${state.showVariantModal ? renderVariantModal() : ''}
   `;
   bindEvents();
+
+  const newWeekScroll = document.querySelector('.week-scroll');
+  if (newWeekScroll) {
+    if (scrollLeft !== null && state.selectedWeek === lastRenderedWeek) {
+      newWeekScroll.scrollLeft = scrollLeft;
+    } else {
+      const activePill = newWeekScroll.querySelector('.week-pill.active');
+      if (activePill) {
+        // Run after DOM has finished layout/rendering
+        setTimeout(() => {
+          activePill.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }, 50);
+      }
+    }
+  }
+
+  lastRenderedWeek = state.selectedWeek;
 }
 
 function renderHeader() {
