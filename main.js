@@ -193,8 +193,8 @@ function renderHeader() {
         <div class="app-logo">
           <div class="logo-mark">H</div>
           <div class="logo-text">
-            <span class="logo-title">HYROX PREP</span>
-            <span class="logo-subtitle">${ATHLETE.race}</span>
+            <span class="logo-title">HYROX PREP 🇧🇷</span>
+            <span class="logo-subtitle">${ATHLETE.race} 🌴🌊</span>
           </div>
         </div>
         <div class="header-countdown">
@@ -335,15 +335,21 @@ function renderTrainingPage() {
     <div class="page">
       <!-- Hero -->
       <div class="hero-banner">
-        <div class="hero-phase" style="color:${phase.color}">Phase ${phase.id} — ${phase.name}${weekData.deload ? ' · DELOAD' : ''}${weekData.taper ? ' · TAPER' : ''}</div>
-        <div class="hero-title">Week ${state.selectedWeek} of 23</div>
-        <div class="hero-desc">${phase.description}</div>
-        <div class="progress-bar mt-md">
-          <div class="progress-fill" style="width:${overall}%"></div>
-        </div>
-        <div class="flex justify-between mt-sm">
-          <span class="caption">Overall Progress</span>
-          <span class="caption fw-600">${overall}%</span>
+        <div class="rio-waves"></div>
+        <div class="hero-content">
+          <div class="flex justify-between items-center mb-sm">
+            <div class="hero-phase" style="color:${phase.color}">Phase ${phase.id} — ${phase.name}${weekData.deload ? ' · DELOAD' : ''}${weekData.taper ? ' · TAPER' : ''}</div>
+            <div class="rio-badge">RIO 2026 🇧🇷</div>
+          </div>
+          <div class="hero-title">Week ${state.selectedWeek} of 23</div>
+          <div class="hero-desc">${phase.description}</div>
+          <div class="progress-bar mt-md">
+            <div class="progress-fill" style="width:${overall}%"></div>
+          </div>
+          <div class="flex justify-between mt-sm">
+            <span class="caption">Overall Progress</span>
+            <span class="caption fw-600">${overall}%</span>
+          </div>
         </div>
 
         <!-- IT Band Status (inline) -->
@@ -651,9 +657,15 @@ function renderRacePage() {
   return `
     <div class="page">
       <div class="hero-banner">
-        <div class="hero-phase">Race Day Strategy</div>
-        <div class="hero-title">${ATHLETE.race}</div>
-        <div class="hero-desc">November 21, 2026 · ${ATHLETE.division} · Target: ${ATHLETE.goal}</div>
+        <div class="rio-waves"></div>
+        <div class="hero-content">
+          <div class="flex justify-between items-center mb-sm">
+            <div class="hero-phase">Race Day Strategy</div>
+            <div class="rio-badge">RIO 2026 🇧🇷</div>
+          </div>
+          <div class="hero-title">${ATHLETE.race}</div>
+          <div class="hero-desc">November 21, 2026 · ${ATHLETE.division} · Target: ${ATHLETE.goal}</div>
+        </div>
       </div>
 
       <!-- Buenos Aires vs Rio Comparison -->
@@ -771,9 +783,15 @@ function renderStationsPage() {
   return `
     <div class="page">
       <div class="hero-banner">
-        <div class="hero-phase">Know Your Stations</div>
-        <div class="hero-title">8 Stations Breakdown</div>
-        <div class="hero-desc">Open Men's specifications with your gym alternatives and race strategy.</div>
+        <div class="rio-waves"></div>
+        <div class="hero-content">
+          <div class="flex justify-between items-center mb-sm">
+            <div class="hero-phase">Know Your Stations</div>
+            <div class="rio-badge">RIO 2026 🇧🇷</div>
+          </div>
+          <div class="hero-title">8 Stations Breakdown</div>
+          <div class="hero-desc">Open Men's specifications with your gym alternatives and race strategy.</div>
+        </div>
       </div>
 
       <div class="section">
@@ -816,9 +834,15 @@ function renderProfilePage() {
   return `
     <div class="page">
       <div class="hero-banner">
-        <div class="hero-phase">Athlete Profile</div>
-        <div class="hero-title">${ATHLETE.name}</div>
-        <div class="hero-desc">${ATHLETE.division} · ${ATHLETE.race} · ${ATHLETE.goal}</div>
+        <div class="rio-waves"></div>
+        <div class="hero-content">
+          <div class="flex justify-between items-center mb-sm">
+            <div class="hero-phase">Athlete Profile</div>
+            <div class="rio-badge">RIO 2026 🇧🇷</div>
+          </div>
+          <div class="hero-title">${ATHLETE.name}</div>
+          <div class="hero-desc">${ATHLETE.division} · ${ATHLETE.race} · ${ATHLETE.goal}</div>
+        </div>
       </div>
 
       <!-- Progress -->
