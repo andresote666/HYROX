@@ -115,7 +115,7 @@ function getDaysUntilRace() {
 }
 
 function getCurrentWeek() {
-  const start = new Date('2026-06-15');
+  const start = new Date('2026-06-15T00:00:00-03:00');
   const now = new Date();
   const diff = now - start;
   const week = Math.floor(diff / (7 * 24 * 60 * 60 * 1000)) + 1;
@@ -396,10 +396,21 @@ function renderTrainingPage() {
             const p = getWeekProgress(w.week);
             const isActive = w.week === state.selectedWeek;
             const isCompleted = p === 100;
+            const isCurrent = w.week === getCurrentWeek();
+            const isPassed = w.week < getCurrentWeek();
+            
+            let pillClasses = 'week-pill';
+            if (isActive) pillClasses += ' active';
+            if (isCompleted) pillClasses += ' completed';
+            if (isCurrent) pillClasses += ' current';
+            if (isPassed) pillClasses += ' passed';
+            
+            const label = isCurrent ? 'NOW' : (w.deload ? 'DL' : w.taper ? 'TP' : 'WK');
+            
             return `
-              <button class="week-pill ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}" data-week="${w.week}">
+              <button class="${pillClasses}" data-week="${w.week}">
                 <span class="week-pill-number">${w.week}</span>
-                <span class="week-pill-label">${w.deload ? 'DL' : w.taper ? 'TP' : 'WK'}</span>
+                <span class="week-pill-label">${label}</span>
               </button>
             `;
           }).join('')}
