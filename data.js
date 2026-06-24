@@ -364,6 +364,50 @@ const P2_TUE = {
   ]
 };
 
+// TUESDAY: TEMPO RUN (Week 3 bridge — introduce sustained Z3 effort)
+const P2_TUE_TEMPO = {
+  day: 'Tuesday', type: 'Running: Z3 Tempo Run', duration: '50 min',
+  dotClass: 'running', intensity: 'Moderate-High', variant: 'A', category: 'running',
+  blocks: [
+    { title: 'Warmup · 10 min', exercises: [{ name: 'Easy Z2 Jog', detail: 'Settle in, 144-150 bpm', sets: '10 min' }] },
+    { title: 'Tempo Block (Garmin Z3)', exercises: [
+      { name: 'Sustained Z3 Tempo', detail: 'Hold 160-170 bpm. Comfortably hard, conversational limit.', sets: '20 min', weight: '5:30-5:45/km' }
+    ] },
+    { title: 'Cooldown', exercises: [
+      { name: 'Easy Z2 Jog', detail: 'Bring HR down gradually', sets: '10 min' },
+      { name: '100m Strides', detail: '90% speed, walk-back recovery', sets: '3 reps' }
+    ] }
+  ]
+};
+
+// TUESDAY: FARTLEK (Week 4 — introduce Z4 efforts with Z2 recovery)
+const P2_TUE_FARTLEK = {
+  day: 'Tuesday', type: 'Running: Fartlek (Z2/Z4 Mix)', duration: '55 min',
+  dotClass: 'running', intensity: 'High', variant: 'A', category: 'running',
+  blocks: [
+    { title: 'Warmup · 10 min', exercises: [{ name: 'Easy Z2 Jog', detail: 'Settle in, 144-150 bpm', sets: '10 min' }] },
+    { title: 'Fartlek Intervals', exercises: [
+      { name: '1 min Z4 / 2 min Z2 Recovery', detail: 'Push to 171-180 bpm on efforts, recover to ~150 bpm between. Unstructured feel.', sets: '6 rounds (18 min)' }
+    ] },
+    { title: 'Cooldown', exercises: [
+      { name: 'Easy Z2 Jog', detail: 'Z1-Z2, recover fully', sets: '10 min' }
+    ] }
+  ]
+};
+
+// TUESDAY: THRESHOLD INTRO (Week 6 — 4×800m, building toward 5)
+const P2_TUE_THRESHOLD = {
+  day: 'Tuesday', type: 'Running: Threshold Intervals (Intro)', duration: '60 min',
+  dotClass: 'running', intensity: 'High', variant: 'A', category: 'running',
+  blocks: [
+    { title: 'Warmup · 10 min', exercises: [{ name: 'Easy Jog', detail: 'Z2 pace', sets: '10 min' }] },
+    { title: 'Threshold Intervals (Garmin Z4)', exercises: [
+      { name: '800m Repeats', detail: 'Target HR 171-180 bpm (Z4). 90s jog recovery.', sets: '4 reps', weight: '4:45/km pace' }
+    ] },
+    { title: 'Cooldown', exercises: [{ name: 'Easy Jog', detail: 'Z1-Z2', sets: '10 min' }] }
+  ]
+};
+
 const P2_THU = {
   day: 'Thursday', type: 'Active Recovery / Mobility', duration: '50 min',
   dotClass: 'recovery', intensity: 'Low', variant: 'A', category: 'recovery',
@@ -617,12 +661,12 @@ export const WEEKS = [
   
   // Phase 2: Hypertrophy Base (7 weeks, Weeks 2-8)
   { week: 2, phase: 2, days: [P2_MON, P2_TUE, P2_WED, P2_THU, P2_FRI, P2_SAT, P2_SUN] },
-  { week: 3, phase: 2, days: [P2_MON, P2_TUE, P2_WED, P2_THU, P2_FRI, P2_SAT, P2_SUN] },
-  { week: 4, phase: 2, days: [P2_MON, P2_TUE, P2_WED, P2_THU, P2_FRI, P2_SAT, P2_SUN] },
+  { week: 3, phase: 2, days: [P2_MON, P2_TUE_TEMPO, P2_WED, P2_THU, P2_FRI, P2_SAT, P2_SUN] },
+  { week: 4, phase: 2, days: [P2_MON, P2_TUE_FARTLEK, P2_WED, P2_THU, P2_FRI, P2_SAT, P2_SUN] },
   { week: 5, phase: 2, deload: true, days: [P1_MON, P1_TUE, P1_WED, P1_THU, P1_FRI, P1_SAT, P1_SUN] }, // Deload 1
-  { week: 6, phase: 2, days: [P2_MON, P2_TUE, P2_WED, P2_THU, P2_FRI, P2_SAT, P2_SUN] },
-  { week: 7, phase: 2, days: [P2_MON, P2_TUE, P2_WED, P2_THU, P2_FRI, P2_SAT, P2_SUN] },
-  { week: 8, phase: 2, days: [P2_MON, P2_TUE, P2_WED, P2_THU, P2_FRI, P2_SAT, P2_SUN] },
+  { week: 6, phase: 2, days: [P2_MON, P2_TUE_THRESHOLD, P2_WED, P2_THU, P2_FRI, P2_SAT, P2_SUN] },
+  { week: 7, phase: 2, days: [P2_MON, P3_TUE, P2_WED, P2_THU, P2_FRI, P2_SAT, P2_SUN] },
+  { week: 8, phase: 2, days: [P2_MON, P3_TUE, P2_WED, P2_THU, P2_FRI, P2_SAT, P2_SUN] },
   
   // Phase 3: Hypertrophy Build (8 weeks, Weeks 9-16)
   // Tuesday becomes intervals (P3_TUE), Thursday becomes light station circuits (P3_THU), Sunday becomes heavy sleds (P3_SUN)
