@@ -24,6 +24,8 @@ const defaults = () => ({
   weights: [],      // [{ date, kg }]
   benchmarks: [],   // [{ date, id, value }]
   notes: {},        // { 'YYYY-MM-DD': 'text' }
+  meals: {},        // { 'YYYY-MM-DD': { breakfast: true, ... } }
+  shopping: {},     // { itemId: true }
   sync: { token: '', last: null, error: null, wellness: {}, activities: [] }, // Garmin via intervals.icu
   ui: { tab: 'today', libSection: 'stations' },
 });

@@ -90,7 +90,7 @@ function body(id) {
   switch (id) {
     case 'training': return TRAINING.map(topic).join('') + zonesCard(TRAINING.length + 1);
     case 'shins': return SHINS.map(topic).join('');
-    case 'food': return FOOD.map(topic).join('');
+    case 'food': return `<button class="card card-glass checkin-cta rise" style="--i:1;text-align:left;width:100%" data-act="open-food"><div class="pulse">${icons.food}</div><div class="grow"><div class="h3">Your meal plan</div><div class="small">Today's menu, shopping list and swaps, in the Food tab.</div></div>${icons.chevronR}</button>` + FOOD.map((t, i) => topic(t, i + 1)).join('');
     case 'words': return words();
     case 'sources': return sources();
     default: return STATIONS.map(station).join('');

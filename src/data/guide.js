@@ -224,10 +224,10 @@ export const FOOD = [
   {
     kicker: 'Every day', title: 'The basics',
     do: [
-      'Protein: 175–210 g a day, spread over 4–5 meals of 30–40 g.',
-      'Hard days (intervals, Saturday sessions): more carbs, about 480–650 g.',
-      'Easy days: fewer carbs, about 290–480 g. Protein stays the same.',
-      'Never do hard intervals on an empty tank.',
+      'Follow the Food tab: it shows today\'s menu (rest day, training day or big day).',
+      'Protein: about 200–235 g a day, spread over every meal.',
+      'Carbs follow the training: about 260 g on rest days, 370 g on training days, 500 g on big days.',
+      'Never do hard intervals on an empty tank: have the snack before training.',
     ],
     why: 'Eating carbs to match the day\'s work keeps hard sessions strong while still letting you lose fat.',
     sources: 'Jäger 2017; Impey 2018',

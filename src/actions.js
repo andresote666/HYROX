@@ -84,6 +84,37 @@ export function handleAction(act, el, ui) {
       store.ui.libSection = ui.libSection; save();
       render();
       break;
+    case 'food-type':
+      ui.foodType = el.dataset.type;
+      render();
+      break;
+    case 'food-view':
+      ui.foodView = el.dataset.view;
+      render({ keepScroll: false });
+      break;
+    case 'meal-tick': {
+      const today = dayKey();
+      const m = { ...(store.meals[today] || {}) };
+      m[el.dataset.meal] = !m[el.dataset.meal];
+      store.meals[today] = m;
+      save();
+      try { navigator.vibrate?.(8); } catch { /* ignore */ }
+      render();
+      break;
+    }
+    case 'shop-tick':
+      store.shopping = { ...store.shopping, [el.dataset.id]: !store.shopping?.[el.dataset.id] };
+      save(); render();
+      break;
+    case 'shop-reset':
+      store.shopping = {};
+      save(); render(); toast('Shopping list cleared');
+      break;
+    case 'open-food':
+      ui.tab = 'food'; ui.foodView = 'menu'; ui.foodType = null;
+      store.ui.tab = 'food'; save();
+      render();
+      break;
     case 'toggle-status':
       ui.statusOpen = !ui.statusOpen;
       render();

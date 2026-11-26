@@ -236,7 +236,7 @@ main.page {
   bottom: calc(var(--safe-bottom) + 12px);
   z-index: var(--z-nav);
   width: min(calc(100% - 24px), 520px);
-  display: grid; grid-template-columns: repeat(5, 1fr);
+  display: grid; grid-template-columns: repeat(6, 1fr);
   padding: 6px; border-radius: 22px;
   background: rgba(26, 26, 22, 0.82);
   border: 1px solid var(--line-2);
@@ -669,3 +669,28 @@ details.why .why-src { font-size: 12px; color: var(--text-3); margin-top: -4px; 
 .glossary div:last-child { border-bottom: 0; }
 .glossary dt { font-weight: 650; font-size: 14.5px; }
 .glossary dd { font-size: 13.5px; color: var(--text-2); margin-top: 3px; line-height: 1.5; }
+
+/* ── food ── */
+.tabbar .tab span { font-size: 10px; }
+.meal-card .eyebrow { font-size: 11.5px; }
+.meal-card.ticked { opacity: 0.6; }
+.meal-check { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 12px; }
+.meal-check .check { width: 28px; height: 28px; }
+.meal-card.ticked .check { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.food-list { list-style: none; margin-top: 10px; display: flex; flex-direction: column; }
+.food-list li { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 14.5px; }
+.food-list li:last-child { border-bottom: 0; }
+.food-list b { font-weight: 550; }
+.food-list small { display: block; font-size: 12px; color: var(--text-3); margin-top: 2px; line-height: 1.35; }
+.food-list li > span { font-family: var(--mono); font-size: 12.5px; color: var(--accent); text-align: right; white-space: nowrap; padding-top: 2px; }
+.swap-list { display: flex; flex-direction: column; margin-top: 10px; }
+.swap-list div { padding: 10px 0; border-bottom: 1px solid var(--line); }
+.swap-list div:last-child { border-bottom: 0; }
+.swap-list b { display: block; font-size: 14px; }
+.swap-list span { font-size: 13.5px; color: var(--text-2); line-height: 1.5; }
+.cmp { display: flex; flex-direction: column; }
+.cmp-row { display: grid; grid-template-columns: 1fr 62px 70px 86px; gap: 6px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; align-items: center; }
+.cmp-row .num { text-align: right; font-size: 12.5px; }
+.cmp-row.head { font-size: 11px; color: var(--text-3); font-weight: 600; padding-top: 0; }
+.cmp-row.head span { text-align: right; }
+.cmp-row:last-child { border-bottom: 0; }

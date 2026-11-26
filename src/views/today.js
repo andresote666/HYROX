@@ -132,16 +132,17 @@ function fuelCard(day, week) {
   return `
     <section class="card rise" style="--i:4" aria-label="Fuel">
       <div class="row between">
-        <div><div class="eyebrow">Fuel · ${f.hard ? 'hard day' : 'easy day'}${f.deficit ? ' · small deficit' : ' · maintenance'}</div>
-        <div class="h3" style="margin-top:2px">${f.kcal[0].toLocaleString()}–${f.kcal[1].toLocaleString()} kcal</div></div>
+        <div><div class="eyebrow">Food · ${esc(f.label.toLowerCase())}${f.deficit ? ' · small deficit' : ' · maintenance'}</div>
+        <div class="h3" style="margin-top:2px">${f.kcal.toLocaleString()} kcal</div></div>
         <button class="btn btn-ghost btn-sm" data-act="sheet" data-type="weight">${icons.scale} ${w.toFixed(1)} kg</button>
       </div>
       <div class="grid-3" style="margin-top:12px">
-        <div class="tile"><span class="num">${f.protein[0]}–${f.protein[1]}</span><small>g protein</small></div>
-        <div class="tile"><span class="num">${f.carbs[0]}–${f.carbs[1]}</span><small>g carbs</small></div>
+        <div class="tile"><span class="num">${f.protein}</span><small>g protein</small></div>
+        <div class="tile"><span class="num">${f.carbs}</span><small>g carbs</small></div>
         <div class="tile"><span class="num">${(w - target).toFixed(1)}</span><small>kg to ${target}</small></div>
       </div>
       <p class="small" style="margin-top:10px">${f.note}</p>
+      <button class="btn btn-primary btn-block btn-sm" style="margin-top:12px" data-act="open-food">${icons.food} See today's meals</button>
     </section>`;
 }
 

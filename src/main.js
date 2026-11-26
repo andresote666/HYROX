@@ -10,6 +10,7 @@ import { renderPlan } from './views/plan.js';
 import { renderRace } from './views/race.js';
 import { renderProgress } from './views/progress.js';
 import { renderLibrary } from './views/library.js';
+import { renderFood } from './views/food.js';
 import { renderSheet, handleSheetAction } from './views/sheets.js';
 import { handleAction } from './actions.js';
 import { syncNow, shouldAutoSync } from './logic/sync.js';
@@ -30,6 +31,7 @@ const TABS = [
   { id: 'today', label: 'Today', icon: icons.today },
   { id: 'plan', label: 'Plan', icon: icons.plan },
   { id: 'race', label: 'Race', icon: icons.race },
+  { id: 'food', label: 'Food', icon: icons.food },
   { id: 'progress', label: 'Progress', icon: icons.progress },
   { id: 'library', label: 'Library', icon: icons.library },
 ];
@@ -75,6 +77,7 @@ function page() {
     case 'race': return renderRace(ui);
     case 'progress': return renderProgress(ui);
     case 'library': return renderLibrary(ui);
+    case 'food': return renderFood(ui);
     default: return renderToday(ui);
   }
 }

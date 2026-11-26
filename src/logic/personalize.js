@@ -2,6 +2,7 @@
    and computes daily fuel targets. */
 import { store, latestWeight } from '../store.js';
 import { fmtSec } from '../data/results.js';
+import { DAY_TYPES, totals, dayTypeFor } from '../data/meals.js';
 
 export function latestBench(id) {
   const rows = store.benchmarks.filter(b => b.id === id).sort((a, b) => a.date.localeCompare(b.date));
@@ -70,22 +71,22 @@ export function personalize(session) {
   return walk(session);
 }
 
-/* Fuel targets (research/02 §E). Deficit ≈300 kcal through week 11, maintenance after. */
+/* Fuel targets come from the meal plan (data/meals.js) so the numbers always
+   match the menu. Deficit through week 11, +300 kcal from week 12. */
 export function fuelFor(session, week) {
-  const kg = latestWeight();
-  const hard = session && ['vo2', 'sim', 'race', 'threshold', 'strength', 'station'].includes(session.kind);
-  const deficit = week <= 11 && session?.kind !== 'race';
-  const protein = [Math.round(kg * 1.8), Math.round(kg * 2.2)];
-  const carbs = hard ? [Math.round(kg * 5), Math.round(kg * 7)] : [Math.round(kg * 3), Math.round(kg * 5)];
-  let kcal = hard ? [3400, 3800] : [2800, 3100];
-  if (!deficit) kcal = kcal.map(k => k + 300);
-  if (session?.kind === 'race') kcal = [3600, 4200];
+  const type = dayTypeFor(session);
+  const sat = session?.dow === 5;
+  const t = totals(type, { saturday: sat });
+  const maint = week >= 12 || session?.kind === 'race';
+  const kcal = t.kcal + (maint ? 300 : 0);
   return {
-    hard, deficit, protein, carbs, kcal,
-    note: session?.kind === 'race' ? 'Race day: breakfast ≈2 g/kg carbs 3 h before, gels at Run 5 and Run 7.'
+    type, label: DAY_TYPES[type].label, hard: type === 'big', deficit: !maint,
+    kcal, protein: t.p, carbs: t.c + (maint ? 40 : 0), fat: t.f,
+    note: session?.kind === 'race' ? 'Race day: breakfast ≈190 g carbs 3 h before, gels at Run 5 and Run 7.'
       : week >= 15 ? 'Taper and race weeks: no deficit. Carb load 6–8 g/kg in the last 2 days.'
-      : hard ? 'Hard day: put most carbs before and after the session. Never do intervals low on carbs.'
-      : 'Easy day: carbs lower, protein the same, 4–5 meals of 30–40 g protein.',
+      : type === 'big' ? 'Big day: extra carbs before and after training. Never do intervals on an empty tank.'
+      : type === 'rest' ? 'Rest day: smaller portions of carbs, same protein.'
+      : 'Training day: snack before training, shake after.',
   };
 }
 
