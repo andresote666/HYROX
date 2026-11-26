@@ -43,6 +43,14 @@ export function normWellness(w) {
     readiness: num(pick(w, 'readiness')),
     ctl: round(num(pick(w, 'ctl'))),
     atl: round(num(pick(w, 'atl'))),
+    rampRate: round(num(pick(w, 'rampRate'))),
+    vo2max: round(num(pick(w, 'vo2max', 'VO2max'))),
+    bodyFat: round(num(pick(w, 'bodyFat'))),
+    spO2: round(num(pick(w, 'spO2'))),
+    sleepQuality: num(pick(w, 'sleepQuality')),
+    avgSleepingHR: num(pick(w, 'avgSleepingHR')),
+    stress: num(pick(w, 'stress')),
+    steps: num(pick(w, 'steps')),
   };
 }
 
@@ -63,6 +71,12 @@ export function normActivity(a) {
     maxHr: num(pick(a, 'max_heartrate', 'icu_max_hr')),
     watts: num(pick(a, 'icu_average_watts', 'average_watts')),
     load: num(pick(a, 'icu_training_load', 'training_load')),
+    cadence: num(pick(a, 'average_cadence')),
+    stride: round(num(pick(a, 'average_stride')), 2),
+    gctMs: num(pick(a, 'average_stance_time')),
+    elevation: num(pick(a, 'total_elevation_gain')),
+    zoneSecs: Array.isArray(a.icu_hr_zone_times) ? a.icu_hr_zone_times : null,
+    zoneTops: Array.isArray(a.icu_hr_zones) ? a.icu_hr_zones : null,
   };
 }
 

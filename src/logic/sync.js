@@ -136,3 +136,79 @@ export function syncAgo() {
   const h = Math.round(m / 60);
   return h < 24 ? `${h} h ago` : `${Math.round(h / 24)} d ago`;
 }
+
+/* ── extra Garmin metrics ─────────────────────────────────────── */
+const PLAN_START_KEY = '2026-11-23'; // week 0 (post-Rio reset)
+
+const wellnessSorted = () => Object.values(store.sync.wellness).sort((a, b) => a.date.localeCompare(b.date));
+
+/* Garmin's VO2max estimate: latest, first reading since the plan began, change */
+export function vo2Trend() {
+  const pts = wellnessSorted().filter(w => w.vo2max > 0);
+  if (!pts.length) return null;
+  const latest = pts[pts.length - 1];
+  const start = pts.find(p => p.date >= PLAN_START_KEY) || pts[0];
+  const before = [...pts].reverse().find(p => p.date < PLAN_START_KEY);
+  const base = before || start;
+  return { latest: latest.vo2max, latestDate: latest.date, base: base.vo2max, change: Math.round((latest.vo2max - base.vo2max) * 10) / 10, points: pts };
+}
+
+/* intervals.icu fitness (CTL), fatigue (ATL) and form (CTL − ATL) */
+export function loadForm() {
+  const w = [...wellnessSorted()].reverse().find(x => x.ctl !== null && x.ctl !== undefined);
+  if (!w) return null;
+  const form = Math.round((w.ctl - w.atl) * 10) / 10;
+  let label = 'Balanced';
+  if (form < -25) label = 'Very tired: risk zone';
+  else if (form < -10) label = 'Building: normal mid-block fatigue';
+  else if (form <= 5) label = 'Balanced';
+  else label = 'Fresh: good for racing';
+  return { fitness: Math.round(w.ctl), fatigue: Math.round(w.atl), form, label, date: w.date };
+}
+
+const steps = a => (a.cadence && a.cadence < 120 ? a.cadence * 2 : a.cadence); // strides → steps/min
+
+/* Running cadence vs baseline: +5–10% lowers braking and tibial load (Heiderscheit 2011) */
+export function cadenceInfo() {
+  const runs = store.sync.activities.filter(a => isRun(a) && a.cadence);
+  if (!runs.length) return null;
+  const median = arr => { const s = [...arr].sort((a, b) => a - b); return s[Math.floor(s.length / 2)]; };
+  const pre = runs.filter(a => a.date < PLAN_START_KEY).slice(-10);
+  const baseline = Math.round(median((pre.length >= 3 ? pre : runs.slice(0, 3)).map(steps)));
+  const recent = runs.slice(-5).map(a => ({ date: a.date, spm: Math.round(steps(a)), mins: a.mins, gctMs: a.gctMs, stride: a.stride }));
+  return { baseline, target: [Math.round(baseline * 1.05), Math.round(baseline * 1.1)], recent, last: recent[recent.length - 1] };
+}
+
+export const runSteps = a => (isRun(a) && a.cadence ? Math.round(steps(a)) : null);
+
+/* Last 7 days: minutes easy / moderate / hard from each workout's HR-zone times.
+   Easy < 80% HRmax, moderate 80–88%, hard > 88% (pyramidal target ≈ 75–80 / 10–15 / 5–10). */
+export function intensityMix(days = 7) {
+  const max = store.profile.maxHR;
+  const from = dayKey(addDays(new Date(), -days + 1));
+  let easy = 0, mod = 0, hard = 0, any = false;
+  store.sync.activities.filter(a => a.date >= from).forEach(a => {
+    if (a.zoneSecs && a.zoneTops && a.zoneSecs.length) {
+      any = true;
+      a.zoneSecs.forEach((secs, i) => {
+        const lo = i === 0 ? 0 : a.zoneTops[i - 1] || 0;
+        const hi = a.zoneTops[i] || max;
+        const mid = (lo + Math.min(hi, max)) / 2 / max;
+        const m = secs / 60;
+        if (mid < 0.8) easy += m; else if (mid <= 0.88) mod += m; else hard += m;
+      });
+    } else if (a.avgHr && a.mins) {
+      any = true;
+      const r = a.avgHr / max;
+      if (r < 0.8) easy += a.mins; else if (r <= 0.88) mod += a.mins; else hard += a.mins;
+    }
+  });
+  if (!any) return null;
+  const total = easy + mod + hard || 1;
+  return { easy: Math.round(easy), mod: Math.round(mod), hard: Math.round(hard), pct: [easy, mod, hard].map(v => Math.round((v / total) * 100)) };
+}
+
+export function latestBodyFat() {
+  const w = [...wellnessSorted()].reverse().find(x => x.bodyFat > 0);
+  return w ? { value: w.bodyFat, date: w.date } : null;
+}

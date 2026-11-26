@@ -596,3 +596,6 @@ details.acc .acc-body { padding-bottom: 16px; }
 .garmin-list { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
 .garmin-act { padding: 10px 12px; border-radius: 12px; background: var(--green-soft); display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
 .garmin-act::before { content: 'Synced from Garmin'; font-size: 11px; font-weight: 600; color: var(--green); letter-spacing: 0.02em; }
+
+.mix-bar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; margin-top: 8px; background: var(--surface-3); gap: 2px; }
+.mix-bar i { display: block; height: 100%; }

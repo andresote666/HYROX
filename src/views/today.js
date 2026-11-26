@@ -7,7 +7,7 @@ import { resolveDay } from '../logic/day.js';
 import { fuelFor } from '../logic/personalize.js';
 import { weekOf, weekDays, phaseFor, TOTAL_WEEKS, DELOAD } from '../data/plan.js';
 import { TIPS } from '../data/library.js';
-import { activitiesOn, wellnessOn, syncConfigured } from '../logic/sync.js';
+import { activitiesOn, wellnessOn, syncConfigured, runSteps, cadenceInfo } from '../logic/sync.js';
 
 function statusBlock(day, key, isToday) {
   if (!day.checkin) {
@@ -62,8 +62,10 @@ function garminDone(day, key, kind) {
   const max = store.profile.maxHR;
   return `<div class="garmin-list">${acts.map(a => {
     const hit = kind === 'vo2' && a.maxHr ? (a.maxHr >= Math.round(max * 0.9) ? `<span class="chip green">reached ${Math.round(max * 0.9)}+</span>` : `<span class="chip amber">peak ${a.maxHr}, target ${Math.round(max * 0.9)}+</span>`) : '';
-    const bits = [a.mins ? `${a.mins} min` : '', a.km ? `${a.km} km` : '', a.avgHr ? `avg ${a.avgHr} bpm` : '', a.maxHr ? `max ${a.maxHr}` : '', a.watts ? `${Math.round(a.watts)} W` : ''].filter(Boolean).join(' · ');
-    return `<div class="garmin-act"><div class="h3" style="font-size:13.5px">${esc(a.name || a.type)} <span class="faint" style="font-weight:500">· ${esc(a.type)}</span></div><div class="small">${bits}</div>${hit}</div>`;
+    const bits = [a.mins ? `${a.mins} min` : '', a.km ? `${a.km} km` : '', a.avgHr ? `avg ${a.avgHr} bpm` : '', a.maxHr ? `max ${a.maxHr}` : '', a.watts ? `${Math.round(a.watts)} W` : '', runSteps(a) ? `${runSteps(a)} spm` : ''].filter(Boolean).join(' · ');
+    const cad = runSteps(a) ? cadenceInfo() : null;
+    const cadNote = cad && runSteps(a) < cad.target[0] ? `<span class="chip amber">cadence ${runSteps(a)}: aim ${cad.target[0]}+ to ease the shins</span>` : '';
+    return `<div class="garmin-act"><div class="h3" style="font-size:13.5px">${esc(a.name || a.type)} <span class="faint" style="font-weight:500">· ${esc(a.type)}</span></div><div class="small">${bits}</div>${hit}${cadNote}</div>`;
   }).join('')}</div>`;
 }
 

@@ -185,6 +185,11 @@ export const GARMIN = `
     <li>Synced workouts tick off the day's session, and VO₂max days show whether you reached 90% of max HR.</li>
     <li>Real running data enforces the rule of no run more than 10% longer than your longest in 30 days${c(26)}.</li>
     <li>Weight from a Garmin scale fills the weight trend on days you don't log by hand.</li>
+    <li><strong>VO₂max:</strong> Garmin's estimate (from outdoor runs with GPS + HR) charted in Progress, with the change since week 0. It's the number the whole plan is built to raise.</li>
+    <li><strong>Fitness, fatigue and form:</strong> intervals.icu's 6-week load (fitness), last-week load (fatigue) and form = fitness − fatigue. Expect −10 to −25 in build weeks and +5 to +15 on race day after the taper.</li>
+    <li><strong>Running cadence:</strong> your usual steps per minute and a +5–10% target for easy runs, with a nudge on Today when a run comes in below it.</li>
+    <li><strong>Intensity mix:</strong> last 7 days of easy / moderate / hard minutes from each workout's heart-rate zones, against the 75–80 / 10–15 / 5–10 target.</li>
+    <li>Body fat % from a Garmin Index scale, plus sleep score.</li>
   </ul>
   <p>The app syncs when you open it (at most every 30 minutes) and from Progress → Sync. If intervals.icu changes what Garmin data it shares, the rest of the app keeps working without it.</p>`;
 

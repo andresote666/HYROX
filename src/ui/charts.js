@@ -28,14 +28,15 @@ export function lineChart(points, { w = 320, h = 150, target = null, targetLabel
 }
 
 /* bars for shin pain by day: values 0–10 or null */
-export function painBars(days, { w = 320, h = 90 } = {}) {
+export function painBars(days, { w = 320, h = 110 } = {}) {
   const pad = { l: 4, r: 4, t: 8, b: 18 };
   const n = days.length;
   const bw = (w - pad.l - pad.r) / n;
   const yy = v => pad.t + (1 - v / 10) * (h - pad.t - pad.b);
   return `
   <svg class="chart" viewBox="0 0 ${w} ${h}" role="img" aria-label="Shin pain by day">
-    <line class="grid-l" x1="0" x2="${w}" y1="${yy(3)}" y2="${yy(3)}"/>
+    <line class="target" x1="0" x2="${w}" y1="${yy(3)}" y2="${yy(3)}" style="stroke:var(--amber)"/>
+    <text class="axis-t" x="${w - 2}" y="${yy(3) - 4}" text-anchor="end" style="fill:var(--amber)">3/10 limit</text>
     ${days.map((d, i) => {
       const x = pad.l + i * bw + bw * 0.18;
       const bwi = bw * 0.64;
