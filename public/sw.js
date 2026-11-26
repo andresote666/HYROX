@@ -1,33 +1,34 @@
-// Service Worker for offline PWA support
-const CACHE_NAME = 'hyrox-prep-v1';
-const ASSETS = [
-  '/',
-  '/index.html',
-  '/style.css',
-  '/main.js',
-  '/data.js',
-  '/manifest.json',
-  '/favicon.svg'
-];
+/* Service worker: network-first for pages and app code so every Vercel deploy
+   reaches the phone on the next open; cache is only an offline fallback. */
+const CACHE = 'hyrox-prep-2027-v1';
 
-self.addEventListener('install', (e) => {
-  e.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
-  );
+self.addEventListener('install', e => {
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(['/', '/manifest.json', '/favicon.svg'])));
   self.skipWaiting();
 });
 
-self.addEventListener('activate', (e) => {
+self.addEventListener('activate', e => {
   e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
-    )
+    caches.keys()
+      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      .then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
-self.addEventListener('fetch', (e) => {
+self.addEventListener('fetch', e => {
+  const req = e.request;
+  if (req.method !== 'GET') return;
+  const url = new URL(req.url);
+  if (url.origin !== location.origin && !url.hostname.endsWith('gstatic.com') && !url.hostname.endsWith('googleapis.com')) return;
   e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request))
+    fetch(req)
+      .then(res => {
+        if (res.ok) {
+          const copy = res.clone();
+          caches.open(CACHE).then(c => c.put(req, copy));
+        }
+        return res;
+      })
+      .catch(() => caches.match(req).then(hit => hit || (req.mode === 'navigate' ? caches.match('/') : undefined)))
   );
 });

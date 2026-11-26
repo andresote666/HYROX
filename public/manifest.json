@@ -1,14 +1,28 @@
 {
-  "name": "HYROX PREP — Buenos Aires 2026",
+  "name": "HYROX PREP · Buenos Aires 2027",
   "short_name": "HYROX PREP",
-  "description": "10-Week Training Plan for HYROX Open Singles",
+  "description": "16-week sub-1:30 HYROX plan with a daily shin check-in.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#0D0D0D",
-  "theme_color": "#0D0D0D",
+  "background_color": "#0d0d0b",
+  "theme_color": "#0d0d0b",
   "orientation": "portrait",
   "icons": [
-    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
   ]
 }
