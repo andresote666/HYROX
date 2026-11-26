@@ -1,6 +1,6 @@
 /* Service worker: network-first for pages and app code so every Vercel deploy
    reaches the phone on the next open; cache is only an offline fallback. */
-const CACHE = 'hyrox-prep-2027-v3';
+const CACHE = 'hyrox-prep-2027-v4';
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(['/', '/manifest.json', '/favicon.svg'])));

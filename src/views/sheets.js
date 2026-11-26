@@ -10,6 +10,7 @@ import { render, toast } from '../main.js';
 import { wellnessOn, syncNow, syncAgo } from '../logic/sync.js';
 import { RPE_LABELS, suggestedMinutes } from '../logic/load.js';
 import { sessionFor } from '../data/plan.js';
+import { autoGarmin } from '../actions.js';
 
 const tone = (v, [g, y]) => (v <= g ? 'g' : v <= y ? 'y' : 'r');
 
@@ -167,6 +168,12 @@ function settingsSheet() {
       <div class="field grow"><label for="sync-token">Sync code</label><input id="sync-token" class="input" type="password" autocomplete="off" value="${esc(store.sync.token)}" placeholder="SYNC_TOKEN" style="font-size:14px"></div>
       <button class="btn btn-ghost" data-act="save-sync">${store.sync.token ? 'Sync now' : 'Connect'}</button>
     </div>
+    ${store.sync.token ? `
+    <label class="toggle-row" style="margin-top:12px">
+      <span class="grow"><span class="h3" style="font-size:14px">Keep the next 7 days on my watch</span>
+      <span class="small" style="display:block">Bike, run and row sessions are sent as workouts with steps whenever the plan or your check-in changes them. In intervals.icu turn on Settings → Garmin → Upload planned workouts once.${store.garmin.last ? ` Last sent ${new Date(store.garmin.last).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}.` : ''}</span></span>
+      <input type="checkbox" class="switch" data-act="garmin-auto" ${store.garmin.auto ? 'checked' : ''}>
+    </label>` : ''}
     <div class="divider"></div>
     <div class="h3">Backup</div>
     <p class="small" style="margin:4px 0 10px">Everything is stored on this phone only. Export a backup before clearing Safari or Chrome data, or to move to another phone.</p>
@@ -282,6 +289,7 @@ export function handleSheetAction(act, el, ui) {
       ui.sheet = null; ui.draft = null;
       render();
       toast(`${STATUS[res.status].label}: ${STATUS[res.status].title.toLowerCase()}`);
+      autoGarmin(); // an amber or red morning changes today's workout on the watch too
       return true;
     }
     case 'save-weight': {

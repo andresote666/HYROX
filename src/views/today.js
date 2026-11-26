@@ -12,6 +12,7 @@ import { activitiesOn, wellnessOn, syncConfigured, runSteps, cadenceInfo } from 
 import { loadSpike, spikeText, rated } from '../logic/load.js';
 import { reviewFor } from '../logic/review.js';
 import { partsForSession } from '../logic/sim.js';
+import { workoutsFor, sentState } from '../logic/garmin.js';
 
 function statusBlock(day, key, isToday, ui) {
   if (!day.checkin) {
@@ -126,6 +127,7 @@ function sessionCard(day, key, ui) {
           ${hasOptional ? `<button class="btn btn-ghost btn-sm" data-act="express" data-date="${key}" aria-pressed="${!!ui.express[key]}">${ui.express[key] ? 'Full session' : 'Short on time'}</button>` : ''}
           ${day.base.variantB || store.variants[key] === 'B' ? `<button class="btn btn-ghost btn-sm" data-act="variant" data-date="${key}">${icons.shuffle} ${store.variants[key] === 'B' ? 'Back to plan' : 'Alternative'}</button>` : ''}
         </div>` : ''}
+      ${watchRow(key)}
       ${sessionBody(s, key)}
       ${s.kind !== 'rest' ? `
       <div class="complete-bar">
@@ -136,6 +138,26 @@ function sessionCard(day, key, ui) {
         <button class="btn ${complete ? 'btn-ghost' : 'btn-primary'}" data-act="complete" data-date="${key}">${complete ? `${icons.check} Completed` : 'Mark session done'}</button>
       </div>` : ''}
     </section>`;
+}
+
+/* Send the planned workouts to the watch (via intervals.icu → Garmin Connect). */
+function watchRow(key) {
+  if (!syncConfigured() || key < dayKey()) return '';
+  const list = workoutsFor(key);
+  if (!list.length) return '';
+  const st = sentState(key);
+  const at = store.garmin.sent[key]?.at;
+  const when = at ? new Date(at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '';
+  const what = list.map(w => w.type === 'Ride' ? 'bike' : w.type === 'Rowing' ? 'row' : 'run').join(' + ');
+  const label = st === 'sent' ? `On intervals.icu since ${when}. Sync your watch to get it.`
+    : st === 'changed' ? 'The plan changed since you sent it. Send again to update the watch.'
+    : `${list.length > 1 ? `${list.length} workouts` : 'Workout'} (${what}) with steps and heart-rate targets.`;
+  return `
+    <div class="watch-row ${st || 'new'}">
+      <span class="kind-badge sm">${icons.watch}</span>
+      <div class="grow small">${label}${store.garmin.error && st !== 'sent' ? ` <span style="color:var(--red)">${esc(store.garmin.error)}</span>` : ''}</div>
+      ${st === 'sent' ? `<span class="chip green">${icons.check} Sent</span>` : `<button class="btn btn-ghost btn-sm" data-act="garmin-send" data-date="${key}">${st === 'changed' ? 'Update' : 'Send to Garmin'}</button>`}
+    </div>`;
 }
 
 function loadNote(key) {

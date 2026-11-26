@@ -12,7 +12,7 @@ import { renderProgress } from './views/progress.js';
 import { renderLibrary } from './views/library.js';
 import { renderFood } from './views/food.js';
 import { renderSheet, handleSheetAction } from './views/sheets.js';
-import { handleAction } from './actions.js';
+import { handleAction, autoGarmin } from './actions.js';
 import { syncNow, shouldAutoSync } from './logic/sync.js';
 
 export const ui = {
@@ -157,6 +157,7 @@ document.addEventListener('visibilitychange', () => {
 render();
 
 function autoSync() {
+  autoGarmin(); // keep the next 7 days on the watch current (only days that changed)
   if (!shouldAutoSync()) return;
   syncNow({ silent: true }).then(r => { if (r.ok && !ui.sheet) render(); });
 }

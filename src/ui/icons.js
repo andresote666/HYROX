@@ -43,6 +43,7 @@ export const icons = {
   voice: svg('<path d="M5 18.5V7a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H8.5z"/><path d="M9 9.5h7M9 12.5h4.5"/>', 'ic ic-sm'),
   voiceOff: svg('<path d="M5 18.5V7a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H8.5z"/><path d="m3 3 18 18"/>', 'ic ic-sm'),
   undo: svg('<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>', 'ic ic-sm'),
+  watch: svg('<rect x="6.5" y="6.5" width="11" height="11" rx="3"/><path d="M9 6.5 9.6 3h4.8l.6 3.5M9 17.5l.6 3.5h4.8l.6-3.5"/><path d="M12 9.5V12l1.6 1"/>', 'ic ic-sm'),
   flag: svg('<path d="M5 21V4"/><path d="M5 4h6l1 2h7v8h-6l-1-2H5"/>', 'ic ic-sm'),
   mute: svg('<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="m16 9.5 5 5M21 9.5l-5 5"/>', 'ic ic-sm'),
 };

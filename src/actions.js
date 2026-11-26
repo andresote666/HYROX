@@ -8,6 +8,7 @@ import { openRpeDraft } from './views/sheets.js';
 import { openSimTimer } from './ui/simtimer.js';
 import { partsForSession, partsForType, SIM_TYPES, deleteSim } from './logic/sim.js';
 import { sessionFor } from './data/plan.js';
+import { sendToGarmin, upcomingKeys, garminAutoSend } from './logic/garmin.js';
 
 /* After a simulation closes: log the session and ask for effort. */
 function afterSim(ui, key) {
@@ -23,6 +24,11 @@ function afterSim(ui, key) {
 function setDone(key, patch) {
   store.done[key] = { items: {}, ...store.done[key], ...patch };
   save();
+}
+
+/* After anything that changes upcoming sessions, refresh what's on the watch (only days that changed). */
+export function autoGarmin() {
+  garminAutoSend().then(r => { if (r && !r.unchanged) { render(); if (!r.ok) toast(`Garmin: ${r.message}`); } });
 }
 
 export function handleAction(act, el, ui) {
@@ -50,7 +56,7 @@ export function handleAction(act, el, ui) {
       break;
     case 'variant':
       if (store.variants[key] === 'B') delete store.variants[key]; else store.variants[key] = 'B';
-      save(); render();
+      save(); render(); autoGarmin();
       break;
     case 'timer': {
       const day = resolveDay(key, { express: !!ui.express[key] });
@@ -115,11 +121,11 @@ export function handleAction(act, el, ui) {
       doSwap(Number(el.dataset.week), Number(el.dataset.from), Number(el.dataset.to));
       save();
       ui.sheet = null; ui.openDay = null;
-      render(); toast('Days swapped');
+      render(); toast('Days swapped'); autoGarmin();
       break;
     case 'reset-week':
       delete store.swaps[`w${el.dataset.week}`];
-      save(); render(); toast('Week order reset');
+      save(); render(); toast('Week order reset'); autoGarmin();
       break;
     case 'race':
       ui.raceId = el.dataset.race;
@@ -168,6 +174,23 @@ export function handleAction(act, el, ui) {
     case 'toggle-notes':
       ui.notesOpen = !ui.notesOpen;
       render();
+      break;
+    case 'garmin-send': {
+      el.setAttribute('disabled', '');
+      el.textContent = 'Sending…';
+      const from = key > dayKey() ? key : dayKey();
+      const first = !store.garmin.last;
+      sendToGarmin(upcomingKeys(from)).then(r => {
+        if (r.ok && first) { store.garmin.auto = true; save(); }
+        render();
+        toast(!r.ok ? r.message : first ? `${r.message}. The next 7 days now stay up to date by themselves.` : r.unchanged ? 'Already on your watch list' : r.message);
+      });
+      break;
+    }
+    case 'garmin-auto':
+      store.garmin.auto = !store.garmin.auto;
+      save(); render();
+      if (store.garmin.auto) autoGarmin();
       break;
     case 'sync-now':
       el.setAttribute('disabled', '');

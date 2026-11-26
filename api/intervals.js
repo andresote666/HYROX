@@ -7,7 +7,14 @@
      SYNC_TOKEN            any long random string; the app sends it so strangers can't read your data
 
    GET /api/intervals?oldest=YYYY-MM-DD&newest=YYYY-MM-DD   (header: x-sync-token)
-   GET /api/intervals?debug=1  → field names intervals.icu actually returns (no values) */
+   GET /api/intervals?debug=1  → field names intervals.icu actually returns (no values)
+
+   POST /api/intervals  { action: 'plan', days: [{ date, events: [{ type, name, description, moving_time }] }] }
+     Puts the app's planned workouts on the intervals.icu calendar (which uploads them
+     to Garmin Connect when "Upload planned workouts" is on). For every date sent, the
+     app's earlier workouts (tag hyrox-app) are removed first, so a resend replaces
+     instead of duplicating. Nothing else on the calendar is touched.
+   POST /api/intervals  { action: 'planned', oldest, newest }  → the app's workouts as intervals.icu parsed them */
 import { timingSafeEqual } from 'node:crypto';
 
 const BASE = 'https://intervals.icu/api/v1';
@@ -80,20 +87,94 @@ export function normActivity(a) {
   };
 }
 
-async function getJSON(path, key) {
+async function getJSON(path, key, { method = 'GET', body } = {}) {
   const r = await fetch(`${BASE}${path}`, {
+    method,
     headers: {
       Authorization: `Basic ${Buffer.from(`API_KEY:${key}`).toString('base64')}`,
       Accept: 'application/json',
       'User-Agent': 'Mozilla/5.0 (HYROX-PREP personal app)',
+      ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
     },
+    ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
   });
   if (!r.ok) {
     const err = new Error(`intervals.icu ${r.status}`);
     err.status = r.status;
+    err.detail = (await r.text().catch(() => '')).slice(0, 300);
     throw err;
   }
-  return r.json();
+  const text = await r.text();
+  return text ? JSON.parse(text) : null;
+}
+
+/* ── planned workouts ── */
+const TAG = 'hyrox-app';
+const TYPES = new Set(['Run', 'Ride', 'VirtualRide', 'Rowing', 'WeightTraining', 'Workout']);
+const ours = e => (Array.isArray(e.tags) && e.tags.includes(TAG)) || String(e.external_id || '').startsWith(`${TAG}-`);
+
+function cleanDays(days) {
+  if (!Array.isArray(days) || !days.length || days.length > 14) throw Object.assign(new Error('Send 1–14 days.'), { status: 400, local: true });
+  return days.map(d => {
+    if (!DAY.test(d?.date)) throw Object.assign(new Error('Bad date.'), { status: 400, local: true });
+    const events = Array.isArray(d.events) ? d.events.slice(0, 4) : [];
+    return {
+      date: d.date,
+      events: events.map((e, i) => {
+        if (!TYPES.has(e?.type)) throw Object.assign(new Error(`Unsupported workout type ${e?.type}.`), { status: 400, local: true });
+        return {
+          category: 'WORKOUT',
+          start_date_local: `${d.date}T00:00:00`,
+          type: e.type,
+          name: String(e.name || 'HYROX workout').slice(0, 80),
+          description: String(e.description || '').slice(0, 4000),
+          moving_time: Math.max(0, Math.min(6 * 3600, Math.round(Number(e.moving_time) || 0))) || undefined,
+          indoor: e.type !== 'Run',
+          external_id: `${TAG}-${d.date}-${i}`,
+          tags: [TAG],
+        };
+      }),
+    };
+  });
+}
+
+async function listOurs(athlete, key, oldest, newest) {
+  const evs = await getJSON(`/athlete/${athlete}/events?oldest=${oldest}&newest=${newest}&category=WORKOUT`, key);
+  return (Array.isArray(evs) ? evs : []).filter(ours);
+}
+
+async function plan(req, res, athlete, key) {
+  const b = req.body || {};
+  if (b.action === 'planned') {
+    const oldest = DAY.test(b.oldest) ? b.oldest : isoDay(new Date());
+    const newest = DAY.test(b.newest) ? b.newest : isoDay(new Date(Date.now() + 7 * 86400000));
+    const evs = await listOurs(athlete, key, oldest, newest);
+    return res.status(200).json({
+      events: evs.map(e => ({
+        id: e.id, date: String(e.start_date_local || '').slice(0, 10), type: e.type, name: e.name,
+        moving_time: e.moving_time, steps: Array.isArray(e.workout_doc?.steps) ? e.workout_doc.steps.length : null,
+        workout_doc: b.full ? e.workout_doc : undefined, push_errors: e.push_errors || null,
+      })),
+    });
+  }
+  if (b.action !== 'plan') return res.status(400).json({ error: 'bad-action', message: 'Unknown action.' });
+
+  const days = cleanDays(b.days);
+  const dates = days.map(d => d.date).sort();
+  const sent = new Set(dates);
+  const old = (await listOurs(athlete, key, dates[0], dates[dates.length - 1]))
+    .filter(e => sent.has(String(e.start_date_local || '').slice(0, 10)));
+  if (old.length) {
+    await getJSON(`/athlete/${athlete}/events/bulk-delete`, key, { method: 'PUT', body: old.map(e => ({ id: e.id })) });
+  }
+  const events = days.flatMap(d => d.events);
+  const created = events.length
+    ? await getJSON(`/athlete/${athlete}/events/bulk?upsertOnUid=false&updatePlanApplied=false`, key, { method: 'POST', body: events })
+    : [];
+  return res.status(200).json({
+    replaced: old.length,
+    created: (created || []).map(e => ({ id: e.id, date: String(e.start_date_local || '').slice(0, 10), name: e.name, steps: Array.isArray(e.workout_doc?.steps) ? e.workout_doc.steps.length : null })),
+  });
 }
 
 export default async function handler(req, res) {
@@ -105,6 +186,22 @@ export default async function handler(req, res) {
   if (!sameToken(req.headers['x-sync-token'], SYNC_TOKEN)) {
     return res.status(401).json({ error: 'bad-token', message: 'Sync code does not match SYNC_TOKEN in Vercel.' });
   }
+
+  if (req.method === 'POST') {
+    try {
+      return await plan(req, res, encodeURIComponent(INTERVALS_ATHLETE_ID), INTERVALS_API_KEY);
+    } catch (e) {
+      if (e.local) return res.status(400).json({ error: 'bad-request', message: e.message });
+      return res.status(502).json({
+        error: 'upstream',
+        message: e.status === 401 || e.status === 403
+          ? 'intervals.icu rejected the API key (check INTERVALS_API_KEY).'
+          : e.status === 429 ? 'intervals.icu rate limit hit. Try again in a few minutes.'
+          : `intervals.icu refused the workouts (${e.message}${e.detail ? `: ${e.detail}` : ''}).`,
+      });
+    }
+  }
+  if (req.method && req.method !== 'GET') return res.status(405).json({ error: 'method' });
 
   const q = req.query || {};
   const today = new Date();

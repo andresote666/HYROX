@@ -22,6 +22,10 @@ Data lives in the phone's localStorage; export a backup from Settings.
 
 `/api/intervals?debug=1` (with the `x-sync-token` header) lists the field names intervals.icu returns, for troubleshooting.
 
+### Workouts to the watch
+
+`Send to Garmin` on Today (and the auto switch in Settings) posts the next 7 days to `POST /api/intervals`. The app writes them as intervals.icu workout text (`src/logic/garmin.js`): bike, run and row with heart-rate targets as % of max HR, run legs as 1 km with a pace range, stations as `Press lap` steps. The function replaces the app's own workouts (tag `hyrox-app`) on those dates and leaves everything else alone. intervals.icu uploads them to Garmin Connect once **Settings → Garmin → Upload planned workouts** is on; set your max HR (193) in intervals.icu so the % targets match.
+
 ```bash
 npm install
 npm run dev

@@ -30,6 +30,7 @@ const defaults = () => ({
   sims: [],         // saved race simulations [{ id, date, type, label, segs: [{ seg, label, secs, target, counts }], total }]
   simLive: null,    // race simulation in progress (survives an app reload)
   sync: { token: '', last: null, error: null, wellness: {}, activities: [] }, // Garmin via intervals.icu
+  garmin: { auto: false, sent: {}, last: null, error: null }, // planned workouts sent to the watch: sent = { 'YYYY-MM-DD': { h, at, n } }
   ui: { tab: 'today', libSection: 'stations' },
 });
 

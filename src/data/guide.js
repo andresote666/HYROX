@@ -168,6 +168,7 @@ export const TRAINING = [
       'If your HRV is below your normal range, or your resting heart rate is up by more than 6 bpm, hard days turn easy automatically.',
       'Workouts from your watch tick off the day\'s session.',
       'Progress shows your VO₂max estimate, fitness and fatigue, cadence and easy/hard mix.',
+      'Send to Garmin (Today) puts the bike, run and row sessions on your watch with steps and heart-rate targets. In simulations each station is a "press lap" step. Strength stays in the app.',
     ],
     why: 'Using HRV to decide when to go hard reduces the chance of training while under-recovered.',
     sources: 'Plews 2012; Kiviniemi 2007',
