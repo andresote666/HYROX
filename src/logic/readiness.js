@@ -172,6 +172,7 @@ export function adaptSession(session, status = 'green', readiness = 'normal', { 
   const s = clone(session);
   const notes = [];
   let changed = 0;
+  let lockedN = 0;
 
   s.blocks = s.blocks.map(b => ({
     ...b,
@@ -179,6 +180,7 @@ export function adaptSession(session, status = 'green', readiness = 'normal', { 
       const locked = runLocked && it.mode === 'run';
       const a = adaptItem(it, locked ? 'red' : status);
       if (a.adapted && !locked) changed++;
+      if (a.adapted && locked) lockedN++;
       return a;
     }),
   }));
@@ -188,7 +190,7 @@ export function adaptSession(session, status = 'green', readiness = 'normal', { 
     s.lowReadiness = true;
     notes.push('Low readiness: do the first half of the main set, then switch to Zone 2. Quality beats grinding.');
   }
-  if (runLocked && status !== 'red') notes.push('Running is locked today by the return-to-run rules, so runs move to the bike.');
+  if (lockedN && status !== 'red') notes.push('Running is locked today by the return-to-run rules, so runs move to the bike.');
   if ((status === 'red' || runLocked) && s.timer?.mode === 'run') s.timer.mode = 'bike';
   return { session: s, notes };
 }

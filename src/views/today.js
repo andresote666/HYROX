@@ -10,7 +10,7 @@ import { TIPS } from '../data/library.js';
 import { BENCHMARKS } from '../data/benchmarks.js';
 import { activitiesOn, wellnessOn, syncConfigured, runSteps, cadenceInfo } from '../logic/sync.js';
 
-function statusBlock(day, key, isToday) {
+function statusBlock(day, key, isToday, ui) {
   if (!day.checkin) {
     return `
       <button class="card card-glass checkin-cta rise" style="--i:1;text-align:left;width:100%" data-act="sheet" data-type="checkin">
@@ -26,19 +26,26 @@ function statusBlock(day, key, isToday) {
   const st = STATUS[day.checkin.status];
   const streak = redStreak(store.checkins, key);
   const c = day.checkin;
+  const urgent = c.focal || streak >= 3;
+  const open = !!ui.statusOpen;
+  const reasons = [...scoreReasons(c), ...(!day.gate.allow ? [day.gate.why] : [])];
   return `
-    <section class="card status-card ${st.id} rise" style="--i:1" aria-label="Shin status">
-      <div class="row">
+    <section class="card status-card compact ${st.id} ${open ? 'open' : ''} rise" style="--i:1" aria-label="Shin status">
+      <button class="status-toggle" data-act="toggle-status" aria-expanded="${open}">
         <div class="status-light"><span class="dot"></span></div>
         <div class="grow">
           <div class="status-title"><b>${st.label}</b> · ${st.title}</div>
-          <div class="small">Pain ${c.morning}/${c.palpation}/${c.hopFail ? '✕' : c.hop ?? '–'} · sleep ${c.sleep} h · ${['wrecked', 'low', 'OK', 'good', 'great'][(c.energy || 3) - 1]}</div>
+          <div class="small">Shins ${c.morning}/${c.palpation}/${c.hopFail ? '✕' : c.hop ?? '–'} · sleep ${c.sleep} h${reasons.length ? ` · ${reasons.length} note${reasons.length > 1 ? 's' : ''}` : ''}</div>
         </div>
-        <button class="link-btn" data-act="sheet" data-type="checkin">Edit</button>
-      </div>
-      <p class="body-2" style="margin-top:10px">${st.summary}</p>
-      ${day.checkin.status !== 'green' || !day.gate.allow ? `<ul class="reason-list">${scoreReasons(c).map(r => `<li>${esc(r)}</li>`).join('')}${!day.gate.allow ? `<li>${esc(day.gate.why)}</li>` : ''}</ul>` : ''}
-      ${c.focal || streak >= 3 ? `<div class="note" style="margin-top:12px;background:var(--red-soft)">${icons.alert}<span><b style="color:var(--text)">See a sports doctor or physio${c.focal ? ' now' : ''}.</b> ${c.focal ? 'Pain in one spot on the bone, or at night or rest, can be a bone stress injury and needs imaging (MRI).' : `${streak} red days in a row.`}</span></div>` : ''}
+        <span class="chev">${icons.chevron}</span>
+      </button>
+      ${open ? `
+      <div class="status-more">
+        <p class="body-2">${st.summary}</p>
+        ${reasons.length ? `<ul class="reason-list">${reasons.map(r => `<li>${esc(r)}</li>`).join('')}</ul>` : ''}
+        <button class="link-btn" style="margin-top:10px" data-act="sheet" data-type="checkin">Edit check-in</button>
+      </div>` : ''}
+      ${urgent ? `<div class="note" style="margin-top:12px;background:var(--red-soft)">${icons.alert}<span><b style="color:var(--text)">See a sports doctor or physio${c.focal ? ' now' : ''}.</b> ${c.focal ? 'Pain in one spot on the bone, or at night or rest, can be a bone stress injury and needs imaging (MRI).' : `${streak} red days in a row.`}</span></div>` : ''}
     </section>`;
 }
 
@@ -98,7 +105,9 @@ function sessionCard(day, key, ui) {
   return `
     <section class="card rise" style="--i:2" aria-label="Session">
       ${sessionHeader(s)}
-      ${day.notes.length ? `<div class="notes">${day.notes.map(n => `<div class="note">${icons.info}<span>${esc(n)}</span></div>`).join('')}</div>` : ''}
+      ${day.notes.length ? `
+        <button class="notes-toggle" data-act="toggle-notes" aria-expanded="${!!ui.notesOpen}">${icons.info}<span>${ui.notesOpen ? 'Hide changes' : `Adjusted today: ${day.notes.length} change${day.notes.length > 1 ? 's' : ''}`}</span><span class="chev">${icons.chevron}</span></button>
+        ${ui.notesOpen ? `<div class="notes">${day.notes.map(n => `<div class="note">${icons.info}<span>${esc(n)}</span></div>`).join('')}</div>` : ''}` : ''}
       ${garminDone(day, key, s.kind)}
       ${(s.timers.length || hasOptional || s.variantB || day.base.variantB || benches.length) ? `
         <div class="day-actions">
@@ -159,7 +168,7 @@ export function renderToday(ui) {
       </div>
       ${ring(week + 1, TOTAL_WEEKS + 1, `W${week}`, `OF ${TOTAL_WEEKS}`)}
     </section>
-    ${statusBlock(day, key, isToday)}
+    ${statusBlock(day, key, isToday, ui)}
     ${syncConfigured() ? recoveryStrip(day, key) : ''}
     ${sessionCard(day, key, ui)}
     ${weekStrip(week, key)}

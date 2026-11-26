@@ -603,3 +603,29 @@ details.acc .acc-body { padding-bottom: 16px; }
 .bench { grid-template-columns: minmax(0, 1fr) auto; column-gap: 14px; }
 .bench .vals { max-width: 44vw; }
 .bench .vals small { font-family: var(--font); text-wrap: balance; }
+
+/* ── touch: no accidental text selection or double-tap zoom ── */
+html { touch-action: manipulation; }
+body {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+/* reading content stays selectable with a long press */
+.prose, .prose *, .src-list, input, textarea, select {
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
+}
+
+.status-toggle { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; }
+.status-toggle .chev { color: var(--text-3); transition: transform 0.3s var(--ease); margin-left: auto; }
+.status-card.open .status-toggle .chev { transform: rotate(180deg); }
+.status-card.compact { padding: 12px 14px; }
+.status-card.compact .status-light { width: 36px; height: 36px; border-radius: 12px; }
+.status-card.compact .status-light .dot { width: 11px; height: 11px; }
+.status-more { margin-top: 10px; animation: rise 0.3s var(--ease) both; }
+.notes-toggle { display: flex; align-items: center; gap: 8px; width: 100%; margin-top: 12px; padding: 10px 12px; border-radius: 12px; background: var(--amber-soft); color: var(--text-2); font-size: 13px; text-align: left; }
+.notes-toggle .ic { color: var(--amber); }
+.notes-toggle .chev { margin-left: auto; color: var(--text-3); transition: transform 0.3s var(--ease); }
+.notes-toggle[aria-expanded="true"] .chev { transform: rotate(180deg); }

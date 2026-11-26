@@ -84,6 +84,14 @@ export function handleAction(act, el, ui) {
       store.ui.libSection = ui.libSection; save();
       render();
       break;
+    case 'toggle-status':
+      ui.statusOpen = !ui.statusOpen;
+      render();
+      break;
+    case 'toggle-notes':
+      ui.notesOpen = !ui.notesOpen;
+      render();
+      break;
     case 'sync-now':
       el.setAttribute('disabled', '');
       syncNow().then(r => { render(); toast(r.ok ? 'Garmin data synced' : r.message); });
