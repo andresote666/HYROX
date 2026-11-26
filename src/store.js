@@ -17,6 +17,7 @@ const defaults = () => ({
     raceId: 'ba27',
     bikeWatts: false, // gym spin bike has no screen
     voice: true,      // spoken cues in the timers
+    reminderTime: '07:00', // daily calendar reminder (Settings → Morning reminder)
   },
   checkins: {},     // { 'YYYY-MM-DD': { morning, hop, palpation, focal, settled, sleep, energy, status, ts } }
   done: {},         // { 'YYYY-MM-DD': { items, complete, auto, rpe (0–10), mins } }
@@ -31,6 +32,7 @@ const defaults = () => ({
   simLive: null,    // race simulation in progress (survives an app reload)
   sync: { token: '', last: null, error: null, wellness: {}, activities: [] }, // Garmin via intervals.icu
   garmin: { auto: true, sent: {}, last: null, error: null }, // planned workouts sent to the watch: sent = { 'YYYY-MM-DD': { h, at, n } }
+  learn: {},       // what the app worked out from your data: { maxHR: { value, date } }
   ui: { tab: 'today', libSection: 'stations' },
 });
 

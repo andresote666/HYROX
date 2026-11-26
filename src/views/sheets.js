@@ -175,6 +175,13 @@ function settingsSheet() {
       <input type="checkbox" class="switch" data-act="garmin-auto" ${store.garmin.auto ? 'checked' : ''}>
     </label>` : ''}
     <div class="divider"></div>
+    <div class="h3">Morning reminder</div>
+    <p class="small" style="margin:4px 0 10px">Adds a daily alert to your phone's calendar: "Shin check · today's session". It works with the app closed. Subscribe once; the calendar keeps itself up to date.</p>
+    <div class="input-row">
+      <div class="field" style="width:120px"><label for="rem-time">Time</label><input id="rem-time" class="input" type="time" value="${esc(store.profile.reminderTime || '07:00')}" style="font-size:15px"></div>
+      <button class="btn btn-ghost grow" data-act="add-calendar">${icons.plan} Add to calendar</button>
+    </div>
+    <div class="divider"></div>
     <div class="h3">Backup</div>
     <p class="small" style="margin:4px 0 10px">Everything is stored on this phone only. Export a backup before clearing Safari or Chrome data, or to move to another phone.</p>
     <div class="grid-2">

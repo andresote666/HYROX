@@ -187,6 +187,28 @@ export function handleAction(act, el, ui) {
       });
       break;
     }
+    case 'add-calendar': {
+      const t = document.getElementById('rem-time')?.value || '07:00';
+      store.profile.reminderTime = /^\d\d:\d\d$/.test(t) ? t : '07:00';
+      save();
+      // webcal:// makes iPhone and Mac offer "Subscribe" (Android: Google Calendar → From URL, https link)
+      location.href = `webcal://${location.host}/api/calendar?time=${store.profile.reminderTime}`;
+      toast('Choose Subscribe, then set the alert sound if you like');
+      break;
+    }
+    case 'scroll-session':
+      document.getElementById('session-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      break;
+    case 'toggle-more':
+      ui.moreOpen = !ui.moreOpen;
+      render();
+      break;
+    case 'learn-maxhr':
+      store.profile.maxHR = Number(el.dataset.value);
+      store.learn = { ...(store.learn || {}), maxHR: { value: store.profile.maxHR, date: dayKey(), manual: true } };
+      save(); render(); toast(`Max HR set to ${store.profile.maxHR}. Set the same in intervals.icu → Settings so the watch matches.`);
+      autoGarmin();
+      break;
     case 'garmin-auto':
       store.garmin.auto = !store.garmin.auto;
       save(); render();

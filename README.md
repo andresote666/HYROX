@@ -22,6 +22,18 @@ Data lives in the phone's localStorage; export a backup from Settings.
 
 `/api/intervals?debug=1` (with the `x-sync-token` header) lists the field names intervals.icu returns, for troubleshooting.
 
+### Auto-learning (`src/logic/learn.js`)
+
+Plain rules on your own data, shown in Progress → What the app has learned:
+- **Max HR** from Garmin workouts (raised automatically if a workout goes higher; detects intervals.icu clipping at its max-HR setting).
+- **Bike intervals**: two sessions in a row at the target HR (90% max) with effort ≤ 8 add a rep; below target with effort to spare → go harder; effort 10 or missed target at 9+ → start easier.
+- **Shin limit**: run minutes vs the next morning's check-in; easy runs are capped above the length that keeps leading to amber/red mornings.
+- **Calories**: 21-day weight slope; adds 100–200 kcal when losing > 0.5 kg/week, trims 150 when flat.
+
+### Morning reminder
+
+`/api/calendar?time=07:00` is an iCalendar feed (no personal data, no token): a daily 10-minute event "Shin check · <planned session>" with an alert. Settings → Morning reminder subscribes to it with `webcal://`.
+
 ### Workouts to the watch
 
 `Send to Garmin` on Today (and the auto switch in Settings) posts the next 7 days to `POST /api/intervals`. The app writes them as intervals.icu workout text (`src/logic/garmin.js`): bike, run and row with heart-rate targets as % of max HR, run legs as 1 km with a pace range, stations as `Press lap` steps. The function replaces the app's own workouts (tag `hyrox-app`) on those dates and leaves everything else alone. intervals.icu uploads them to Garmin Connect once **Settings → Garmin → Upload planned workouts** is on; set your max HR (193) in intervals.icu so the % targets match.

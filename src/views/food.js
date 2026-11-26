@@ -3,6 +3,7 @@ import { icons } from '../ui/icons.js';
 import { esc } from '../ui/components.js';
 import { DAY_TYPES, totals, mealTotals, dayTypeFor, MAINTENANCE_ADD, LAST_YEAR, SWAPS, SHOPPING, PREP, RACE_FOOD } from '../data/meals.js';
 import { sessionFor, weekOf } from '../data/plan.js';
+import { calorieAdjust } from '../logic/learn.js';
 
 const VIEWS = [
   { id: 'menu', label: 'Menu' },
@@ -21,6 +22,7 @@ function menu(ui) {
   const t = totals(type, { saturday: type === 'big' ? isSat : false });
   const { week } = weekOf(today);
   const maint = week >= 12;
+  const adj = maint ? { delta: 0 } : calorieAdjust(week);
   const eaten = store.meals[today] || {};
   const meals = d.meals;
   const done = meals.filter(m => eaten[m.id]).length;
@@ -34,11 +36,12 @@ function menu(ui) {
       <div class="eyebrow">${esc(d.when)}</div>
       <div class="h2" style="margin-top:2px">${esc(d.label)}${type === todayType && session ? ` <span class="small">· today: ${esc(session.title)}</span>` : ''}</div>
       <div class="stat-tiles" style="margin-top:12px">
-        <div class="tile"><span class="num">${(t.kcal + (maint ? 300 : 0)).toLocaleString()}</span><small>kcal</small></div>
+        <div class="tile"><span class="num">${(t.kcal + (maint ? 300 : 0) + adj.delta).toLocaleString()}</span><small>kcal</small></div>
         <div class="tile"><span class="num">${t.p}</span><small>g protein</small></div>
-        <div class="tile"><span class="num">${t.c + (maint ? 40 : 0)}</span><small>g carbs</small></div>
+        <div class="tile"><span class="num">${t.c + (maint ? 40 : 0) + Math.round(adj.delta / 4)}</span><small>g carbs</small></div>
         <div class="tile"><span class="num">${t.f + (maint ? 10 : 0)}</span><small>g fat</small></div>
       </div>
+      ${adj.delta ? `<div class="note learned" style="margin-top:10px">${icons.bolt}<span><b style="color:var(--text)">${adj.delta > 0 ? '+' : '−'}${Math.abs(adj.delta)} kcal, learned from your weight.</b> ${esc(adj.why)}</span></div>` : ''}
       ${maint ? `<p class="small" style="margin-top:10px">${esc(MAINTENANCE_ADD)}</p>` : `<p class="small" style="margin-top:10px">Small deficit until week 11, so you lose ~0.3 kg a week without hurting training. Check the weight trend in Progress every 2 weeks.</p>`}
     </section>
 

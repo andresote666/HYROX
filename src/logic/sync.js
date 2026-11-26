@@ -3,6 +3,7 @@
    the 10%-longest-run rule, weight trend, and the Progress charts. */
 import { store, save, dayKey, addDays, parseDay } from '../store.js';
 import { sessionFor } from '../data/plan.js';
+import { applyLearnedMaxHR } from './learn.js';
 
 const STALE_MS = 30 * 60 * 1000;
 let inFlight = null;
@@ -20,6 +21,7 @@ export async function syncNow({ silent = false } = {}) {
       const body = await r.json().catch(() => ({}));
       if (!r.ok) throw new Error(body.message || `Sync failed (${r.status})`);
       merge(body);
+      applyLearnedMaxHR(); // only ever raises it automatically
       store.sync.error = null;
       store.sync.last = new Date().toISOString();
       save();

@@ -113,7 +113,7 @@ function sessionCard(day, key, ui) {
     : simParts ? `<button class="btn btn-primary btn-sm" data-act="sim-open" data-date="${key}">${icons.flag} Race sim timer</button>` : '';
   const r = store.done[key];
   return `
-    <section class="card rise" style="--i:2" aria-label="Session">
+    <section class="card rise" style="--i:2" aria-label="Session" id="session-card">
       ${sessionHeader(s)}
       ${day.notes.length ? `
         <button class="notes-toggle" data-act="toggle-notes" aria-expanded="${!!ui.notesOpen}">${icons.info}<span>${ui.notesOpen ? 'Hide changes' : `Adjusted today: ${day.notes.length} change${day.notes.length > 1 ? 's' : ''}`}</span><span class="chev">${icons.chevron}</span></button>
@@ -221,8 +221,46 @@ function fuelCard(day, week) {
         <div class="tile"><span class="num">${f.carbs}</span><small>g carbs</small></div>
         <div class="tile"><span class="num">${(w - target).toFixed(1)}</span><small>kg to ${target}</small></div>
       </div>
+      ${f.learned?.delta ? `<div class="note learned" style="margin-top:10px">${icons.bolt}<span><b style="color:var(--text)">${f.learned.delta > 0 ? '+' : '−'}${Math.abs(f.learned.delta)} kcal, learned from your weight.</b> ${esc(f.learned.why)}</span></div>` : ''}
       <p class="small" style="margin-top:10px">${f.note}</p>
       <button class="btn btn-primary btn-block btn-sm" style="margin-top:12px" data-act="open-food">${icons.food} See today's meals</button>
+    </section>`;
+}
+
+/* The one thing to do next today: check-in → train → rate the effort → done. */
+function nextStep(day, key) {
+  const s = day.session;
+  const done = store.done[key];
+  const btn = (label, attrs, tone = '') => `<button class="next-step ${tone}" ${attrs}><span class="eyebrow">Next</span><span class="grow">${label}</span>${icons.chevronR}</button>`;
+  if (!day.checkin) return ''; // the check-in card right below is the next step
+  if (s.kind === 'rest') return `<div class="next-step done"><span class="eyebrow">Today</span><span class="grow">Rest day: walk, eat well, sleep 8 h.</span></div>`;
+  if (!done?.complete) {
+    const watch = sentState(key) === 'sent' ? ' · on your watch' : '';
+    return btn(`${esc(s.title)}${watch}`, 'data-act="scroll-session"');
+  }
+  if (!rated(key)) return btn('Rate how hard it felt', `data-act="sheet" data-type="rpe" data-date="${key}"`, 'accent');
+  return `<div class="next-step done"><span class="eyebrow">Today</span><span class="grow">All done: ${esc(s.title)}, effort ${done.rpe}/10. Recover well.</span>${icons.check}</div>`;
+}
+
+/* After the check-in, food and the coach note fold into one line so the session stays in focus. */
+function foldedExtras(day, week, tip, ui) {
+  const f = fuelFor(day.session, week);
+  if (ui.moreOpen) {
+    return `
+      <button class="more-toggle open" data-act="toggle-more" aria-expanded="true"><span class="grow">Food and coach note</span><span class="chev">${icons.chevron}</span></button>
+      ${fuelCard(day, week)}
+      ${coachNote(tip)}`;
+  }
+  return `<button class="more-toggle" data-act="toggle-more" aria-expanded="false">${icons.food}<span class="grow">Food today: <b>${f.kcal.toLocaleString()} kcal</b> · ${f.protein} g protein${f.learned?.delta ? ' · adjusted to your weight' : ''}</span><span class="chev">${icons.chevron}</span></button>`;
+}
+
+function coachNote(tip) {
+  return `
+    <section class="card tight rise" style="--i:5">
+      <div class="row" style="align-items:flex-start">
+        <div class="kind-badge" style="width:36px;height:36px;border-radius:11px">${icons.book}</div>
+        <div class="grow"><div class="eyebrow">Coach note</div><p class="body-2" style="margin-top:2px">${tip}</p></div>
+      </div>
     </section>`;
 }
 
@@ -249,17 +287,12 @@ export function renderToday(ui) {
       </div>
       ${ring(week + 1, TOTAL_WEEKS + 1, `W${week}`, `OF ${TOTAL_WEEKS}`)}
     </section>
+    ${isToday ? nextStep(day, key) : ''}
     ${isToday && reviewFor(key) ? reviewCard(reviewFor(key), ui) : ''}
     ${statusBlock(day, key, isToday, ui)}
     ${isToday ? loadNote(key) : ''}
     ${syncConfigured() ? recoveryStrip(day, key) : ''}
     ${sessionCard(day, key, ui)}
     ${weekStrip(week, key)}
-    ${fuelCard(day, week)}
-    <section class="card tight rise" style="--i:5">
-      <div class="row" style="align-items:flex-start">
-        <div class="kind-badge" style="width:36px;height:36px;border-radius:11px">${icons.book}</div>
-        <div class="grow"><div class="eyebrow">Coach note</div><p class="body-2" style="margin-top:2px">${tip}</p></div>
-      </div>
-    </section>`;
+    ${isToday && day.checkin ? foldedExtras(day, week, tip, ui) : `${fuelCard(day, week)}${coachNote(tip)}`}`;
 }

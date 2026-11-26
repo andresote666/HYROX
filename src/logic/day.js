@@ -3,6 +3,7 @@ import { sessionFor } from '../data/plan.js';
 import { adaptSession, runGate } from './readiness.js';
 import { personalize } from './personalize.js';
 import { hrvStatus, rhrStatus, runLoad } from './sync.js';
+import { intervalAdjust, applyIntervalAdjust, shinLimit, applyShinLimit } from './learn.js';
 
 /* Everything the UI needs for one date: the planned session, adapted to the
    shin check-in + run gate + readiness (check-in, Garmin HRV and resting HR),
@@ -27,6 +28,17 @@ export function resolveDay(key, { express = false } = {}) {
     notes.splice(notes.length - 1, 0, `Garmin: ${recovery.join('; ')}.`);
   }
 
+  // Learned from your own data: interval progression and your personal shin limit
+  const adj = intervalAdjust(key, session);
+  if (adj && adj.kind !== 'good') {
+    applyIntervalAdjust(session, adj);
+    notes.push(adj.note);
+  }
+  if (gate.allow && status === 'green') {
+    const capNote = applyShinLimit(session, shinLimit());
+    if (capNote) notes.push(capNote);
+  }
+
   // 10% rule on the longest run in the last 30 days (Frandsen 2025)
   const load = runLoad(key);
   if (load.capMins && gate.allow && status !== 'red') {
@@ -36,5 +48,5 @@ export function resolveDay(key, { express = false } = {}) {
 
   const s = personalize(session);
   s.express = express && s.blocks.some(b => b.optional);
-  return { session: s, base, checkin, gate, notes, status: checkin?.status || null, hrv, rhr, load };
+  return { session: s, base, checkin, gate, notes, status: checkin?.status || null, hrv, rhr, load, adj };
 }

@@ -8,6 +8,9 @@ import { weightTrend, latestBench, firstBench } from '../logic/personalize.js';
 import { runGate } from '../logic/readiness.js';
 import { weekDays, currentWeek, DELOAD } from '../data/plan.js';
 import { weekLoad, loadSpike, spikeText } from '../logic/load.js';
+import { maxHRInsight, shinLimit, calorieAdjust } from '../logic/learn.js';
+import { resolveDay } from '../logic/day.js';
+import { sessionFor } from '../data/plan.js';
 import { hrvStatus, runLoad, syncAgo, syncConfigured, vo2Trend, loadForm, cadenceInfo, intensityMix, latestBodyFat } from '../logic/sync.js';
 
 const fmtVal = (b, v) => (v === null || v === undefined ? '—' : b.unit === 'time' ? fmtSec(v) : b.unit === 'watts' ? `${Math.round(v)} W` : b.unit === 'bpm' ? `${Math.round(v)} bpm` : `${Math.round(v * 10) / 10}`);
@@ -68,6 +71,54 @@ function shinCard() {
       </div>
       <p class="small" style="margin-top:10px"><b style="color:var(--text)">How to read it:</b> one bar per day for the last two weeks. The height is your worst shin pain that morning (0–10). Below the dashed line (3/10) is fine; above it, the app shortens or swaps your runs. A flat row of short green bars means your shins are ready for more running.</p>`
       : `<p class="small" style="margin-top:8px">Each morning's 45-second check-in appears here as a bar, so you can see whether your shins are calming down week to week. Start it from the Today tab.</p>`}
+    </section>`;
+}
+
+/* Everything the app has worked out from your own data, with what it was based on. */
+function learnedCard() {
+  const row = (icon, title, body, tone = '', action = '') => `
+    <div class="learn-row ${tone}">
+      <span class="kind-badge sm">${icon}</span>
+      <div class="grow"><div class="h3" style="font-size:14px">${title}</div><p class="small" style="margin-top:2px">${body}</p>${action}</div>
+    </div>`;
+
+  // 1. heart rate
+  const m = maxHRInsight();
+  const hr = !m.ready
+    ? row(icons.heart, 'Max heart rate', `Needs 5 Garmin workouts with heart rate (${m.n} so far). The app uses ${store.profile.maxHR} bpm.`)
+    : m.capped
+      ? row(icons.heart, `Max heart rate · using ${store.profile.maxHR} bpm`, `${m.atTop} of your workouts peak at exactly ${m.top} bpm. That's intervals.icu cutting off readings above its old max-HR setting, not your real max. It's now set to ${store.profile.maxHR}, so new workouts will show your true peaks and the app will learn from them.`)
+      : m.advice?.kind === 'lower'
+        ? row(icons.heart, `Max heart rate · probably ${m.learned} bpm`, `Your hardest days in the last year peaked at ${m.learned}–${m.top} bpm, well under the ${m.profile} the app uses, so heart-rate targets are set too high.`, 'warn', `<button class="btn btn-ghost btn-sm" style="margin-top:8px" data-act="learn-maxhr" data-value="${m.learned}">Use ${m.learned} bpm</button>`)
+        : row(icons.heart, `Max heart rate · ${store.profile.maxHR} bpm`, `Highest recorded ${m.top} bpm (${shortDate(m.topDate)}).${store.learn?.maxHR ? ` Raised automatically on ${shortDate(store.learn.maxHR.date)} when a workout went higher.` : ' The app raises it by itself if a workout ever goes higher.'}`, 'good');
+
+  // 2. intervals: what next bike-interval day will do
+  const nextVo2 = Array.from({ length: 8 }, (_, i) => dayKey(addDays(new Date(), i))).find(k => sessionFor(k)?.kind === 'vo2');
+  const adj = nextVo2 ? resolveDay(nextVo2).adj : null;
+  const iv = adj
+    ? row(icons.bike, `Bike intervals · ${adj.kind === 'more' ? 'one rep added' : adj.kind === 'push' ? 'go harder' : adj.kind === 'ease' ? 'start easier' : 'on track'}`, `${esc(adj.note)} Applies on ${shortDate(nextVo2)}${adj.kind === 'more' ? ', and the watch gets the extra rep too' : ''}.`, adj.kind === 'ease' ? 'warn' : 'good')
+    : row(icons.bike, 'Bike intervals', 'After each interval session, rate the effort. With your Garmin heart rate the app then decides the next one: one more rep, harder, easier or the same. Nothing to learn from yet.');
+
+  // 3. shins
+  const sl = shinLimit();
+  const surf = sl.ready && sl.tread && sl.road ? ` Treadmill: ${sl.tread.bad} of ${sl.tread.n} next mornings amber or red; road: ${sl.road.bad} of ${sl.road.n}.` : '';
+  const sh = !sl.ready
+    ? row(icons.shin, 'Your shin limit', `Learns how long you can run before your shins complain, from each run and the next morning's check-in. Needs 6 runs with a check-in the morning after (${sl.n} so far).`)
+    : sl.limit
+      ? row(icons.shin, `Your shin limit · ${sl.limit} min`, `Runs up to ${sl.limit} min: ${sl.under.green} of ${sl.under.n} next mornings green. Longer runs: ${sl.over.bad} of ${sl.over.n} amber or red. Easy runs are capped at ${sl.limit} min (the rest on the bike) until longer runs stop causing amber mornings.${surf}`, 'warn')
+      : row(icons.shin, 'Your shin limit · no limit found', `${sl.n} runs so far and no run length keeps leading to amber mornings. Keep checking in every morning.${surf}`, 'good');
+
+  // 4. calories
+  const ca = calorieAdjust();
+  const kc = !ca.rate
+    ? row(icons.scale, 'Calories', 'Follows your weight trend: if you lose faster than about 0.5 kg a week it adds food, if the weight stalls it trims a little. Needs 6 weigh-ins over 2 weeks.')
+    : row(icons.scale, ca.delta ? `Calories · ${ca.delta > 0 ? '+' : '−'}${Math.abs(ca.delta)} kcal a day` : 'Calories · no change', esc(ca.why), ca.delta ? 'warn' : 'good');
+
+  return `
+    <section class="card rise" style="--i:1" aria-label="What the app learned">
+      <div class="eyebrow">Auto-learning · from your own data</div>
+      <div class="h3" style="margin-top:2px">What the app has learned</div>
+      <div class="learn-list">${hr}${iv}${sh}${kc}</div>
     </section>`;
 }
 
@@ -231,6 +282,7 @@ export function renderProgress() {
       <div class="eyebrow">Trends & tests</div>
       <h1 class="h1" style="margin-top:4px">Progress</h1>
     </section>
+    ${learnedCard()}
     ${weightCard()}
     ${shinCard()}
     ${garminCard()}

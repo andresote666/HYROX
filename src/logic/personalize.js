@@ -3,6 +3,7 @@
 import { store, latestWeight } from '../store.js';
 import { fmtSec } from '../data/results.js';
 import { DAY_TYPES, totals, dayTypeFor } from '../data/meals.js';
+import { calorieAdjust } from './learn.js';
 
 export function latestBench(id) {
   const rows = store.benchmarks.filter(b => b.id === id).sort((a, b) => a.date.localeCompare(b.date));
@@ -78,10 +79,11 @@ export function fuelFor(session, week) {
   const sat = session?.dow === 5;
   const t = totals(type, { saturday: sat });
   const maint = week >= 12 || session?.kind === 'race';
-  const kcal = t.kcal + (maint ? 300 : 0);
+  const learned = maint ? { delta: 0 } : calorieAdjust(week);
+  const kcal = t.kcal + (maint ? 300 : 0) + learned.delta;
   return {
-    type, label: DAY_TYPES[type].label, hard: type === 'big', deficit: !maint,
-    kcal, protein: t.p, carbs: t.c + (maint ? 40 : 0), fat: t.f,
+    type, label: DAY_TYPES[type].label, hard: type === 'big', deficit: !maint && learned.delta < 300,
+    kcal, protein: t.p, carbs: t.c + (maint ? 40 : 0) + Math.round(learned.delta / 4), fat: t.f, learned,
     note: session?.kind === 'race' ? 'Race day: breakfast ≈190 g carbs 3 h before, gels at Run 5 and Run 7.'
       : week >= 15 ? 'Taper and race weeks: no deficit. Carb load 6–8 g/kg in the last 2 days.'
       : type === 'big' ? 'Big day: extra carbs before and after training. Never do intervals on an empty tank.'
