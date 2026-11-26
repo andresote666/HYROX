@@ -8,6 +8,8 @@ import { RACES } from '../data/races.js';
 import { weekDays, swapSafety } from '../data/plan.js';
 import { render, toast } from '../main.js';
 import { wellnessOn, syncNow, syncAgo } from '../logic/sync.js';
+import { RPE_LABELS, suggestedMinutes } from '../logic/load.js';
+import { sessionFor } from '../data/plan.js';
 
 const tone = (v, [g, y]) => (v <= g ? 'g' : v <= y ? 'y' : 'r');
 
@@ -106,6 +108,33 @@ function benchSheet(ui) {
     <button class="btn btn-primary btn-block" style="margin-top:8px" data-act="save-bench" data-id="${b.id}">Save result</button>`;
 }
 
+function rpeSheet(ui) {
+  const d = ui.draft;
+  const key = ui.sheet.date;
+  const s = sessionFor(key);
+  const sug = suggestedMinutes(key);
+  const load = d.rpe !== null && d.mins > 0 ? Math.round(d.rpe * d.mins) : null;
+  return `
+    <div class="sheet-head">
+      <div>
+        <div class="eyebrow">${esc(s?.title || 'Session')} · rate it now or within 30 min</div>
+        <div class="h1" style="margin-top:4px">How hard was it?</div>
+      </div>
+      <button class="icon-btn" data-act="close-sheet" aria-label="Close">${icons.close}</button>
+    </div>
+    <p class="small">The whole session, not the hardest moment. This turns into your weekly training load and warns you about sudden jumps.</p>
+    <div class="scale rpe" role="radiogroup" aria-label="Effort from 0 to 10">
+      ${Array.from({ length: 11 }, (_, i) => `<button role="radio" aria-checked="${d.rpe === i}" class="${d.rpe === i ? 'on a' : ''}" data-act="draft" data-field="rpe" data-value="${i}">${i}</button>`).join('')}
+    </div>
+    <div class="rpe-label">${d.rpe === null ? 'Tap a number' : `<b>${d.rpe}</b> · ${RPE_LABELS[d.rpe]}`}</div>
+    <div class="input-row" style="margin-top:14px">
+      <div class="field grow"><label for="rpe-mins">Minutes of training (${sug.from === 'Garmin' ? `Garmin: ${sug.mins}` : 'from the plan'})</label>
+        <input id="rpe-mins" class="input" type="number" inputmode="numeric" min="5" max="300" value="${d.mins}"></div>
+    </div>
+    <div class="err" id="rpe-err"></div>
+    <button class="btn btn-primary btn-block" data-act="save-rpe" data-date="${key}">${load !== null ? `Save · load ${load}` : 'Save'}</button>`;
+}
+
 function settingsSheet() {
   const p = store.profile;
   const field = (id, label, val, step = 1) => `<div class="field"><label for="${id}">${label}</label><input id="${id}" class="input" type="number" inputmode="decimal" step="${step}" value="${val}"></div>`;
@@ -179,8 +208,18 @@ export function renderSheet(ui) {
     : t === 'weight' ? weightSheet(ui)
     : t === 'bench' ? benchSheet(ui)
     : t === 'swap' ? swapSheet(ui)
+    : t === 'rpe' ? rpeSheet(ui)
     : settingsSheet(ui);
   return `<div class="scrim"></div><div class="sheet" role="dialog" aria-modal="true"><div class="grabber"></div>${body}</div>`;
+}
+
+const ui_load = d => d.rpe * d.mins;
+
+/* Draft for the effort sheet: existing rating, or Garmin / plan minutes. */
+export function openRpeDraft(ui, key) {
+  const d = store.done[key] || {};
+  ui.sheet = { type: 'rpe', date: key };
+  ui.draft = { rpe: d.rpe ?? null, mins: d.mins || suggestedMinutes(key).mins };
 }
 
 const parseTime = s => {
@@ -192,7 +231,8 @@ export function handleSheetAction(act, el, ui) {
   switch (act) {
     case 'sheet': {
       const type = el.dataset.type;
-      ui.sheet = { type, id: el.dataset.id, week: Number(el.dataset.week), from: Number(el.dataset.from) };
+      ui.sheet = { type, id: el.dataset.id, week: Number(el.dataset.week), from: Number(el.dataset.from), date: el.dataset.date };
+      if (type === 'rpe') openRpeDraft(ui, el.dataset.date);
       if (type === 'checkin') {
         const existing = store.checkins[ui.date];
         const w = wellnessOn(ui.date);
@@ -210,10 +250,23 @@ export function handleSheetAction(act, el, ui) {
       }
       return true;
     }
+    case 'save-rpe': {
+      const key = el.dataset.date;
+      const mins = Number(document.getElementById('rpe-mins').value);
+      if (ui.draft.rpe === null) { document.getElementById('rpe-err').textContent = 'Tap how hard it felt, 0 to 10.'; return true; }
+      if (!(mins >= 5 && mins <= 300)) { document.getElementById('rpe-err').textContent = 'Enter the minutes you trained (5–300).'; return true; }
+      store.done[key] = { items: {}, ...store.done[key], complete: true, rpe: ui.draft.rpe, mins: Math.round(mins) };
+      save();
+      ui.sheet = null; ui.draft = null;
+      render(); toast(`Effort saved · load ${Math.round(ui_load(store.done[key]))}`);
+      return true;
+    }
     case 'close-sheet':
       ui.sheet = null; ui.draft = null; render(); return true;
     case 'draft': {
       const f = el.dataset.field;
+      const minsIn = document.getElementById('rpe-mins');
+      if (minsIn) ui.draft.mins = Number(minsIn.value) || ui.draft.mins;
       let v = el.dataset.value;
       if (v === 'true' || v === 'false') v = v === 'true';
       else if (v === 'skip') v = null;

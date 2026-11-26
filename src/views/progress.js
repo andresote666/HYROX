@@ -6,7 +6,8 @@ import { activeBenchmarks, benchTarget } from '../data/benchmarks.js';
 import { fmtSec } from '../data/results.js';
 import { weightTrend, latestBench, firstBench } from '../logic/personalize.js';
 import { runGate } from '../logic/readiness.js';
-import { weekDays, currentWeek } from '../data/plan.js';
+import { weekDays, currentWeek, DELOAD } from '../data/plan.js';
+import { weekLoad, loadSpike, spikeText } from '../logic/load.js';
 import { hrvStatus, runLoad, syncAgo, syncConfigured, vo2Trend, loadForm, cadenceInfo, intensityMix, latestBodyFat } from '../logic/sync.js';
 
 const fmtVal = (b, v) => (v === null || v === undefined ? '—' : b.unit === 'time' ? fmtSec(v) : b.unit === 'watts' ? `${Math.round(v)} W` : b.unit === 'bpm' ? `${Math.round(v)} bpm` : `${Math.round(v * 10) / 10}`);
@@ -157,6 +158,35 @@ function adherenceCard() {
     </div>`;
 }
 
+/* Weekly training load from session effort ratings (effort × minutes). */
+function loadCard() {
+  const cw = currentWeek();
+  const weeks = Array.from({ length: Math.min(cw + 1, 8) }, (_, i) => cw - Math.min(cw, 7) + i).map(w => ({ w, ...weekLoad(w) }));
+  const max = Math.max(1, ...weeks.map(x => x.sum));
+  const sp = loadSpike();
+  const any = weeks.some(x => x.n);
+  return `
+    <section class="card rise" style="--i:3" aria-label="Training load">
+      <div class="eyebrow">From your effort ratings</div>
+      <div class="h3" style="margin-top:2px">Training load</div>
+      ${any ? `
+        <div class="load-bars">
+          ${weeks.map(x => `
+            <div class="lb ${x.w === cw ? 'cur' : ''}">
+              <span class="num">${x.n ? x.sum.toLocaleString() : ''}</span>
+              <i style="height:${x.n ? Math.max(6, (x.sum / max) * 100) : 4}%"></i>
+              <small>W${x.w}${DELOAD.has(x.w) ? '·d' : ''}</small>
+            </div>`).join('')}
+        </div>
+        <p class="small" style="margin-top:10px">${sp.ready ? (spikeText(sp) || `Last 7 days: ${sp.last7.toLocaleString()} (${sp.pct >= 0 ? '+' : ''}${sp.pct}% vs your usual week). A steady build is what the shins like.`) : 'After about 2 weeks of ratings, the app compares each week with the three before and warns you about sudden jumps.'}</p>` : `
+        <p class="small" style="margin-top:6px">After each session, tap how hard it felt (0–10). Effort × minutes = load. It counts sleds, lunges and wall balls properly, which your watch misses, and flags week-to-week jumps that often come before shin pain.</p>`}
+      <details class="why"><summary>${icons.info}<span>Why</span>${icons.chevron}</summary>
+        <p>Session effort (sRPE) is one of the most validated ways to track load in mixed training. Weeks that jump well above your recent average are linked to more injuries. Deload weeks (·d) are meant to be lower.</p>
+        <p class="why-src">Research: Foster 2001; Haddad 2017; Gabbett 2016; Impellizzeri 2020</p>
+      </details>
+    </section>`;
+}
+
 function benchCard() {
   const groups = [...new Set(activeBenchmarks().map(b => b.group))];
   const tested = activeBenchmarks().filter(b => latestBench(b.id)).length;
@@ -205,5 +235,6 @@ export function renderProgress() {
     ${shinCard()}
     ${garminCard()}
     ${adherenceCard()}
+    ${loadCard()}
     ${benchCard()}`;
 }

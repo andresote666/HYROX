@@ -16,9 +16,10 @@ const defaults = () => ({
     restHR: 52,
     raceId: 'ba27',
     bikeWatts: false, // gym spin bike has no screen
+    voice: true,      // spoken cues in the timers
   },
   checkins: {},     // { 'YYYY-MM-DD': { morning, hop, palpation, focal, settled, sleep, energy, status, ts } }
-  done: {},         // { 'YYYY-MM-DD': { 'b0-i2': true, ... , _complete: true, rpe } }
+  done: {},         // { 'YYYY-MM-DD': { items, complete, auto, rpe (0–10), mins } }
   swaps: {},        // { 'w3': [0,1,2,3,4,5,6] }
   variants: {},     // { 'YYYY-MM-DD': 'B' }
   weights: [],      // [{ date, kg }]
@@ -26,6 +27,8 @@ const defaults = () => ({
   notes: {},        // { 'YYYY-MM-DD': 'text' }
   meals: {},        // { 'YYYY-MM-DD': { breakfast: true, ... } }
   shopping: {},     // { itemId: true }
+  sims: [],         // saved race simulations [{ id, date, type, label, segs: [{ seg, label, secs, target, counts }], total }]
+  simLive: null,    // race simulation in progress (survives an app reload)
   sync: { token: '', last: null, error: null, wellness: {}, activities: [] }, // Garmin via intervals.icu
   ui: { tab: 'today', libSection: 'stations' },
 });

@@ -4,6 +4,21 @@ import { doSwap } from './data/plan.js';
 import { resolveDay } from './logic/day.js';
 import { openTimer } from './ui/timer.js';
 import { syncNow } from './logic/sync.js';
+import { openRpeDraft } from './views/sheets.js';
+import { openSimTimer } from './ui/simtimer.js';
+import { partsForSession, partsForType, SIM_TYPES, deleteSim } from './logic/sim.js';
+import { sessionFor } from './data/plan.js';
+
+/* After a simulation closes: log the session and ask for effort. */
+function afterSim(ui, key) {
+  return res => {
+    if (res?.saved) {
+      if (key) { setDone(key, { complete: true }); openRpeDraft(ui, key); }
+      render(); toast('Simulation saved · prediction updated');
+    } else if (res?.running) { render(); toast('Simulation still timing · resume from Today or Race'); }
+    else render();
+  };
+}
 
 function setDone(key, patch) {
   store.done[key] = { items: {}, ...store.done[key], ...patch };
@@ -24,6 +39,7 @@ export function handleAction(act, el, ui) {
     case 'complete': {
       const now = !store.done[key]?.complete;
       setDone(key, { complete: now });
+      if (now) openRpeDraft(ui, key);
       render();
       if (now) toast('Session logged');
       break;
@@ -39,9 +55,39 @@ export function handleAction(act, el, ui) {
     case 'timer': {
       const day = resolveDay(key, { express: !!ui.express[key] });
       const spec = day.session.timers[Number(el.dataset.idx)];
-      if (spec) openTimer(spec, finished => { if (finished) { setDone(key, { complete: true }); render(); toast('Session logged'); } });
+      if (spec) openTimer(spec, finished => { if (finished) { setDone(key, { complete: true }); openRpeDraft(ui, key); render(); toast('Session logged'); } });
       break;
     }
+    case 'sim-open': {
+      if (key) {
+        const day = resolveDay(key, { express: !!ui.express[key] });
+        const parts = partsForSession(day.session);
+        if (parts) openSimTimer({ parts, title: day.session.title, date: key }, afterSim(ui, key));
+      } else {
+        const type = el.dataset.type;
+        openSimTimer({ parts: partsForType(type), title: `${SIM_TYPES[type].label} simulation`, date: dayKey() }, afterSim(ui, null));
+      }
+      break;
+    }
+    case 'sim-resume': {
+      const live = store.simLive;
+      if (!live) break;
+      const fromSession = !!partsForSession(sessionFor(live.date)) && sessionFor(live.date)?.title === live.title;
+      openSimTimer({ parts: live.parts, title: live.title, date: live.date }, afterSim(ui, fromSession ? live.date : null));
+      break;
+    }
+    case 'sim-delete':
+      if (el.dataset.confirm !== '1') { el.dataset.confirm = '1'; el.textContent = 'Tap again to delete'; break; }
+      deleteSim(el.dataset.id); render(); toast('Simulation deleted');
+      break;
+    case 'toggle-review':
+      ui.reviewOpen = !ui.reviewOpen;
+      render();
+      break;
+    case 'dismiss-review':
+      store.ui.reviewDismissed = Number(el.dataset.week);
+      save(); render();
+      break;
     case 'pick-day':
       ui.date = key;
       render();

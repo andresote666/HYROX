@@ -40,6 +40,10 @@ export const icons = {
   target: svg('<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor"/>', 'ic ic-sm'),
   book: svg('<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20"/>', 'ic ic-sm'),
   sound: svg('<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/>', 'ic ic-sm'),
+  voice: svg('<path d="M5 18.5V7a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H8.5z"/><path d="M9 9.5h7M9 12.5h4.5"/>', 'ic ic-sm'),
+  voiceOff: svg('<path d="M5 18.5V7a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H8.5z"/><path d="m3 3 18 18"/>', 'ic ic-sm'),
+  undo: svg('<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>', 'ic ic-sm'),
+  flag: svg('<path d="M5 21V4"/><path d="M5 4h6l1 2h7v8h-6l-1-2H5"/>', 'ic ic-sm'),
   mute: svg('<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="m16 9.5 5 5M21 9.5l-5 5"/>', 'ic ic-sm'),
 };
 

@@ -9,6 +9,9 @@ import { weekOf, weekDays, phaseFor, TOTAL_WEEKS, DELOAD } from '../data/plan.js
 import { TIPS } from '../data/library.js';
 import { BENCHMARKS } from '../data/benchmarks.js';
 import { activitiesOn, wellnessOn, syncConfigured, runSteps, cadenceInfo } from '../logic/sync.js';
+import { loadSpike, spikeText, rated } from '../logic/load.js';
+import { reviewFor } from '../logic/review.js';
+import { partsForSession } from '../logic/sim.js';
 
 function statusBlock(day, key, isToday, ui) {
   if (!day.checkin) {
@@ -102,6 +105,12 @@ function sessionCard(day, key, ui) {
   const hasOptional = day.session.blocks.some(b => b.optional);
   const benchIds = [...new Set(s.blocks.flatMap(b => b.items).filter(i => i.bench && !i.adapted).flatMap(i => (i.bench === 'calfL' ? ['calfL', 'calfR'] : [i.bench])))];
   const benches = benchIds.map(id => BENCHMARKS.find(b => b.id === id)).filter(Boolean);
+  const simParts = partsForSession(s);
+  const live = store.simLive;
+  const simBtn = live
+    ? `<button class="btn btn-primary btn-sm" data-act="sim-resume">${icons.flag} Resume race sim</button>`
+    : simParts ? `<button class="btn btn-primary btn-sm" data-act="sim-open" data-date="${key}">${icons.flag} Race sim timer</button>` : '';
+  const r = store.done[key];
   return `
     <section class="card rise" style="--i:2" aria-label="Session">
       ${sessionHeader(s)}
@@ -109,8 +118,9 @@ function sessionCard(day, key, ui) {
         <button class="notes-toggle" data-act="toggle-notes" aria-expanded="${!!ui.notesOpen}">${icons.info}<span>${ui.notesOpen ? 'Hide changes' : `Adjusted today: ${day.notes.length} change${day.notes.length > 1 ? 's' : ''}`}</span><span class="chev">${icons.chevron}</span></button>
         ${ui.notesOpen ? `<div class="notes">${day.notes.map(n => `<div class="note">${icons.info}<span>${esc(n)}</span></div>`).join('')}</div>` : ''}` : ''}
       ${garminDone(day, key, s.kind)}
-      ${(s.timers.length || hasOptional || s.variantB || day.base.variantB || benches.length) ? `
+      ${(s.timers.length || hasOptional || s.variantB || day.base.variantB || benches.length || simBtn) ? `
         <div class="day-actions">
+          ${simBtn}
           ${s.timers.map((t, i) => `<button class="btn btn-primary btn-sm" data-act="timer" data-date="${key}" data-idx="${i}">${icons.timer} ${esc(t.title)}</button>`).join('')}
           ${benches.map(b => `<button class="btn btn-ghost btn-sm" data-act="sheet" data-type="bench" data-id="${b.id}">${icons.target} Log: ${esc(b.name)}</button>`).join('')}
           ${hasOptional ? `<button class="btn btn-ghost btn-sm" data-act="express" data-date="${key}" aria-pressed="${!!ui.express[key]}">${ui.express[key] ? 'Full session' : 'Short on time'}</button>` : ''}
@@ -120,7 +130,55 @@ function sessionCard(day, key, ui) {
       ${s.kind !== 'rest' ? `
       <div class="complete-bar">
         <div class="grow small" style="align-self:center">${done}/${total} done</div>
+        ${complete ? (rated(key)
+          ? `<button class="chip accent rpe-chip" data-act="sheet" data-type="rpe" data-date="${key}" aria-label="Edit effort rating">Effort ${r.rpe} · ${r.mins} min</button>`
+          : `<button class="btn btn-ghost btn-sm" data-act="sheet" data-type="rpe" data-date="${key}">Rate effort</button>`) : ''}
         <button class="btn ${complete ? 'btn-ghost' : 'btn-primary'}" data-act="complete" data-date="${key}">${complete ? `${icons.check} Completed` : 'Mark session done'}</button>
+      </div>` : ''}
+    </section>`;
+}
+
+function loadNote(key) {
+  const sp = loadSpike(key);
+  const text = spikeText(sp);
+  if (!text) return '';
+  return `<div class="card tight load-note ${sp.level} rise" style="--i:1">${icons.alert}<span>${esc(text)}</span></div>`;
+}
+
+function reviewCard(rv, ui) {
+  const open = !!ui.reviewOpen;
+  const sh = rv.shins;
+  const shinTxt = sh.n ? (sh.red ? `${sh.red} red` : sh.amber ? `${sh.amber} amber` : 'all green') : 'no check-ins';
+  const kg = rv.kgChange;
+  const summary = [`${rv.done}/${rv.planned} sessions`, `shins ${shinTxt}`, kg !== null ? `${kg > 0 ? '+' : ''}${kg.toFixed(1)} kg` : ''].filter(Boolean).join(' · ');
+  const tile = (v, l, tone = '') => `<div class="tile ${tone}"><span class="num">${v}</span><small>${l}</small></div>`;
+  return `
+    <section class="card review-card ${open ? 'open' : ''} rise" style="--i:1" aria-label="Week review">
+      <div class="row" style="align-items:flex-start;gap:8px">
+        <button class="status-toggle grow" data-act="toggle-review" aria-expanded="${open}">
+          <div class="kind-badge" style="width:36px;height:36px;border-radius:11px;color:var(--accent)">${icons.progress}</div>
+          <div class="grow">
+            <div class="status-title"><b>Week ${rv.lastWeek} review</b></div>
+            <div class="small">${esc(summary)}</div>
+          </div>
+          <span class="chev">${icons.chevron}</span>
+        </button>
+        <button class="icon-btn" data-act="dismiss-review" data-week="${rv.week}" aria-label="Dismiss the week review" style="width:36px;height:36px">${icons.close}</button>
+      </div>
+      ${open ? `
+      <div class="status-more">
+        <p class="body-2">${esc(rv.headline)}</p>
+        <div class="grid-3" style="margin-top:12px">
+          ${tile(`${rv.done}/${rv.planned}`, 'sessions done', rv.planned && rv.done / rv.planned >= 0.8 ? 'good' : '')}
+          ${tile(rv.load.n ? rv.load.sum.toLocaleString() : '–', rv.loadPct !== null ? `load · ${rv.loadPct >= 0 ? '+' : ''}${rv.loadPct}% vs week before` : rv.load.n ? 'training load' : 'load · rate your sessions')}
+          ${tile(sh.n ? `${sh.green || 0}/${sh.n}` : '–', 'green mornings', sh.red ? 'bad' : sh.amber >= 3 ? 'warn' : '')}
+        </div>
+        <ul class="reason-list" style="margin-top:12px">
+          ${kg !== null ? `<li>Weight ${kg > 0 ? 'up' : 'down'} ${Math.abs(kg).toFixed(1)} kg (weekly average ${rv.kgLast.toFixed(1)} kg). ${kg <= -0.2 && kg >= -0.8 ? 'Right on pace.' : kg < -0.8 ? 'Faster than planned: eat a bit more on big days.' : 'Flat or up: tighten the rest-day portions.'}</li>` : ''}
+          ${rv.hrv.status ? `<li>HRV ${rv.hrv.avg7} ms, ${rv.hrv.status === 'low' ? 'below your normal: the app will ease hard days' : rv.hrv.status === 'high' ? 'above your normal' : 'within your normal range'}.</li>` : ''}
+          ${rv.tests.length ? `<li>Tests logged: ${esc(rv.tests.join(', '))}. Check the Race tab for your new predicted time.</li>` : ''}
+          ${rv.key ? `<li>This week's key session: <b>${esc(rv.key.day)}, ${esc(rv.key.title)}</b>.${rv.deload ? ' It\'s a lighter week: recover and let the work sink in.' : ''}</li>` : ''}
+        </ul>
       </div>` : ''}
     </section>`;
 }
@@ -169,7 +227,9 @@ export function renderToday(ui) {
       </div>
       ${ring(week + 1, TOTAL_WEEKS + 1, `W${week}`, `OF ${TOTAL_WEEKS}`)}
     </section>
+    ${isToday && reviewFor(key) ? reviewCard(reviewFor(key), ui) : ''}
     ${statusBlock(day, key, isToday, ui)}
+    ${isToday ? loadNote(key) : ''}
     ${syncConfigured() ? recoveryStrip(day, key) : ''}
     ${sessionCard(day, key, ui)}
     ${weekStrip(week, key)}

@@ -3,12 +3,13 @@
                    sets?: number, setRest?: seconds }  (all times in seconds)
    or { title, steps: [{ label, kind: 'work'|'rest'|'prep', secs, cue }] } */
 import { icons } from './icons.js';
+import { say, stopVoice, toggleVoice, voiceOn, voiceSupported, shortCue, spokenTime } from './voice.js';
 
 let ctx = null;
 let muted = false;
 let wakeLock = null;
 
-function beep(freq = 880, dur = 0.12, vol = 0.25) {
+export function beep(freq = 880, dur = 0.12, vol = 0.25) {
   if (muted) return;
   try {
     ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
@@ -24,14 +25,14 @@ function beep(freq = 880, dur = 0.12, vol = 0.25) {
   } catch { /* audio unavailable */ }
 }
 
-function buzz(pattern) {
+export function buzz(pattern) {
   try { navigator.vibrate?.(pattern); } catch { /* not supported */ }
 }
 
-async function lockScreen() {
+export async function lockScreen() {
   try { wakeLock = await navigator.wakeLock?.request('screen'); } catch { /* not supported */ }
 }
-function releaseScreen() {
+export function releaseScreen() {
   try { wakeLock?.release(); } catch { /* ignore */ }
   wakeLock = null;
 }
@@ -51,6 +52,23 @@ export function buildSteps(spec) {
   }
   if (spec.cooldown) steps.push({ label: 'Cool-down', kind: 'prep', secs: spec.cooldown, cue: 'Easy Zone 1–2' });
   return steps;
+}
+
+/* What the voice says when a block starts. Short intervals (like 30/15)
+   get one word so the voice doesn't talk over the effort. */
+function announce(st, next) {
+  const label = String(st.label).replace(/·/g, ',');
+  const time = spokenTime(st.secs);
+  const short = st.secs < 60;
+  if (st.kind === 'work') {
+    if (short && st.rep > 0) return `${st.rep + 1}. Go.`;
+    return `${label}. ${time}. ${shortCue(st.cue)}`;
+  }
+  if (st.kind === 'rest') {
+    if (short) return 'Easy.';
+    return `Recover. ${time}.${next ? ` Next, ${String(next.label).replace(/·/g, ',').toLowerCase()}.` : ''}`;
+  }
+  return `${label}. ${time}. ${shortCue(st.cue)}`;
 }
 
 const fmt = s => {
@@ -89,7 +107,10 @@ export function openTimer(spec, onClose) {
       <div class="timer-top">
         <button class="icon-btn" data-t="close" aria-label="Close timer">${icons.close}</button>
         <div class="small" style="text-align:center">${spec.title}<br><span class="mono">${fmt(elapsed())} / ${fmt(total)}</span></div>
-        <button class="icon-btn" data-t="mute" aria-label="${muted ? 'Unmute' : 'Mute'}">${muted ? icons.mute : icons.sound}</button>
+        <div class="row" style="gap:6px">
+          ${voiceSupported() ? `<button class="icon-btn" data-t="voice" aria-pressed="${voiceOn()}" aria-label="${voiceOn() ? 'Turn voice cues off' : 'Turn voice cues on'}">${voiceOn() ? icons.voice : icons.voiceOff}</button>` : ''}
+          <button class="icon-btn" data-t="mute" aria-label="${muted ? 'Unmute beeps' : 'Mute beeps'}">${muted ? icons.mute : icons.sound}</button>
+        </div>
       </div>
       <div class="timer-main">
         <div class="timer-phase">${st.kind === 'work' ? 'Work' : st.kind === 'rest' ? 'Recover' : st.label}</div>
@@ -112,6 +133,7 @@ export function openTimer(spec, onClose) {
       running = false;
       beep(660, 0.25); setTimeout(() => beep(880, 0.25), 260); setTimeout(() => beep(1100, 0.4), 520);
       buzz([200, 100, 200, 100, 400]);
+      say('Session done. Cool down, then check your shins.');
       remaining = 0;
       paint();
       root.querySelector('.timer-phase').textContent = 'Done';
@@ -123,6 +145,7 @@ export function openTimer(spec, onClose) {
     const k = steps[idx].kind;
     if (k === 'work') { beep(1046, 0.35, 0.3); buzz([300]); }
     else { beep(523, 0.35, 0.3); buzz([120, 80, 120]); }
+    say(announce(steps[idx], steps[idx + 1]));
     paint();
   }
 
@@ -136,6 +159,9 @@ export function openTimer(spec, onClose) {
     if (whole !== lastWhole) {
       lastWhole = whole;
       if (whole <= 3 && whole > 0) beep(740, 0.08, 0.2);
+      const st = steps[idx];
+      if (st.kind !== 'prep' && st.secs >= 60 && whole === 10) say('10 seconds', { interrupt: false });
+      if (st.kind === 'work' && st.secs >= 60 && whole === Math.round(st.secs / 2)) say('Halfway', { interrupt: false });
       if (remaining <= 0) { advance(); lastWhole = Math.ceil(remaining); }
       else {
         const clock = root.querySelector('.timer-clock');
@@ -150,6 +176,7 @@ export function openTimer(spec, onClose) {
   function close() {
     running = false;
     cancelAnimationFrame(raf);
+    stopVoice();
     releaseScreen();
     root.remove();
     document.removeEventListener('visibilitychange', onVis);
@@ -165,9 +192,13 @@ export function openTimer(spec, onClose) {
     const a = b.dataset.t;
     if (a === 'close') return close();
     if (a === 'mute') { muted = !muted; paint(); return; }
+    if (a === 'voice') { if (toggleVoice()) say('Voice cues on'); paint(); return; }
     if (a === 'toggle') {
       running = !running;
-      if (running) { beep(880, 0.1); last = performance.now(); raf = requestAnimationFrame(tick); }
+      if (running) {
+        beep(880, 0.1); last = performance.now(); raf = requestAnimationFrame(tick);
+        if (elapsed() < 1) say(announce(steps[idx], steps[idx + 1])); // first cue from the tap (iOS rule)
+      }
       else cancelAnimationFrame(raf);
       paint();
       return;

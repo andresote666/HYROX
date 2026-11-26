@@ -689,3 +689,86 @@ details.why .why-src { font-size: 12px; color: var(--text-3); margin-top: -4px; 
 .cmp-row.head { font-size: 11px; color: var(--text-3); font-weight: 600; padding-top: 0; }
 .cmp-row.head span { text-align: right; }
 .cmp-row:last-child { border-bottom: 0; }
+
+/* ── effort rating ── */
+.scale button.on.a { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.rpe-label { margin-top: 10px; font-size: 14px; color: var(--text-2); min-height: 20px; }
+.rpe-label b { color: var(--accent); font-family: var(--mono); }
+.rpe-chip { cursor: pointer; align-self: center; white-space: nowrap; }
+.complete-bar { flex-wrap: wrap; }
+.complete-bar > .grow.small { white-space: nowrap; }
+
+/* ── load warning ── */
+.load-note { display: flex; gap: 10px; align-items: flex-start; font-size: 13.5px; color: var(--text-2); line-height: 1.45; }
+.load-note .ic { flex: none; margin-top: 2px; color: var(--amber); }
+.load-note.up { background: var(--amber-soft); border-color: transparent; }
+.load-note.high { background: var(--red-soft); border-color: transparent; }
+.load-note.high .ic { color: var(--red); }
+
+/* ── weekly review ── */
+.review-card { border-color: var(--accent-line); background: linear-gradient(180deg, var(--accent-soft), transparent 70%), var(--surface); }
+.review-card .status-toggle { padding: 0; }
+.tile.good .num { color: var(--green); }
+.tile.warn .num { color: var(--amber); }
+.tile.bad .num { color: var(--red); }
+
+/* ── prediction ── */
+.predict-card .big-time { font-size: 44px; }
+.pbar { margin-top: 16px; }
+.pbar-track { position: relative; height: 8px; border-radius: 4px; background: var(--surface-3); }
+.pbar-track i { position: absolute; inset: 0 auto 0 0; border-radius: 4px; background: linear-gradient(90deg, var(--text-3), var(--accent)); }
+.pbar-track b { position: absolute; top: 50%; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); border: 3px solid var(--bg); transform: translate(-50%, -50%); box-shadow: 0 0 0 1px var(--accent-line); }
+.pbar-ends { display: flex; justify-content: space-between; margin-top: 8px; font-size: 11.5px; color: var(--text-3); font-family: var(--mono); }
+.gap-list { display: flex; flex-direction: column; margin-top: 4px; }
+.gap-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 12px; align-items: baseline; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.gap-row:last-child { border-bottom: 0; }
+.gap-row .mono { font-size: 13px; }
+
+/* ── race simulation ── */
+.sim-pick { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
+.sim-type { display: flex; flex-direction: column; gap: 3px; align-items: flex-start; text-align: left; padding: 12px; border-radius: 14px; background: var(--surface-2); border: 1px solid var(--line-2); transition: transform 0.15s var(--spring), border-color 0.2s; }
+.sim-type:active { transform: scale(0.97); }
+.sim-type b { font-size: 14px; }
+.sim-type span { font-size: 11.5px; color: var(--text-3); line-height: 1.3; }
+.sim-saved { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); cursor: pointer; list-style: none; }
+.sim-saved b { display: block; font-size: 14px; font-weight: 600; }
+.sim-saved small { font-size: 12px; color: var(--text-3); }
+.sim-detail { padding: 6px 0 12px; border-bottom: 1px solid var(--line); }
+.sim-row { display: grid; grid-template-columns: minmax(0, 1fr) 52px 52px 58px; gap: 8px; align-items: baseline; padding: 6px 0; font-size: 13px; border-bottom: 1px solid var(--line); text-align: right; }
+.sim-row > span:first-child { text-align: left; }
+.sim-row.head { font-size: 10.5px; letter-spacing: 0.08em; color: var(--text-3); font-weight: 600; }
+.sim-row.sub > span:first-child { color: var(--text-3); }
+.sim-row:last-child { border-bottom: 0; }
+.good { color: var(--green); }
+.bad { color: var(--amber); }
+
+.timer.sim .timer-main { gap: 8px; }
+.sim-warn { margin-top: 10px; padding: 10px 12px; border-radius: 12px; background: var(--amber-soft); color: var(--amber); font-size: 13px; text-align: center; }
+.sim-ready { flex: 1; overflow-y: auto; padding: 18px 2px 14px; -webkit-overflow-scrolling: touch; }
+.sim-list { list-style: none; margin: 16px 0 0; padding: 0; counter-reset: p; }
+.sim-list li { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.sim-list li.rox { font-size: 12px; color: var(--text-3); padding: 4px 0 4px 14px; }
+.sim-list li.sub { color: var(--text-3); }
+.sim-list li .mono { color: var(--text-2); }
+.sim-phase.rox { color: var(--green) !important; }
+.sim-name { max-width: 22ch; text-wrap: balance; }
+.sim-clock { font-size: clamp(76px, 25vw, 128px); }
+.sim-target { font-size: 15px; color: var(--text-2); }
+.sim-target b { color: var(--text); }
+.sim-over { color: var(--amber); margin-left: 6px; }
+.sim-delta { margin-top: 4px; padding: 7px 12px; border-radius: 999px; font-size: 13px; background: var(--surface-2); color: var(--text-2); }
+.sim-delta.ahead b { color: var(--green); }
+.sim-delta.behind b { color: var(--amber); }
+.timer-ctrls.single { grid-template-columns: 1fr; }
+.timer-ctrls.two { grid-template-columns: 1fr 1.6fr; }
+.timer.sim .sim-lap { height: 84px !important; font-size: 22px; font-weight: 700; letter-spacing: 0.04em; border-radius: 24px !important; }
+.timer.sim .sim-lap .ic { width: 22px; height: 22px; }
+.timer-ctrls .btn[disabled] { opacity: 0.35; }
+
+/* ── training load bars ── */
+.load-bars { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 6px; height: 120px; margin-top: 14px; align-items: end; }
+.lb { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 4px; }
+.lb i { width: 100%; max-width: 28px; border-radius: 6px 6px 3px 3px; background: var(--surface-3); }
+.lb.cur i { background: var(--accent); }
+.lb .num { font-size: 10.5px; color: var(--text-3); }
+.lb small { font-size: 10.5px; color: var(--text-3); font-family: var(--mono); }
