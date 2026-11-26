@@ -159,8 +159,15 @@ function adherenceCard() {
 
 function benchCard() {
   const groups = [...new Set(BENCHMARKS.map(b => b.group))];
-  return groups.map((g, gi) => `
-    <section class="card rise" style="--i:${4 + gi}" aria-label="${g}">
+  const tested = BENCHMARKS.filter(b => latestBench(b.id)).length;
+  const intro = `
+    <section class="rise" style="--i:4;padding:14px 4px 0">
+      <div class="eyebrow">Benchmark tests · ${tested} of ${BENCHMARKS.length} done</div>
+      <h2 class="h2" style="margin-top:4px">Are you getting fitter?</h2>
+      <p class="body-2" style="margin-top:6px">Short tests you repeat a few times before March. Each one is already scheduled in your plan in the weeks shown. Do it that day, then tap the test here (or the button on Today) and type your result. The app shows your first result, your latest, and how close you are to the goal.</p>
+    </section>`;
+  return intro + groups.map((g, gi) => `
+    <section class="card rise" style="--i:${5 + gi}" aria-label="${g}">
       <div class="eyebrow" style="margin-bottom:4px">${g}</div>
       ${BENCHMARKS.filter(b => b.group === g).map(b => {
         const last = latestBench(b.id);
@@ -173,10 +180,15 @@ function benchCard() {
           else pct = b.lowerBetter ? Math.min(1, target / last.value) : Math.min(1, last.value / target);
           pct = Math.max(0.03, Math.min(1, pct));
         }
+        const goal = target ? `goal ${fmtVal(b, target)}` : b.goalPct ? `goal: ${b.goalPct}% better than test 1` : '';
         return `
         <button class="bench" style="width:100%;text-align:left" data-act="sheet" data-type="bench" data-id="${b.id}">
-          <span><div class="h3">${esc(b.name)}</div><div class="small">${esc(b.weeks)}</div></span>
-          <span class="vals">${fmtVal(b, last?.value)}<small>${target ? `goal ${fmtVal(b, target)}` : 'set by first test'}</small></span>
+          <span>
+            <div class="h3">${esc(b.name)}</div>
+            <div class="small" style="color:var(--text-2)">${esc(b.why || '')}</div>
+            <div class="small">When: ${esc(b.weeks)}</div>
+          </span>
+          <span class="vals">${last ? fmtVal(b, last.value) : '<span class="faint" style="font-family:var(--font);font-size:12.5px">not tested yet</span>'}<small>${last && first && first !== last ? `first ${fmtVal(b, first.value)} · ` : ''}${goal}</small><small class="accent" style="font-family:var(--font)">${last ? 'tap to add' : 'tap to log'} ›</small></span>
           ${last ? `<div class="meter"><i style="width:${pct * 100}%"></i></div>` : ''}
         </button>`;
       }).join('')}

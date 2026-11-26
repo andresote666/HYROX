@@ -7,6 +7,7 @@ import { resolveDay } from '../logic/day.js';
 import { fuelFor } from '../logic/personalize.js';
 import { weekOf, weekDays, phaseFor, TOTAL_WEEKS, DELOAD } from '../data/plan.js';
 import { TIPS } from '../data/library.js';
+import { BENCHMARKS } from '../data/benchmarks.js';
 import { activitiesOn, wellnessOn, syncConfigured, runSteps, cadenceInfo } from '../logic/sync.js';
 
 function statusBlock(day, key, isToday) {
@@ -92,14 +93,17 @@ function sessionCard(day, key, ui) {
   const done = doneCount(s, key);
   const complete = !!store.done[key]?.complete;
   const hasOptional = day.session.blocks.some(b => b.optional);
+  const benchIds = [...new Set(s.blocks.flatMap(b => b.items).filter(i => i.bench && !i.adapted).flatMap(i => (i.bench === 'calfL' ? ['calfL', 'calfR'] : [i.bench])))];
+  const benches = benchIds.map(id => BENCHMARKS.find(b => b.id === id)).filter(Boolean);
   return `
     <section class="card rise" style="--i:2" aria-label="Session">
       ${sessionHeader(s)}
       ${day.notes.length ? `<div class="notes">${day.notes.map(n => `<div class="note">${icons.info}<span>${esc(n)}</span></div>`).join('')}</div>` : ''}
       ${garminDone(day, key, s.kind)}
-      ${(s.timers.length || hasOptional || s.variantB || day.base.variantB) ? `
+      ${(s.timers.length || hasOptional || s.variantB || day.base.variantB || benches.length) ? `
         <div class="day-actions">
           ${s.timers.map((t, i) => `<button class="btn btn-primary btn-sm" data-act="timer" data-date="${key}" data-idx="${i}">${icons.timer} ${esc(t.title)}</button>`).join('')}
+          ${benches.map(b => `<button class="btn btn-ghost btn-sm" data-act="sheet" data-type="bench" data-id="${b.id}">${icons.target} Log: ${esc(b.name)}</button>`).join('')}
           ${hasOptional ? `<button class="btn btn-ghost btn-sm" data-act="express" data-date="${key}" aria-pressed="${!!ui.express[key]}">${ui.express[key] ? 'Full session' : 'Short on time'}</button>` : ''}
           ${day.base.variantB || store.variants[key] === 'B' ? `<button class="btn btn-ghost btn-sm" data-act="variant" data-date="${key}">${icons.shuffle} ${store.variants[key] === 'B' ? 'Back to plan' : 'Alternative'}</button>` : ''}
         </div>` : ''}

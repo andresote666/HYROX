@@ -599,3 +599,7 @@ details.acc .acc-body { padding-bottom: 16px; }
 
 .mix-bar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; margin-top: 8px; background: var(--surface-3); gap: 2px; }
 .mix-bar i { display: block; height: 100%; }
+
+.bench { grid-template-columns: minmax(0, 1fr) auto; column-gap: 14px; }
+.bench .vals { max-width: 44vw; }
+.bench .vals small { font-family: var(--font); text-wrap: balance; }
