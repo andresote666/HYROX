@@ -629,3 +629,43 @@ body {
 .notes-toggle .ic { color: var(--amber); }
 .notes-toggle .chev { margin-left: auto; color: var(--text-3); transition: transform 0.3s var(--ease); }
 .notes-toggle[aria-expanded="true"] .chev { transform: rotate(180deg); }
+
+/* ── library guide ── */
+.guide-card .h2 { font-size: 17px; }
+.do-list { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+.do-list li { position: relative; padding-left: 26px; font-size: 14.5px; line-height: 1.5; color: var(--text); text-wrap: pretty; }
+.do-list li::before { content: ''; position: absolute; left: 2px; top: 4px; width: 16px; height: 16px; border-radius: 5px; background: var(--accent-soft); border: 1px solid var(--accent-line); }
+.do-list li::after { content: ''; position: absolute; left: 7px; top: 8px; width: 6px; height: 4px; border-left: 2px solid var(--accent); border-bottom: 2px solid var(--accent); transform: rotate(-45deg); }
+.cue-list { list-style: none; counter-reset: cue; display: flex; flex-direction: column; gap: 10px; }
+.cue-list li { counter-increment: cue; position: relative; padding-left: 32px; font-size: 14.5px; line-height: 1.5; text-wrap: pretty; }
+.cue-list li::before { content: counter(cue); position: absolute; left: 0; top: 0; width: 22px; height: 22px; border-radius: 7px; display: grid; place-items: center; font-family: var(--mono); font-size: 12px; font-weight: 600; background: var(--surface-3); color: var(--accent); }
+.station summary { list-style: none; display: flex; align-items: center; gap: 12px; cursor: pointer; }
+.station summary::-webkit-details-marker { display: none; }
+.station .chev { color: var(--text-3); transition: transform 0.3s var(--ease); }
+.station[open] .chev { transform: rotate(180deg); }
+.station-times { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; font-size: 11.5px; color: var(--text-3); white-space: nowrap; }
+.station-times b { font-size: 13px; color: var(--text-2); font-weight: 600; margin-left: 4px; }
+.station-times b.accent { color: var(--accent); }
+.station-body { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+.station-body .label { font-size: 12px; font-weight: 600; color: var(--text-3); letter-spacing: 0.03em; margin: 14px 0 8px; }
+.station-body .label:first-child { margin-top: 0; }
+details.why { margin-top: 14px; border-radius: 12px; background: var(--bg-2); border: 1px solid var(--line); }
+details.why summary { list-style: none; display: flex; align-items: center; gap: 8px; padding: 10px 12px; font-size: 13px; font-weight: 600; color: var(--text-2); cursor: pointer; }
+details.why summary::-webkit-details-marker { display: none; }
+details.why summary .ic { color: var(--text-3); }
+details.why summary .ic:last-child { margin-left: auto; transition: transform 0.3s var(--ease); }
+details.why[open] summary .ic:last-child { transform: rotate(180deg); }
+details.why p { padding: 0 12px 12px; font-size: 13.5px; color: var(--text-2); line-height: 1.55; }
+details.why .why-src { font-size: 12px; color: var(--text-3); margin-top: -4px; }
+.week-rows { display: flex; flex-direction: column; margin-top: 10px; }
+.week-rows div { display: grid; grid-template-columns: 46px 1fr; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.week-rows div:last-child { border-bottom: 0; }
+.week-rows b { font-family: var(--mono); font-size: 12.5px; color: var(--accent); padding-top: 1px; }
+.lights { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+.light { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; padding: 12px; border-radius: 12px; background: var(--bg-2); border: 1px solid var(--line); }
+.light p { font-size: 14px; line-height: 1.5; color: var(--text); }
+.glossary { display: flex; flex-direction: column; }
+.glossary div { padding: 12px 0; border-bottom: 1px solid var(--line); }
+.glossary div:last-child { border-bottom: 0; }
+.glossary dt { font-weight: 650; font-size: 14.5px; }
+.glossary dd { font-size: 13.5px; color: var(--text-2); margin-top: 3px; line-height: 1.5; }

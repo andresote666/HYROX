@@ -1,81 +1,116 @@
 import { icons } from '../ui/icons.js';
 import { esc } from '../ui/components.js';
-import { STATIONS, SCIENCE, SHINS, FUEL, GARMIN, SOURCES } from '../data/library.js';
+import { SOURCES } from '../data/library.js';
+import { STATIONS, TRAINING, SHINS, FOOD, GLOSSARY } from '../data/guide.js';
 import { zones } from '../logic/personalize.js';
-import { store } from '../store.js';
 
 const SECTIONS = [
-  { id: 'stations', label: 'Stations' },
-  { id: 'science', label: 'Engine' },
-  { id: 'shins', label: 'Shins' },
-  { id: 'fuel', label: 'Fuel' },
-  { id: 'zones', label: 'Zones' },
-  { id: 'garmin', label: 'Garmin' },
-  { id: 'sources', label: 'Sources' },
+  { id: 'stations', label: 'Stations', intro: 'How to race each station, and how the plan trains it. Tap a station to open it.' },
+  { id: 'training', label: 'Training', intro: 'How your week works and how hard each session should feel.' },
+  { id: 'shins', label: 'Shins', intro: 'What the morning check-in means and how to keep your shins healthy.' },
+  { id: 'food', label: 'Food', intro: 'What to eat to train well and lose 3 kg without slowing down.' },
+  { id: 'words', label: 'Words', intro: 'Plain meanings for the terms used in the app.' },
 ];
 
-const ZONE_TINT = ['#3a3a33', '#2f5a41', '#5a5330', '#6b4a24', '#6e3328'];
+const why = (text, sources) => (text ? `
+  <details class="why">
+    <summary>${icons.info}<span>Why</span>${icons.chevron}</summary>
+    <p>${esc(text)}</p>
+    ${sources ? `<p class="why-src">Research: ${esc(sources)}</p>` : ''}
+  </details>` : '');
+
+const doList = items => `<ul class="do-list">${items.map(t => `<li>${esc(t)}</li>`).join('')}</ul>`;
+
+function topic(t, i) {
+  return `
+    <section class="card guide-card rise" style="--i:${i + 1}">
+      <div class="eyebrow">${esc(t.kicker)}</div>
+      <h3 class="h2" style="margin-top:2px">${esc(t.title)}</h3>
+      ${t.do ? doList(t.do) : ''}
+      ${t.rows ? `<div class="week-rows">${t.rows.map(([d, x]) => `<div><b>${d}</b><span>${esc(x)}</span></div>`).join('')}</div>` : ''}
+      ${t.lights ? `<div class="lights">${t.lights.map(([tone, label, text]) => `<div class="light"><span class="chip ${tone}"><span class="dot"></span>${label}</span><p>${esc(text)}</p></div>`).join('')}</div>` : ''}
+      ${why(t.why, t.sources)}
+    </section>`;
+}
+
+function station(s, i) {
+  return `
+    <section class="card guide-card rise" style="--i:${i + 1}">
+      <details class="station" ${i === 0 ? 'open' : ''}>
+        <summary>
+          <span class="grow"><span class="eyebrow" style="display:block">${esc(s.spec)}</span><span class="h3" style="font-size:16px">${esc(s.name)}</span></span>
+          <span class="station-times"><span>Rio <b class="mono">${esc(s.rio)}</b></span><span>Goal <b class="mono accent">${esc(s.goal)}</b></span></span>
+          <span class="chev">${icons.chevron}</span>
+        </summary>
+        <div class="station-body">
+          <div class="label">In the race</div>
+          <ol class="cue-list">${s.cues.map(c => `<li>${esc(c)}</li>`).join('')}</ol>
+          ${s.train ? `<div class="label">How the plan trains it</div><p class="body-2">${esc(s.train)}</p>` : ''}
+          ${s.rule ? `<div class="label">Rule to know</div><p class="body-2">${esc(s.rule)}</p>` : ''}
+          ${why(s.why)}
+        </div>
+      </details>
+    </section>`;
+}
+
+function zonesCard(i) {
+  const tint = ['#3a3a33', '#2f5a41', '#5a5330', '#6b4a24', '#6e3328'];
+  return `
+    <section class="card guide-card rise" style="--i:${i}">
+      <div class="eyebrow">Heart rate</div>
+      <h3 class="h2" style="margin-top:2px">Your heart-rate zones</h3>
+      <p class="small" style="margin:4px 0 6px">Based on your max heart rate (change it in Settings).</p>
+      ${zones().map((z, k) => `
+        <div class="zone-row">
+          <span class="zone-tag" style="background:${tint[k]}">${z.id}</span>
+          <span><div class="h3" style="font-size:14px">${z.name}</div><div class="small">${z.use}</div></span>
+          <span class="num small" style="color:var(--text)">${z.lo ? `${z.lo}–${z.hi}` : `<${z.hi}`}</span>
+        </div>`).join('')}
+    </section>`;
+}
+
+function words() {
+  return `
+    <section class="card guide-card rise" style="--i:1">
+      <dl class="glossary">${GLOSSARY.map(([t, d]) => `<div><dt>${esc(t)}</dt><dd>${esc(d)}</dd></div>`).join('')}</dl>
+    </section>`;
+}
+
+function sources() {
+  return `
+    <section class="card rise" style="--i:1">
+      <button class="link-btn" data-act="lib" data-sec="stations">${icons.chevronL} Back to the Library</button>
+      <h3 class="h2" style="margin-top:10px">Research sources</h3>
+      <p class="small" style="margin:4px 0 14px">The studies and coaching sources behind the plan. HYROX-specific research is still thin (one lab study of 11 athletes), so station advice mostly comes from experienced coaches and race data.</p>
+      <ol class="src-list">${SOURCES.map(([t, u]) => `<li><a href="${u}" target="_blank" rel="noopener">${esc(t)}</a></li>`).join('')}</ol>
+    </section>`;
+}
 
 function body(id) {
   switch (id) {
-    case 'stations': return STATIONS.map((s, i) => `
-      <section class="card lib-card rise" style="--i:${i + 1}">
-        <details class="acc" ${i === 0 ? 'open' : ''}>
-          <summary>
-            <span><span class="eyebrow" style="display:block;font-weight:500">${esc(s.spec)}</span>${esc(s.name)}</span>
-            <span class="row" style="gap:10px"><span class="num small" style="text-align:right">${esc(s.rio)}<br><span class="accent">${esc(s.target)}</span></span>${icons.chevron}</span>
-          </summary>
-          <div class="acc-body prose">${s.body}</div>
-        </details>
-      </section>`).join('');
-    case 'science': return SCIENCE.map((s, i) => `
-      <section class="card lib-card rise" style="--i:${i + 1}">
-        <h3>${esc(s.title)}</h3>
-        <div class="prose" style="margin-top:8px">${s.body}</div>
-      </section>`).join('');
-    case 'shins': return `<section class="card lib-card rise" style="--i:1"><h3>Shin splints & soleus</h3><div class="prose" style="margin-top:8px">${SHINS}</div></section>`;
-    case 'fuel': return `<section class="card lib-card rise" style="--i:1"><h3>Fuel & weight</h3><div class="prose" style="margin-top:8px">${FUEL}</div></section>`;
-    case 'garmin': return `<section class="card lib-card rise" style="--i:1"><h3>Garmin data</h3><div class="prose" style="margin-top:8px">${GARMIN}</div></section>`;
-    case 'zones': return `
-      <section class="card rise" style="--i:1">
-        <h3 class="h3">Heart-rate zones</h3>
-        <p class="small" style="margin:2px 0 8px">From your max HR in Settings. Bike and rower max HR often run a few beats lower than running.</p>
-        ${zones().map((z, i) => `
-          <div class="zone-row">
-            <span class="zone-tag" style="background:${ZONE_TINT[i]}">${z.id}</span>
-            <span><div class="h3" style="font-size:14px">${z.name}</div><div class="small">${z.use}</div></span>
-            <span class="num small" style="color:var(--text)">${z.lo ? `${z.lo}–${z.hi}` : `<${z.hi}`}</span>
-          </div>`).join('')}
-      </section>
-      <section class="card rise" style="--i:2">
-        <h3 class="h3">Intensity by machine</h3>
-        <div class="prose" style="margin-top:6px"><ul>
-          <li><strong>Bike with no screen (your gym):</strong> steer by effort and heart rate. RPE 8–9 on 4×4s means you can only say 2–3 words; your Garmin should show ${Math.round(store.profile.maxHR * 0.9)}+ bpm in the last 1–2 minutes of reps 2–4. To find ~90 rpm, count right-foot turns: 15 in 10 seconds. Use the same knob position each week and nudge it up when the reps start to feel easier.</li>
-          <li><strong>Bike with watts:</strong> 85–92% of your 5-min test watts, 85–100 rpm, RPE 8–9.</li>
-          <li><strong>Bike 30/15:</strong> 100–110% of 5-min power for the 30 s, ~50% for the 15 s.</li>
-          <li><strong>Row threshold:</strong> 2k split + 6–10 s per 500 m, 24–28 spm. Watts = 2.80 ÷ (sec per m)³.</li>
-          <li><strong>Row VO₂max:</strong> 2k split + 3–6 s per 500 m.</li>
-          <li><strong>Zone 2:</strong> nasal breathing possible, full sentences.</li>
-        </ul></div>
-      </section>`;
-    case 'sources': return `
-      <section class="card rise" style="--i:1">
-        <h3 class="h3">Sources</h3>
-        <p class="small" style="margin:2px 0 14px">Peer-reviewed studies plus coach and race-data sources. HYROX-specific research is thin (one lab study, n=11), so most station advice is expert opinion. Full reports with evidence grades are in the repo's <span class="mono">/research</span> folder.</p>
-        <ol class="src-list">${SOURCES.map(([t, u]) => `<li><a href="${u}" target="_blank" rel="noopener">${esc(t)}</a></li>`).join('')}</ol>
-      </section>`;
-    default: return '';
+    case 'training': return TRAINING.map(topic).join('') + zonesCard(TRAINING.length + 1);
+    case 'shins': return SHINS.map(topic).join('');
+    case 'food': return FOOD.map(topic).join('');
+    case 'words': return words();
+    case 'sources': return sources();
+    default: return STATIONS.map(station).join('');
   }
 }
 
 export function renderLibrary(ui) {
+  const valid = [...SECTIONS.map(s => s.id), 'sources'];
+  if (!valid.includes(ui.libSection)) ui.libSection = 'stations';
+  const sec = SECTIONS.find(s => s.id === ui.libSection);
   return `
     <section class="rise" style="--i:0;padding:6px 4px 0">
-      <div class="eyebrow">Research, condensed</div>
+      <div class="eyebrow">Your guide</div>
       <h1 class="h1" style="margin-top:4px">Library</h1>
     </section>
+    ${ui.libSection !== 'sources' ? `
     <div class="seg" role="tablist" aria-label="Library sections">
       ${SECTIONS.map(s => `<button class="${ui.libSection === s.id ? 'on' : ''}" data-act="lib" data-sec="${s.id}" role="tab" aria-selected="${ui.libSection === s.id}">${s.label}</button>`).join('')}
     </div>
-    ${body(ui.libSection)}`;
+    <p class="body-2" style="padding:0 4px">${esc(sec.intro)}</p>` : ''}
+    ${body(ui.libSection)}
+    ${ui.libSection !== 'sources' ? `<button class="link-btn" style="align-self:center;padding:8px" data-act="lib" data-sec="sources">${icons.book} See the research sources</button>` : ''}`;
 }
