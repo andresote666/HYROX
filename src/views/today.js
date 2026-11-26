@@ -7,6 +7,7 @@ import { resolveDay } from '../logic/day.js';
 import { fuelFor } from '../logic/personalize.js';
 import { weekOf, weekDays, phaseFor, TOTAL_WEEKS, DELOAD } from '../data/plan.js';
 import { TIPS } from '../data/library.js';
+import { activitiesOn, wellnessOn, syncConfigured } from '../logic/sync.js';
 
 function statusBlock(day, key, isToday) {
   if (!day.checkin) {
@@ -42,6 +43,30 @@ function statusBlock(day, key, isToday) {
 
 const scoreReasons = c => scoreCheckin(c).reasons;
 
+function recoveryStrip(day, key) {
+  const w = wellnessOn(key);
+  if (!w && !day.hrv.status) return '';
+  const chip = (label, tone = '') => `<span class="chip ${tone}">${label}</span>`;
+  const parts = [];
+  if (day.hrv.status) parts.push(chip(`HRV ${day.hrv.avg7} ms · ${day.hrv.status === 'low' ? 'below normal' : day.hrv.status === 'high' ? 'above normal' : 'normal'}`, day.hrv.status === 'low' ? 'amber' : 'green'));
+  else if (w?.hrv) parts.push(chip(`HRV ${Math.round(w.hrv)} ms`));
+  if (w?.rhr) parts.push(chip(`RHR ${w.rhr}${day.rhr.status === 'elevated' ? ' ↑' : ''}`, day.rhr.status === 'elevated' ? 'amber' : ''));
+  if (w?.sleepH) parts.push(chip(`Sleep ${w.sleepH.toFixed(1)} h${w.sleepScore ? ` · ${w.sleepScore}` : ''}`, w.sleepH < 6 ? 'amber' : ''));
+  if (!parts.length) return '';
+  return `<div class="row wrap rise" style="--i:1;gap:6px;padding:0 2px"><span class="eyebrow" style="margin-right:2px">Garmin</span>${parts.join('')}</div>`;
+}
+
+function garminDone(day, key, kind) {
+  const acts = activitiesOn(key);
+  if (!acts.length) return '';
+  const max = store.profile.maxHR;
+  return `<div class="garmin-list">${acts.map(a => {
+    const hit = kind === 'vo2' && a.maxHr ? (a.maxHr >= Math.round(max * 0.9) ? `<span class="chip green">reached ${Math.round(max * 0.9)}+</span>` : `<span class="chip amber">peak ${a.maxHr}, target ${Math.round(max * 0.9)}+</span>`) : '';
+    const bits = [a.mins ? `${a.mins} min` : '', a.km ? `${a.km} km` : '', a.avgHr ? `avg ${a.avgHr} bpm` : '', a.maxHr ? `max ${a.maxHr}` : '', a.watts ? `${Math.round(a.watts)} W` : ''].filter(Boolean).join(' · ');
+    return `<div class="garmin-act"><div class="h3" style="font-size:13.5px">${esc(a.name || a.type)} <span class="faint" style="font-weight:500">· ${esc(a.type)}</span></div><div class="small">${bits}</div>${hit}</div>`;
+  }).join('')}</div>`;
+}
+
 function weekStrip(week, selKey) {
   if (week < 0 || week > TOTAL_WEEKS) return '';
   const today = dayKey();
@@ -69,6 +94,7 @@ function sessionCard(day, key, ui) {
     <section class="card rise" style="--i:2" aria-label="Session">
       ${sessionHeader(s)}
       ${day.notes.length ? `<div class="notes">${day.notes.map(n => `<div class="note">${icons.info}<span>${esc(n)}</span></div>`).join('')}</div>` : ''}
+      ${garminDone(day, key, s.kind)}
       ${(s.timers.length || hasOptional || s.variantB || day.base.variantB) ? `
         <div class="day-actions">
           ${s.timers.map((t, i) => `<button class="btn btn-primary btn-sm" data-act="timer" data-date="${key}" data-idx="${i}">${icons.timer} ${esc(t.title)}</button>`).join('')}
@@ -128,6 +154,7 @@ export function renderToday(ui) {
       ${ring(week + 1, TOTAL_WEEKS + 1, `W${week}`, `OF ${TOTAL_WEEKS}`)}
     </section>
     ${statusBlock(day, key, isToday)}
+    ${syncConfigured() ? recoveryStrip(day, key) : ''}
     ${sessionCard(day, key, ui)}
     ${weekStrip(week, key)}
     ${fuelCard(day, week)}

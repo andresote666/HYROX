@@ -168,6 +168,26 @@ export const FUEL = `
     <li>During: 30–60 g/h → gel at Run 5, gel or carb sip at Run 7. Sip in the Roxzone, don't stop.</li>
   </ul>`;
 
+export const GARMIN = `
+  <p>Garmin doesn't let personal apps read its data directly, so the app reads it through <strong>intervals.icu</strong>, a free training site with an official Garmin sync. Your key stays in Vercel, never in the public repo.</p>
+  <h4>One-time setup (about 5 minutes)</h4>
+  <ul>
+    <li><strong>intervals.icu:</strong> create a free account, then Settings → connect <strong>Garmin Connect</strong>. Tick the options to download activities <em>and</em> wellness (HRV, sleep, resting HR, weight).</li>
+    <li>Still in intervals.icu Settings, scroll to <strong>Developer Settings</strong> and copy your <strong>API key</strong>.</li>
+    <li><strong>Vercel</strong> → your hyrox project → Settings → Environment Variables. Add <span class="mono">INTERVALS_API_KEY</span> (the key) and <span class="mono">SYNC_TOKEN</span> (any long password you invent). Then Deployments → ⋯ → Redeploy.</li>
+    <li><strong>In this app:</strong> Settings (gear) → Garmin → paste the same SYNC_TOKEN → Connect.</li>
+  </ul>
+  <h4>What it changes</h4>
+  <ul>
+    <li>Sleep pre-filled in the morning check-in; HRV, resting HR and sleep shown on Today.</li>
+    <li><strong>HRV readiness:</strong> 7-day average of ln(rMSSD) against your 60-day baseline ± 0.5 SD. Below the band, the day's hard session becomes easy (Plews 2012; Kiviniemi 2007)${c(36)}. Needs 14 days of readings.</li>
+    <li>Resting HR more than 6 bpm above your week also turns hard sessions easy.</li>
+    <li>Synced workouts tick off the day's session, and VO₂max days show whether you reached 90% of max HR.</li>
+    <li>Real running data enforces the rule of no run more than 10% longer than your longest in 30 days${c(26)}.</li>
+    <li>Weight from a Garmin scale fills the weight trend on days you don't log by hand.</li>
+  </ul>
+  <p>The app syncs when you open it (at most every 30 minutes) and from Progress → Sync. If intervals.icu changes what Garmin data it shares, the rest of the app keeps working without it.</p>`;
+
 export const SOURCES = [
   ['Brandt et al. 2025, Front Physiol: physiological responses and performance determinants in HYROX', 'https://pmc.ncbi.nlm.nih.gov/articles/PMC11994925/'],
   ['Helgerud et al. 2007, MSSE: aerobic high-intensity intervals improve VO₂max', 'https://pubmed.ncbi.nlm.nih.gov/17414804/'],
@@ -204,6 +224,7 @@ export const SOURCES = [
   ['Roxlyfe: HYROX burpee broad jumps guide', 'https://roxlyfe.com/hyrox-burpee-broad-jumps-guide'],
   ['BoxRox: 3 hacks for more efficient burpee broad jumps', 'https://www.boxrox.com/3-hacks-for-more-efficient-burpee-broad-jumps-in-hyrox/'],
   ['Boxlife Magazine: HYROX pacing secrets (sled push, burpee jumps)', 'https://boxlifemagazine.com/hyrox-pacing-secrets-sled-push-burpee-jumps/'],
+  ['Plews et al. 2012, Eur J Appl Physiol: HRV in elite triathletes (7-day rolling lnRMSSD)', 'https://pubmed.ncbi.nlm.nih.gov/22367011/'],
 ];
 
 export const TIPS = [

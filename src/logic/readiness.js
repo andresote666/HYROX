@@ -186,7 +186,7 @@ export function adaptSession(session, status = 'green', readiness = 'normal', { 
 
   if (readiness === 'low' && ['vo2', 'threshold', 'sim'].includes(s.kind)) {
     s.lowReadiness = true;
-    notes.push('Low sleep or energy: do the first half of the main set, then switch to Zone 2. Quality beats grinding.');
+    notes.push('Low readiness: do the first half of the main set, then switch to Zone 2. Quality beats grinding.');
   }
   if (runLocked && status !== 'red') notes.push('Running is locked today by the return-to-run rules, so runs move to the bike.');
   if ((status === 'red' || runLocked) && s.timer?.mode === 'run') s.timer.mode = 'bike';

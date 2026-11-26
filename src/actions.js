@@ -3,6 +3,7 @@ import { render, toast } from './main.js';
 import { doSwap } from './data/plan.js';
 import { resolveDay } from './logic/day.js';
 import { openTimer } from './ui/timer.js';
+import { syncNow } from './logic/sync.js';
 
 function setDone(key, patch) {
   store.done[key] = { items: {}, ...store.done[key], ...patch };
@@ -82,6 +83,10 @@ export function handleAction(act, el, ui) {
       ui.libSection = el.dataset.sec;
       store.ui.libSection = ui.libSection; save();
       render();
+      break;
+    case 'sync-now':
+      el.setAttribute('disabled', '');
+      syncNow().then(r => { render(); toast(r.ok ? 'Garmin data synced' : r.message); });
       break;
     default:
       break;

@@ -7,6 +7,7 @@ import { BENCHMARKS } from '../data/benchmarks.js';
 import { RACES } from '../data/races.js';
 import { weekDays, swapSafety } from '../data/plan.js';
 import { render, toast } from '../main.js';
+import { wellnessOn, syncNow, syncAgo } from '../logic/sync.js';
 
 const tone = (v, [g, y]) => (v <= g ? 'g' : v <= y ? 'y' : 'r');
 
@@ -58,7 +59,7 @@ function checkinSheet(ui) {
     ${optQ('settled', 'Did yesterday\'s training soreness settle overnight?', 'Pain monitoring model: acceptable load settles by the next morning.', d.settled, [{ v: true, l: 'Yes / no soreness' }, { v: false, l: 'No, still there' }])}
     <div class="q">
       <div class="q-label">Sleep & energy</div>
-      <div class="q-help">Changes the intensity of today's hard session, not the shin rules.</div>
+      <div class="q-help">Changes the intensity of today's hard session, not the shin rules.${(() => { const w = wellnessOn(ui.date); return w?.sleepH ? ` Garmin: ${w.sleepH.toFixed(1)} h${w.hrv ? `, HRV ${Math.round(w.hrv)} ms` : ''}${w.rhr ? `, RHR ${w.rhr}` : ''}.` : ''; })()}</div>
       <div class="opts">${[5, 6, 7, 8, 9].map(h => `<button class="opt ${d.sleep === h ? 'on' : ''}" data-act="draft" data-field="sleep" data-value="${h}">${h === 5 ? '≤5' : h === 9 ? '9+' : h} h</button>`).join('')}</div>
       <div class="opts">${[1, 2, 3, 4, 5].map(v => `<button class="opt ${d.energy === v ? 'on' : ''}" data-act="draft" data-field="energy" data-value="${v}">${['Wrecked', 'Low', 'OK', 'Good', 'Great'][v - 1]}</button>`).join('')}</div>
     </div>
@@ -126,6 +127,13 @@ function settingsSheet() {
     </div>
     <button class="btn btn-primary btn-block" style="margin-top:14px" data-act="save-settings">Save profile</button>
     <div class="divider"></div>
+    <div class="h3">Garmin (via intervals.icu)</div>
+    <p class="small" style="margin:4px 0 10px">${store.sync.token ? `Last sync ${syncAgo()}.${store.sync.error ? ` <span style="color:var(--red)">${esc(store.sync.error)}</span>` : ` ${store.sync.activities.length} workouts, ${Object.keys(store.sync.wellness).length} days of HRV/sleep stored.`}` : 'Paste the sync code you set as SYNC_TOKEN in Vercel. Setup steps are in Library → Garmin.'}</p>
+    <div class="input-row">
+      <div class="field grow"><label for="sync-token">Sync code</label><input id="sync-token" class="input" type="password" autocomplete="off" value="${esc(store.sync.token)}" placeholder="SYNC_TOKEN" style="font-size:14px"></div>
+      <button class="btn btn-ghost" data-act="save-sync">${store.sync.token ? 'Sync now' : 'Connect'}</button>
+    </div>
+    <div class="divider"></div>
     <div class="h3">Backup</div>
     <p class="small" style="margin:4px 0 10px">Everything is stored on this phone only. Export a backup before clearing Safari or Chrome data, or to move to another phone.</p>
     <div class="grid-2">
@@ -182,7 +190,9 @@ export function handleSheetAction(act, el, ui) {
       ui.sheet = { type, id: el.dataset.id, week: Number(el.dataset.week), from: Number(el.dataset.from) };
       if (type === 'checkin') {
         const existing = store.checkins[ui.date];
-        ui.draft = existing ? { ...existing } : { morning: 0, palpation: 0, focal: false, hop: 0, hopFail: false, runPain: null, settled: true, sleep: 7, energy: 3 };
+        const w = wellnessOn(ui.date);
+        const sleep = w?.sleepH ? Math.min(9, Math.max(5, Math.round(w.sleepH))) : 7;
+        ui.draft = existing ? { ...existing } : { morning: 0, palpation: 0, focal: false, hop: 0, hopFail: false, runPain: null, settled: true, sleep, energy: 3 };
       }
       render();
       if (type === 'settings') {
@@ -251,6 +261,14 @@ export function handleSheetAction(act, el, ui) {
       ui.raceId = p.raceId;
       save();
       ui.sheet = null; render(); toast('Profile saved');
+      return true;
+    }
+    case 'save-sync': {
+      store.sync.token = document.getElementById('sync-token').value.trim();
+      save();
+      el.textContent = 'Syncing…';
+      el.setAttribute('disabled', '');
+      syncNow().then(r => { render(); toast(r.ok ? 'Garmin data synced' : r.message); });
       return true;
     }
     case 'export': {

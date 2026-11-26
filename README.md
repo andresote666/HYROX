@@ -10,6 +10,18 @@ Personal training PWA for HYROX Buenos Aires (20–21 Mar 2027) with HYROX Santi
 
 Data lives in the phone's localStorage; export a backup from Settings.
 
+## Garmin data (via intervals.icu)
+
+`api/intervals.js` is a Vercel function that reads your own wellness (HRV, resting HR, sleep, weight) and workouts from intervals.icu, which syncs them from Garmin Connect. Set these in Vercel → Settings → Environment Variables, then redeploy:
+
+| Variable | Value |
+|---|---|
+| `INTERVALS_API_KEY` | intervals.icu → Settings → Developer Settings → API key |
+| `SYNC_TOKEN` | any long random string; paste the same value in the app's Settings → Garmin |
+| `INTERVALS_ATHLETE_ID` | optional, defaults to `0` (the key's own athlete) |
+
+`/api/intervals?debug=1` (with the `x-sync-token` header) lists the field names intervals.icu returns, for troubleshooting.
+
 ```bash
 npm install
 npm run dev

@@ -1,6 +1,6 @@
 import { icons } from '../ui/icons.js';
 import { esc } from '../ui/components.js';
-import { STATIONS, SCIENCE, SHINS, FUEL, SOURCES } from '../data/library.js';
+import { STATIONS, SCIENCE, SHINS, FUEL, GARMIN, SOURCES } from '../data/library.js';
 import { zones } from '../logic/personalize.js';
 
 const SECTIONS = [
@@ -9,6 +9,7 @@ const SECTIONS = [
   { id: 'shins', label: 'Shins' },
   { id: 'fuel', label: 'Fuel' },
   { id: 'zones', label: 'Zones' },
+  { id: 'garmin', label: 'Garmin' },
   { id: 'sources', label: 'Sources' },
 ];
 
@@ -33,6 +34,7 @@ function body(id) {
       </section>`).join('');
     case 'shins': return `<section class="card lib-card rise" style="--i:1"><h3>Shin splints & soleus</h3><div class="prose" style="margin-top:8px">${SHINS}</div></section>`;
     case 'fuel': return `<section class="card lib-card rise" style="--i:1"><h3>Fuel & weight</h3><div class="prose" style="margin-top:8px">${FUEL}</div></section>`;
+    case 'garmin': return `<section class="card lib-card rise" style="--i:1"><h3>Garmin data</h3><div class="prose" style="margin-top:8px">${GARMIN}</div></section>`;
     case 'zones': return `
       <section class="card rise" style="--i:1">
         <h3 class="h3">Heart-rate zones</h3>

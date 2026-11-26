@@ -1,6 +1,6 @@
 /* Tiny dependency-free SVG charts. */
 
-export function lineChart(points, { w = 320, h = 150, target = null, yPad = 0.6, fmtY = v => v.toFixed(1), fmtX = d => d } = {}) {
+export function lineChart(points, { w = 320, h = 150, target = null, targetLabel = 'goal', yPad = 0.6, fmtY = v => v.toFixed(1), fmtX = d => d } = {}) {
   if (!points.length) return '';
   const pad = { l: 34, r: 10, t: 12, b: 22 };
   const ys = points.map(p => p.y).concat(target !== null ? [target] : []);
@@ -20,7 +20,7 @@ export function lineChart(points, { w = 320, h = 150, target = null, yPad = 0.6,
       <stop offset="0" stop-color="#ebcb52" stop-opacity="0.22"/><stop offset="1" stop-color="#ebcb52" stop-opacity="0"/>
     </linearGradient></defs>
     ${ticks.map(t => `<line class="grid-l" x1="${pad.l}" x2="${w - pad.r}" y1="${y(t)}" y2="${y(t)}"/><text class="axis-t" x="${pad.l - 6}" y="${y(t) + 3}" text-anchor="end">${fmtY(t)}</text>`).join('')}
-    ${target !== null ? `<line class="target" x1="${pad.l}" x2="${w - pad.r}" y1="${y(target)}" y2="${y(target)}"/><text class="axis-t" x="${w - pad.r}" y="${y(target) - 5}" text-anchor="end" style="fill:var(--green)">goal ${fmtY(target)}</text>` : ''}
+    ${target !== null ? `<line class="target" x1="${pad.l}" x2="${w - pad.r}" y1="${y(target)}" y2="${y(target)}"/><text class="axis-t" x="${w - pad.r}" y="${y(target) - 5}" text-anchor="end" style="fill:var(--green)">${targetLabel} ${fmtY(target)}</text>` : ''}
     ${n > 1 ? `<path class="area" d="${area}"/><path class="line" d="${path}"/>` : ''}
     ${points.map((p, i) => `<circle class="pt" cx="${x(i)}" cy="${y(p.y)}" r="${n > 20 ? 2 : 3.5}"/>`).join('')}
     ${xLabels.map(i => `<text class="axis-t" x="${x(i)}" y="${h - 6}" text-anchor="${i === 0 && n > 1 ? 'start' : 'end'}">${fmtX(points[i].x)}</text>`).join('')}

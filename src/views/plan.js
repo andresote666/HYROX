@@ -87,6 +87,7 @@ export function renderPlan(ui) {
           ${open ? `
           <div class="day-body">
             <div style="padding-top:14px">${sessionHeader(s, { compact: true })}</div>
+            ${day.notes.length ? `<div class="notes">${day.notes.map(n => `<div class="note">${icons.info}<span>${esc(n)}</span></div>`).join('')}</div>` : ''}
             ${sessionBody(s, d.key)}
             <div class="day-actions">
               <button class="btn btn-ghost btn-sm" data-act="open-today" data-date="${d.key}">${icons.today} Open in Today</button>

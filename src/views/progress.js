@@ -7,6 +7,7 @@ import { fmtSec } from '../data/results.js';
 import { weightTrend, latestBench, firstBench } from '../logic/personalize.js';
 import { runGate } from '../logic/readiness.js';
 import { weekDays, currentWeek } from '../data/plan.js';
+import { hrvStatus, runLoad, syncAgo, syncConfigured } from '../logic/sync.js';
 
 const fmtVal = (b, v) => (v === null || v === undefined ? '—' : b.unit === 'time' ? fmtSec(v) : b.unit === 'watts' ? `${Math.round(v)} W` : b.unit === 'bpm' ? `${Math.round(v)} bpm` : `${Math.round(v * 10) / 10}`);
 const shortDate = k => parseDay(k).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
@@ -54,6 +55,35 @@ function shinCard() {
       </div>
       <div style="margin-top:14px">${painBars(days)}</div>
       <p class="small" style="margin-top:8px">${gate.allow ? 'Bars show the highest pain score each day; the line marks 3/10. Progress running only after green days, by no more than 10% on your longest run in 30 days.' : esc(gate.why)}${logged.length ? '' : ' Do the daily check-in to start the trend.'}</p>
+    </section>`;
+}
+
+function garminCard() {
+  if (!syncConfigured()) {
+    return `<button class="card card-glass checkin-cta rise" style="--i:3;text-align:left;width:100%" data-act="sheet" data-type="settings">
+      <div class="pulse">${icons.heart}</div>
+      <div class="grow"><div class="h3">Connect Garmin</div><div class="small">HRV, resting HR, sleep and workouts via intervals.icu. Setup steps: Library → Garmin.</div></div>${icons.chevronR}</button>`;
+  }
+  const today = dayKey();
+  const days = Object.values(store.sync.wellness).filter(w => w.hrv > 0).sort((a, b) => a.date.localeCompare(b.date)).slice(-42);
+  const hrv = hrvStatus(today);
+  const load = runLoad(dayKey(addDays(new Date(), 1)));
+  const rhrDays = Object.values(store.sync.wellness).filter(w => w.rhr).sort((a, b) => a.date.localeCompare(b.date));
+  const rhr = rhrDays.length ? rhrDays[rhrDays.length - 1].rhr : null;
+  return `
+    <section class="card rise" style="--i:3" aria-label="Garmin">
+      <div class="row between">
+        <div><div class="eyebrow">Garmin · synced ${syncAgo()}</div><div class="h3" style="margin-top:2px">HRV ${hrv.status ? `${hrv.avg7} ms (7-day)` : days.length ? `${Math.round(days[days.length - 1].hrv)} ms` : '—'}</div></div>
+        <button class="btn btn-ghost btn-sm" data-act="sync-now">${icons.reset} Sync</button>
+      </div>
+      ${days.length >= 2 ? `<div style="margin-top:12px">${lineChart(days.map(d => ({ x: shortDate(d.date), y: d.hrv })), { fmtY: v => Math.round(v), yPad: 3, target: hrv.status ? hrv.base : null, targetLabel: 'baseline' })}</div>` : ''}
+      <p class="small" style="margin-top:8px">${hrv.status ? `Normal band ${hrv.band[0]}–${hrv.band[1]} ms (60-day baseline ± 0.5 SD). Below the band, hard sessions turn easy automatically.` : `HRV readiness switches on after 14 days of readings (${hrv.n} so far).`}</p>
+      <div class="grid-3" style="margin-top:12px">
+        <div class="tile"><span class="num">${rhr ?? '—'}</span><small>resting HR</small></div>
+        <div class="tile"><span class="num">${load.km7}</span><small>run km, 7 days</small></div>
+        <div class="tile"><span class="num">${load.longestMins || '—'}</span><small>longest run, 30 d (min)</small></div>
+      </div>
+      ${store.sync.error ? `<p class="small" style="margin-top:10px;color:var(--red)">${esc(store.sync.error)}</p>` : ''}
     </section>`;
 }
 
@@ -105,6 +135,7 @@ export function renderProgress() {
     </section>
     ${weightCard()}
     ${shinCard()}
+    ${garminCard()}
     ${adherenceCard()}
     ${benchCard()}`;
 }

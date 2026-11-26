@@ -12,6 +12,7 @@ import { renderProgress } from './views/progress.js';
 import { renderLibrary } from './views/library.js';
 import { renderSheet, handleSheetAction } from './views/sheets.js';
 import { handleAction } from './actions.js';
+import { syncNow, shouldAutoSync } from './logic/sync.js';
 
 export const ui = {
   tab: store.ui.tab || 'today',
@@ -151,6 +152,13 @@ document.addEventListener('visibilitychange', () => {
 });
 
 render();
+
+function autoSync() {
+  if (!shouldAutoSync()) return;
+  syncNow({ silent: true }).then(r => { if (r.ok && !ui.sheet) render(); });
+}
+autoSync();
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') autoSync(); });
 
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
   navigator.serviceWorker.register('/sw.js').then(reg => {
