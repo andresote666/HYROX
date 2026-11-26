@@ -48,7 +48,7 @@ function topbar() {
   return `
     <header class="topbar">
       <div class="brand">
-        <div class="brand-mark" aria-hidden="true">HX</div>
+        <div class="brand-mark" aria-hidden="true"><svg viewBox="0 0 512 512"><defs><linearGradient id="bm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f2d665"/><stop offset="1" stop-color="#e3bf3f"/></linearGradient></defs><rect width="512" height="512" rx="128" fill="url(#bm)"/><g fill="none" stroke="#17140a" stroke-linecap="round" stroke-linejoin="round"><path d="M148 128v256M364 128v256" stroke-width="58"/><path d="M148 268h52l24-48 34 128 38-176 24 96h44" stroke-width="32"/></g></svg></div>
         <div class="brand-text">
           <span class="brand-title">HYROX PREP</span>
           <span class="brand-sub">${race.flag} ${race.city} · ${race.date.slice(8)} ${new Date(race.date + 'T12:00').toLocaleDateString('en-GB', { month: 'short' })}</span>
