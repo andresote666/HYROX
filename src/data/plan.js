@@ -38,8 +38,8 @@ const calf = (name, dose, detail) => ({ name, dose, detail, mode: 'calf' });
 
 /* ── timers ── */
 const T = {
-  bike44: (reps = 4, work = 240) => ({ title: `Bike ${reps}×${work / 60}`, mode: 'bike', warmup: 600, reps, work, rest: 180, cooldown: 300, cue: 'Hard but even: RPE 8–9, 85–100 rpm. {vo2w}', restCue: 'Easy spin. Keep pedalling.' }),
-  bike3015: sets => ({ title: `Bike 30/15 × 13 × ${sets}`, mode: 'bike', warmup: 600, sets, reps: 13, work: 30, rest: 15, setRest: 180, cooldown: 300, cue: 'Hardest power you can repeat 13 times. 90–105 rpm.', restCue: 'Soft pedal ~50%' }),
+  bike44: (reps = 4, work = 240) => ({ title: `Bike ${reps}×${work / 60}`, mode: 'bike', warmup: 600, reps, work, rest: 180, cooldown: 300, cue: '{vo2w}', restCue: 'Easy spin. Keep pedalling.' }),
+  bike3015: sets => ({ title: `Bike 30/15 × 13 × ${sets}`, mode: 'bike', warmup: 600, sets, reps: 13, work: 30, rest: 15, setRest: 180, cooldown: 300, cue: '{b3015}', restCue: 'Soft pedal, very easy' }),
   bikeTest: { title: 'Bike 5-min test', mode: 'bike', steps: [
     { label: 'Warm-up', kind: 'prep', secs: 600, cue: 'Easy, building' },
     { label: 'Surge 1', kind: 'work', secs: 20, cue: 'Quick 20 s surge' }, { label: 'Easy', kind: 'rest', secs: 100, cue: 'Spin' },
@@ -54,18 +54,18 @@ const T = {
 
 /* ── weekly progression tables (index = week) ── */
 const VO2 = {
-  1: { title: 'Bike 5-min test', main: [it('5-min max test', '5 min', 'Even pacing, empty the tank in the last minute. Log average watts in Progress → Bike 5-min max.', { bench: 'bike5', mode: 'bike' })], timer: T.bikeTest, purpose: 'Baseline for every bike prescription that follows. Your 4×4 power will be 85–95% of this number.' },
+  1: { title: 'Bike 5-min test', main: [it('5-min max test', '5 min', 'Even pacing, empty the tank in the last minute. Log average watts in Progress → Bike 5-min max.', { bench: 'bike5', mode: 'bike' })], timer: T.bikeTest, purpose: 'Baseline for every bike prescription that follows. Your 4×4 power will be 85–95% of this number.' , noWatts: { title: 'Bike 4×4 · learn the effort', main: [it('4 × 4 min', '4×4', '{vo2w} 3 min easy between. This first session teaches you what the right effort feels like; check your Garmin HR afterwards.', { mode: 'bike' })], timer: T.bike44(4), purpose: 'Your bike has no screen, so effort and heart rate replace watts. <b>Helgerud 2007:</b> 4×4 at 90–95% HRmax raised VO₂max 7.2% in 8 weeks.' } },
   2: { title: 'Bike 4×4 · Norwegian intervals', main: [it('4 × 4 min', '4×4', '{vo2w} · 3 min easy spin between. HR should reach {hr90}+ by min 3 of reps 2–4.', { mode: 'bike' })], timer: T.bike44(4), purpose: '<b>Helgerud 2007:</b> 4×4 at 90–95% HRmax raised VO₂max 7.2% in 8 weeks. The single best-evidenced protocol for your goal.' },
   3: { title: 'Bike 5×4', main: [it('5 × 4 min', '5×4', '{vo2w} · 3 min easy between.', { mode: 'bike' })], timer: T.bike44(5), purpose: 'Adding a fifth rep = more time above 90% VO₂max, the variable that drives adaptation (Buchheit & Laursen 2013).' },
   4: { title: 'Bike 3×4 · deload', main: [it('3 × 4 min', '3×4', '{vo2w} · keep the intensity, cut the volume.', { mode: 'bike' })], timer: T.bike44(3), purpose: 'Deload keeps intensity and drops volume, so fitness holds while fatigue clears.' },
-  5: { title: 'Bike 30/15 · Rønnestad', main: [it('2 sets × 13 × 30 s on / 15 s easy', '2×13', '30 s at the hardest power you can repeat 13 times (≈100–110% of 5-min power). 3 min between sets.', { mode: 'bike' })], timer: T.bike3015(2), purpose: '<b>Rønnestad 2015/2020:</b> 30/15 short intervals beat effort-matched long intervals for aerobic power in cyclists.' },
-  6: { title: 'Bike 30/15 × 3 sets', main: [it('3 sets × 13 × 30/15', '3×13', 'Same power as last week, one more set. HR should climb to {hr90}+ by the end of each set.', { mode: 'bike' })], timer: T.bike3015(3), purpose: 'Full Rønnestad dose: about 20 min of work near VO₂max.' },
-  7: { title: 'Bike 4×6 · long intervals', main: [it('4 × 6 min', '4×6', 'About 85–90% of 5-min power ({vo2w} minus 5%). 3 min easy between.', { mode: 'bike' })], timer: T.bike44(4, 360), purpose: '<b>Wen 2019 meta-analysis:</b> long (≥2 min), high-volume (≥15 min work) intervals gave the biggest VO₂max gains.' },
-  8: { title: 'Bike 5-min retest', main: [it('5-min max test', '5 min', 'Same protocol as week 1. Log it: the app re-scales your interval power.', { bench: 'bike5', mode: 'bike' })], timer: T.bikeTest, purpose: 'Halfway check. Expect +4–8% on week 1 if the engine is responding.' },
-  9: { title: 'Bike 30/15 × 3', main: [it('3 sets × 13 × 30/15', '3×13', 'Use your new 5-min number. 3 min between sets.', { mode: 'bike' })], timer: T.bike3015(3), purpose: 'Short intervals keep you at VO₂max longer per session while you add race-specific load on other days.' },
+  5: { title: 'Bike 30/15 · Rønnestad', main: [it('2 sets × 13 × 30 s on / 15 s easy', '2×13', '{b3015} 3 min between sets.', { mode: 'bike' })], timer: T.bike3015(2), purpose: '<b>Rønnestad 2015/2020:</b> 30/15 short intervals beat effort-matched long intervals for aerobic power in cyclists.' },
+  6: { title: 'Bike 30/15 × 3 sets', main: [it('3 sets × 13 × 30/15', '3×13', 'Same effort as last week, one more set. HR should climb to {hr90}+ by the end of each set.', { mode: 'bike' })], timer: T.bike3015(3), purpose: 'Full Rønnestad dose: about 20 min of work near VO₂max.' },
+  7: { title: 'Bike 4×6 · long intervals', main: [it('4 × 6 min', '4×6', '{vo2w6} 3 min easy between.', { mode: 'bike' })], timer: T.bike44(4, 360), purpose: '<b>Wen 2019 meta-analysis:</b> long (≥2 min), high-volume (≥15 min work) intervals gave the biggest VO₂max gains.' },
+  8: { title: 'Bike 5-min retest', main: [it('5-min max test', '5 min', 'Same protocol as week 1. Log it: the app re-scales your interval power.', { bench: 'bike5', mode: 'bike' })], timer: T.bikeTest, purpose: 'Halfway check. Expect +4–8% on week 1 if the engine is responding.' , noWatts: { title: 'Bike 5×4', main: [it('5 × 4 min', '5×4', '{vo2w} 3 min easy between.', { mode: 'bike' })], timer: T.bike44(5), purpose: 'Halfway point. Your engine check this week is the 2 km row on Wednesday.' } },
+  9: { title: 'Bike 30/15 × 3', main: [it('3 sets × 13 × 30/15', '3×13', '{b3015} 3 min between sets.', { mode: 'bike' })], timer: T.bike3015(3), purpose: 'Short intervals keep you at VO₂max longer per session while you add race-specific load on other days.' },
   10: { title: 'Bike 5×4', main: [it('5 × 4 min', '5×4', '{vo2w} · 3 min easy between.', { mode: 'bike' })], timer: T.bike44(5), purpose: 'Back to the long format so both stimuli stay in the mix.' },
   11: { title: 'Bike 4×4 · sim week', main: [it('4 × 4 min', '4×4', '{vo2w}. Leave a little in the tank: full simulation on Saturday.', { mode: 'bike' })], timer: T.bike44(4), purpose: 'Maintains the VO₂max stimulus without eating into Saturday.' },
-  12: { title: 'Bike 5-min retest', main: [it('5-min max test', '5 min', 'Third test. The week is lighter so this is a fair read.', { bench: 'bike5', mode: 'bike' })], timer: T.bikeTest, purpose: 'Final engine check before the peak block.' },
+  12: { title: 'Bike 5-min retest', main: [it('5-min max test', '5 min', 'Third test. The week is lighter so this is a fair read.', { bench: 'bike5', mode: 'bike' })], timer: T.bikeTest, purpose: 'Final engine check before the peak block.' , noWatts: { title: 'Bike 4×4 · lighter week', main: [it('4 × 4 min', '4×4', '{vo2w} 3 min easy between.', { mode: 'bike' })], timer: T.bike44(4), purpose: 'Lighter week: quality over volume. Engine check is the 2 km row on Wednesday.' } },
   13: { title: 'Bike 5×4 · last big one', main: [it('5 × 4 min', '5×4', '{vo2w} · 3 min easy between.', { mode: 'bike' })], timer: T.bike44(5), purpose: 'Last high-volume VO₂max session. From here it is about freshness.' },
 };
 
@@ -152,8 +152,13 @@ function monStrengthA(w) {
 function tueVO2(w) {
   const v = VO2[w];
   const r = TUE_RUN[w];
+  const alt = v.noWatts ? tueVO2Build(w, { ...v, ...v.noWatts, noWatts: null }, r) : null;
+  return { ...tueVO2Build(w, v, r), ...(alt ? { noWatts: alt } : {}) };
+}
+
+function tueVO2Build(w, v, r) {
   return {
-    kind: 'vo2', title: v.title, duration: w === 1 || w === 8 || w === 12 ? '45 min' : '55–60 min', intensity: 'Hard',
+    kind: 'vo2', title: v.title, duration: v.main[0].bench ? '45 min' : '55–60 min', intensity: 'Hard',
     tags: ['Bike', 'VO₂max'],
     purpose: v.purpose,
     blocks: [
@@ -175,7 +180,7 @@ function wedRow(w) {
       ? 'Easy volume builds the aerobic base without any tibial load. 75–80% of your training should feel like this (pyramidal distribution, Rosenblat 2025).'
       : 'Threshold work raises the pace you can hold for 90 minutes: the intensity HYROX actually lives at (≈80% of race time above 90% HRmax, Brandt 2025).',
     blocks: [
-      { title: 'Row', items: r.items },
+      { title: 'Row', items: [it('HR check: 5 min at 2:35/500 m', '5 min', 'Damper 5, about 20 strokes/min, hold 2:35 on the monitor. Note your HR at the end (Progress → HR at 2:35 row). Lower over the weeks = fitter.', { bench: 'hrRow', mode: 'row', only: 'noWatts' }), ...r.items] },
       { title: 'Shin & hip prehab · 15 min', items: [
         calf('Straight-knee calf raise', '3×12', 'Slow, full range, single leg when easy.'),
         it('Single-leg balance + reach', '3×30 s/leg', 'Foot control, arch active.', { mode: 'mobility' }),
@@ -219,11 +224,11 @@ function friZ2(w) {
   return {
     kind: 'z2', title: `Zone 2 bike · ${mins} min`, duration: `${mins + 15} min`, intensity: 'Easy',
     tags: ['Bike', 'Aerobic base'],
-    purpose: 'Long, easy and boring on purpose. Builds mitochondria and capillaries, and lets you recover for Saturday. Track HR at 180 W every week: it should drift down.',
+    purpose: 'Long, easy and boring on purpose. Builds mitochondria and capillaries, and lets you recover for Saturday. Easy means you could talk in full sentences the whole ride.',
     blocks: [
       { title: 'Bike', items: [
-        it('HR check: 180 W for 5 min', '5 min', 'Note HR at the end (Progress → HR at 180 W). Lower over the weeks = fitter.', { bench: 'hr180', mode: 'bike' }),
-        it('Zone 2 ride', `${mins - 5} min`, 'HR {z2}. Nasal breathing possible. 85–95 rpm.', { mode: 'bike' }),
+        it('HR check: 180 W for 5 min', '5 min', 'Note HR at the end (Progress → HR at 180 W). Lower over the weeks = fitter.', { bench: 'hr180', mode: 'bike', only: 'watts' }),
+        it('Zone 2 ride', `${mins - 5} min`, 'HR {z2}. Nasal breathing possible. Light knob, smooth ~90 rpm (15 right-foot turns per 10 s).', { mode: 'bike' }),
       ] },
       { title: 'Mobility · 10 min', optional: true, items: [it('Hips, T-spine, calves', '10 min', 'Couch stretch, open books, calf wall stretch (bent and straight knee)', { mode: 'mobility' })] },
     ],
@@ -346,7 +351,15 @@ export function sessionFor(key) {
   const src = orderFor(week)[dow];
   let s = WEEKS[week].days[src];
   if (store.variants[key] === 'B' && s.variantB) s = { ...s.variantB, id: s.id, timers: s.variantB.timers || [] };
-  return { ...s, week, dow, src };
+  return { ...forEquipment(s), week, dow, src };
+}
+
+/* Bike with or without a watts display (profile.bikeWatts). */
+export function forEquipment(s) {
+  const watts = !!store.profile.bikeWatts;
+  let out = !watts && s.noWatts ? { ...s.noWatts, id: s.id } : s;
+  out = { ...out, blocks: out.blocks.map(b => ({ ...b, items: b.items.filter(i => !i.only || (i.only === 'watts') === watts) })) };
+  return out;
 }
 
 export function weekDays(w) {

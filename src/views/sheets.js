@@ -120,6 +120,11 @@ function settingsSheet() {
       ${field('p-maxhr', 'Max HR (bpm)', p.maxHR)}
       ${field('p-resthr', 'Resting HR (bpm)', p.restHR)}
       ${field('p-target', 'Target weight (kg)', p.targetWeightKg, 0.1)}
+      <div class="field"><label for="p-bike">Gym bike screen</label>
+        <select id="p-bike" class="input" style="font-family:var(--font);font-size:15px">
+          <option value="no" ${!p.bikeWatts ? 'selected' : ''}>No watts (effort + HR)</option>
+          <option value="yes" ${p.bikeWatts ? 'selected' : ''}>Shows watts</option>
+        </select></div>
       <div class="field"><label for="p-race">Target race</label>
         <select id="p-race" class="input" style="font-family:var(--font);font-size:15px">
           ${Object.values(RACES).map(r => `<option value="${r.id}" ${p.raceId === r.id ? 'selected' : ''}>${r.city}</option>`).join('')}
@@ -258,6 +263,7 @@ export function handleSheetAction(act, el, ui) {
       p.restHR = num('p-resthr') || p.restHR;
       p.targetWeightKg = num('p-target') || p.targetWeightKg;
       p.raceId = document.getElementById('p-race').value;
+      p.bikeWatts = document.getElementById('p-bike').value === 'yes';
       ui.raceId = p.raceId;
       save();
       ui.sheet = null; render(); toast('Profile saved');

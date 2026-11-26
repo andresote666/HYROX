@@ -15,6 +15,7 @@ const defaults = () => ({
     maxHR: 193,
     restHR: 52,
     raceId: 'ba27',
+    bikeWatts: false, // gym spin bike has no screen
   },
   checkins: {},     // { 'YYYY-MM-DD': { morning, hop, palpation, focal, settled, sleep, energy, status, ts } }
   done: {},         // { 'YYYY-MM-DD': { 'b0-i2': true, ... , _complete: true, rpe } }

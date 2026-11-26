@@ -2,6 +2,7 @@ import { icons } from '../ui/icons.js';
 import { esc } from '../ui/components.js';
 import { STATIONS, SCIENCE, SHINS, FUEL, GARMIN, SOURCES } from '../data/library.js';
 import { zones } from '../logic/personalize.js';
+import { store } from '../store.js';
 
 const SECTIONS = [
   { id: 'stations', label: 'Stations' },
@@ -49,7 +50,8 @@ function body(id) {
       <section class="card rise" style="--i:2">
         <h3 class="h3">Intensity by machine</h3>
         <div class="prose" style="margin-top:6px"><ul>
-          <li><strong>Bike VO₂max (4×4):</strong> 85–92% of your 5-min test watts, 85–100 rpm, RPE 8–9.</li>
+          <li><strong>Bike with no screen (your gym):</strong> steer by effort and heart rate. RPE 8–9 on 4×4s means you can only say 2–3 words; your Garmin should show ${Math.round(store.profile.maxHR * 0.9)}+ bpm in the last 1–2 minutes of reps 2–4. To find ~90 rpm, count right-foot turns: 15 in 10 seconds. Use the same knob position each week and nudge it up when the reps start to feel easier.</li>
+          <li><strong>Bike with watts:</strong> 85–92% of your 5-min test watts, 85–100 rpm, RPE 8–9.</li>
           <li><strong>Bike 30/15:</strong> 100–110% of 5-min power for the 30 s, ~50% for the 15 s.</li>
           <li><strong>Row threshold:</strong> 2k split + 6–10 s per 500 m, 24–28 spm. Watts = 2.80 ÷ (sec per m)³.</li>
           <li><strong>Row VO₂max:</strong> 2k split + 3–6 s per 500 m.</li>

@@ -27,9 +27,18 @@ export function tokens() {
   const max = store.profile.maxHR;
   const bike = latestBench('bike5');
   const row = latestBench('row2k');
-  const vo2w = bike
-    ? `${Math.round(bike.value * 0.85)}–${Math.round(bike.value * 0.92)} W (85–92% of your ${bike.value} W test)`
-    : '85–90% of your 5-min test power, or RPE 8–9';
+  const watts = !!store.profile.bikeWatts;
+  const hr90 = Math.round(max * 0.9);
+  const feel = `RPE 8–9: hard, you can only say 2–3 words. Turn the knob until ~90 rpm feels hard (90 rpm = 15 turns of your right foot in 10 s). HR should reach ${hr90}+ in the last 1–2 min of reps 2–4.`;
+  const vo2w = watts
+    ? (bike ? `${Math.round(bike.value * 0.85)}–${Math.round(bike.value * 0.92)} W (85–92% of your ${bike.value} W test), RPE 8–9, 85–100 rpm.` : 'RPE 8–9, 85–100 rpm, 85–90% of your 5-min test watts.')
+    : feel;
+  const vo2w6 = watts
+    ? (bike ? `${Math.round(bike.value * 0.8)}–${Math.round(bike.value * 0.86)} W, RPE 8.` : 'RPE 8, a notch below your 4×4 effort.')
+    : `RPE 8: a notch below your 4×4 effort, still only short sentences. HR ${Math.round(max * 0.88)}+ late in each rep.`;
+  const b3015 = watts
+    ? (bike ? `30 s at ${Math.round(bike.value * 1.0)}–${Math.round(bike.value * 1.1)} W, 15 s soft pedal.` : '30 s at the hardest power you can repeat 13 times, 15 s soft pedal.')
+    : '30 s hard (RPE 9, fast legs ~100 rpm, knob firm), 15 s very easy. Pick a knob setting you can repeat all 13 times: if rep 10 dies, go lighter next set.';
   let rowthr = '2k split + 6–10 s per 500 m.';
   if (row) {
     const split = row.value / 4;
@@ -37,6 +46,8 @@ export function tokens() {
   }
   return {
     '{vo2w}': vo2w,
+    '{vo2w6}': vo2w6,
+    '{b3015}': b3015,
     '{hr90}': `${Math.round(max * 0.9)} bpm`,
     '{z2}': `${Math.round(max * 0.7)}–${Math.round(max * 0.78)} bpm`,
     '{rowthr}': rowthr,

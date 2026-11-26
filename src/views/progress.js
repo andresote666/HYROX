@@ -2,7 +2,7 @@ import { store, dayKey, addDays, parseDay, latestWeight } from '../store.js';
 import { icons } from '../ui/icons.js';
 import { esc } from '../ui/components.js';
 import { lineChart, painBars } from '../ui/charts.js';
-import { BENCHMARKS, benchTarget } from '../data/benchmarks.js';
+import { activeBenchmarks, benchTarget } from '../data/benchmarks.js';
 import { fmtSec } from '../data/results.js';
 import { weightTrend, latestBench, firstBench } from '../logic/personalize.js';
 import { runGate } from '../logic/readiness.js';
@@ -158,18 +158,18 @@ function adherenceCard() {
 }
 
 function benchCard() {
-  const groups = [...new Set(BENCHMARKS.map(b => b.group))];
-  const tested = BENCHMARKS.filter(b => latestBench(b.id)).length;
+  const groups = [...new Set(activeBenchmarks().map(b => b.group))];
+  const tested = activeBenchmarks().filter(b => latestBench(b.id)).length;
   const intro = `
     <section class="rise" style="--i:4;padding:14px 4px 0">
-      <div class="eyebrow">Benchmark tests · ${tested} of ${BENCHMARKS.length} done</div>
+      <div class="eyebrow">Benchmark tests · ${tested} of ${activeBenchmarks().length} done</div>
       <h2 class="h2" style="margin-top:4px">Are you getting fitter?</h2>
       <p class="body-2" style="margin-top:6px">Short tests you repeat a few times before March. Each one is already scheduled in your plan in the weeks shown. Do it that day, then tap the test here (or the button on Today) and type your result. The app shows your first result, your latest, and how close you are to the goal.</p>
     </section>`;
   return intro + groups.map((g, gi) => `
     <section class="card rise" style="--i:${5 + gi}" aria-label="${g}">
       <div class="eyebrow" style="margin-bottom:4px">${g}</div>
-      ${BENCHMARKS.filter(b => b.group === g).map(b => {
+      ${activeBenchmarks().filter(b => b.group === g).map(b => {
         const last = latestBench(b.id);
         const first = firstBench(b.id);
         const target = benchTarget(b, first?.value);

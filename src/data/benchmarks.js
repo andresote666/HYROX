@@ -1,9 +1,10 @@
+import { store } from '../store.js';
 /* Benchmarks. lowerBetter: times / HR. target: absolute goal (seconds or number)
    or goalPct relative to the first logged value. Test weeks are built into the plan. */
 
 export const BENCHMARKS = [
   {
-    id: 'bike5', why: 'Your engine. Sets the watts for every bike interval.', name: 'Bike 5-min max', unit: 'watts', unitLabel: 'Average watts', lowerBetter: false, goalPct: 8,
+    id: 'bike5', requires: 'watts', why: 'Your engine. Sets the watts for every bike interval.', name: 'Bike 5-min max', unit: 'watts', unitLabel: 'Average watts', lowerBetter: false, goalPct: 8,
     group: 'Engine', weeks: 'Weeks 1, 8, 12',
     how: 'After a 15 min warm-up with 3 short surges, ride 5 minutes as hard as you can hold evenly. Record the average watts. Your VO₂max interval power is 85–95% of this number.',
   },
@@ -13,9 +14,14 @@ export const BENCHMARKS = [
     how: 'Damper 5–6, full warm-up. Hold an even split and empty the tank in the last 300 m. Your 4×4 rowing pace is this split + 3–6 s per 500 m.',
   },
   {
-    id: 'hr180', why: 'Aerobic fitness: same effort, lower heart rate = fitter.', name: 'HR at 180 W (5 min)', unit: 'bpm', unitLabel: 'Heart rate at the end (bpm)', lowerBetter: true, goalPct: 5,
+    id: 'hr180', requires: 'watts', why: 'Aerobic fitness: same effort, lower heart rate = fitter.', name: 'HR at 180 W (5 min)', unit: 'bpm', unitLabel: 'Heart rate at the end (bpm)', lowerBetter: true, goalPct: 5,
     group: 'Engine', weeks: 'Every Friday',
     how: 'At the start of the Friday Zone 2 ride, hold exactly 180 W for 5 minutes and note your heart rate at the end. A falling number means your aerobic engine is improving (Buchheit 2014).',
+  },
+  {
+    id: 'hrRow', requires: 'noWatts', why: 'Aerobic fitness: same pace, lower heart rate = fitter.', name: 'HR at 2:35 row (5 min)', unit: 'bpm', unitLabel: 'Heart rate at the end (bpm)', lowerBetter: true, goalPct: 5,
+    group: 'Engine', weeks: 'Every Wednesday',
+    how: 'At the start of Wednesday\'s row: damper 5, about 20 strokes per minute, hold 2:35/500 m on the monitor for 5 minutes. Note your heart rate at the end (watch or chest strap). Same pace with a lower heart rate over the weeks = a stronger engine (Buchheit 2014).',
   },
   {
     id: 'wb100', why: 'Wall-ball speed when fresh (Rio: 9:04 in the race).', name: '100 wall balls (fresh)', unit: 'time', lowerBetter: true, target: 270,
@@ -63,6 +69,8 @@ export const BENCHMARKS = [
     how: 'Treadmill at 1% or a flat track, after a 15 min warm-up. Only on a green day. Your HYROX run pace sits about 50–70 s/km slower than this.',
   },
 ];
+
+export const activeBenchmarks = () => BENCHMARKS.filter(b => !b.requires || (b.requires === 'watts') === !!store.profile.bikeWatts);
 
 export function benchTarget(b, first) {
   if (b.target !== undefined) return b.target;
