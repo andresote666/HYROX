@@ -177,7 +177,8 @@ export function adaptSession(session, status = 'green', readiness = 'normal', { 
   s.blocks = s.blocks.map(b => ({
     ...b,
     items: b.items.map(it => {
-      const locked = runLocked && it.mode === 'run';
+      // the return-to-run lock also stops the small hops (same bone load question)
+      const locked = runLocked && (it.mode === 'run' || it.plyo);
       const a = adaptItem(it, locked ? 'red' : status);
       if (a.adapted && !locked) changed++;
       if (a.adapted && locked) lockedN++;
@@ -190,7 +191,7 @@ export function adaptSession(session, status = 'green', readiness = 'normal', { 
     s.lowReadiness = true;
     notes.push('Low readiness: do the first half of the main set, then switch to Zone 2. Quality beats grinding.');
   }
-  if (lockedN && status !== 'red') notes.push('Running is locked today by the return-to-run rules, so runs move to the bike.');
+  if (lockedN && status !== 'red') notes.push('Running and hops are locked today by the return-to-run rules: runs move to the bike, hops become calf holds.');
   if ((status === 'red' || runLocked) && s.timer?.mode === 'run') s.timer.mode = 'bike';
   return { session: s, notes };
 }

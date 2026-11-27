@@ -101,10 +101,10 @@ export const TRAINING = [
   {
     kicker: 'The plan', title: 'Your week',
     rows: [
-      ['Mon', 'Strength (legs, sled push, calves) + wall balls'],
+      ['Mon', 'Hops + strength (legs, sled push, calves) + wall balls + leg muscle'],
       ['Tue', 'Bike intervals (VO₂max) + a short run'],
       ['Wed', 'Rowing + shin exercises'],
-      ['Thu', 'Easy run + strength (pulling, sled pull) + burpees'],
+      ['Thu', 'Easy run + hops + strength (pulling, sled pull) + burpees + hamstrings and calves'],
       ['Fri', 'Long easy bike'],
       ['Sat', 'HYROX session: stations + runs'],
       ['Sun', 'Rest'],
@@ -142,14 +142,28 @@ export const TRAINING = [
     why: 'The rower\'s monitor is accurate, so it is your most reliable fitness test.',
   },
   {
-    kicker: 'Strength', title: 'Strength, twice a week',
+    kicker: 'Strength', title: 'Strength and leg muscle, twice a week',
     do: [
-      'Mondays (legs) and Thursdays (pulling and hinge). Stop each set with 2–3 reps left in the tank.',
+      'Mondays (squat, sled push, calves) and Thursdays (hinge, pulling, hamstrings). Heavy sets stop with 2–3 reps left in the tank.',
+      'Each strength day ends with a "Muscle" block: leg press, leg curl, loaded calf raises. These sets go to 1–2 reps short of failure: that closeness is what makes muscle grow.',
+      'Calves 3 times a week (about 14 hard sets): pause in the deep stretch at the bottom of every rep.',
+      'Wednesday: DB bench press, so chest and shoulders are not lost while you diet.',
       'Goals by March: squat 100 kg × 5, deadlift 140 kg × 5, 10 strict pull-ups, 30 single-leg calf raises per leg.',
       'Keep heavy lifting and hard intervals at least 6 hours apart.',
     ],
-    why: 'Strength work does not hurt endurance when done on separate sessions, and it makes running 2–8% more economical.',
-    sources: 'Schumann 2022; Blagrove 2018',
+    why: 'About 10+ hard sets per muscle per week builds muscle; keeping the loads heavy keeps it while you lose fat (strength still rises in a deficit). Strength work also makes running 2–8% more economical.',
+    sources: 'Schoenfeld 2017; Murphy & Koehler 2022; Kassiano 2023; Blagrove 2018',
+  },
+  {
+    kicker: 'Plyometrics', title: 'Small hops, green days only',
+    do: [
+      'About 5 minutes of hops before lifting on Monday and Thursday: two-foot pogos first, single-leg pogos from week 6.',
+      'Never more than about 240 contacts a week, burpee broad jumps included.',
+      'Amber day: the hops become calf raises and balance. Red day or return-to-run lock: calf holds.',
+      'Nordic hamstring curls on Thursday start at 2 × 4: the first week makes hamstrings very sore.',
+    ],
+    why: 'Bone and tendon get stronger from short, quick, varied impacts rather than many slow ones. Hops plus heavy lifting improve running economy more than either alone, and low volumes (under 250 a week) work best. Nordic curls halve hamstring injuries.',
+    sources: 'Moran 2023; Llanos-Lagos 2024; Milgrom 2000; Warden 2021; van Dyk 2019',
   },
   {
     kicker: 'Race build-up', title: 'Simulations, Santiago and the taper',
