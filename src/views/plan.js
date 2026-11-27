@@ -58,7 +58,7 @@ export function renderPlan(ui) {
     <div class="stat-tiles rise" style="--i:4">
       <div class="tile"><span class="num">${stats.runMin}</span><small>run min</small></div>
       <div class="tile"><span class="num">${stats.engineMin}</span><small>bike + row min</small></div>
-      <div class="tile"><span class="num">${stats.hard}</span><small>hard days</small></div>
+      <div class="tile"><span class="num">${stats.lifts}</span><small>lifting days</small></div>
       <div class="tile"><span class="num">${stats.jumps}</span><small>jump contacts</small></div>
     </div>
 

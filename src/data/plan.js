@@ -3,17 +3,17 @@
    Week 0 (23–29 Nov) is the post-Rio reset.
    Santiago (6 Mar, week 14) = dress rehearsal at ~95%.
 
-   Weekly skeleton (runs on alternate days for the shins):
-   Mon  Strength A (squat · sled push · soleus) + wall-ball block
-   Tue  VO₂max on the bike + short run off the bike           ← run 1
-   Wed  RowErg: Zone 2 (base) → threshold (build) + shin prehab
-   Thu  Easy run + Strength B (hinge · sled pull · grip) + BBJ ← run 2
-   Fri  Long Zone 2 bike + mobility
-   Sat  HYROX compromised session / simulation                 ← run 3
+   Weekly skeleton (runs on alternate days for the shins; heavy legs never the
+   day before the key engine session):
+   Mon  VO₂max bike + short run off the bike + Upper A (heavy)  ← run 1
+   Tue  Hops + Lower A: squat, both sleds, Nordics, calves + wall balls
+   Wed  RowErg: Zone 2 (base) → threshold (build) + Upper B
+   Thu  Easy run + hops + Lower B: deadlift, BBJ, leg circuit   ← run 2
+   Fri  Long Zone 2 bike + core, carries and feet
+   Sat  HYROX compromised session / simulation                  ← run 3
    Sun  Rest
-   Mon + Thu also start with a few minutes of small hops (green days only), and
-   end with a "Muscle" block (leg press, Nordics, leg curl, loaded calf raises):
-   about 10–12 hard sets per leg muscle a week, the dose that builds muscle.
+   4 lifting sessions (2 upper, 2 lower) + 1 core block a week: ~10 hard sets per
+   muscle per week. Why this order: research/04.
    Evidence: research/02 (§A, B, C, G), research/03 (§1, 2, 6, 7), research/04.
    ═══════════════════════════════════════════════════════════ */
 import { store, parseDay, dayKey, addDays } from '../store.js';
@@ -24,11 +24,11 @@ export const TOTAL_WEEKS = 16;
 
 export const PHASES = [
   { id: 'reset', name: 'Reset', weeks: [0], blurb: 'Post-Rio recovery. Bike and rower only, shins quiet, no running.' },
-  { id: 'rebuild', name: 'Rebuild', weeks: [1, 2, 3, 4], blurb: 'Walk-run return, first VO₂max intervals on the bike, baseline tests, station technique. Week 4 is the Christmas deload.' },
-  { id: 'build1', name: 'Build 1', weeks: [5, 6, 7, 8], blurb: 'Rønnestad 30/15s and long intervals, rowing threshold, half simulations, continuous easy running. Week 8 deload and retest.' },
-  { id: 'build2', name: 'Build 2', weeks: [9, 10, 11, 12], blurb: 'Race-specific: Run 8 bricks, Karen, full simulation in week 11, 1 km run legs. Week 12 is lighter. Calories move to maintenance.' },
-  { id: 'peak', name: 'Peak', weeks: [13, 14], blurb: 'Race-pace sharpening, strength to 2 sets, Santiago as the final dress rehearsal on 6 March.' },
-  { id: 'taper', name: 'Taper', weeks: [15, 16], blurb: 'Volume down 40–60%, intensity kept (Bosquet 2007). Race Buenos Aires.' },
+  { id: 'rebuild', name: 'Rebuild', weeks: [1, 2, 3, 4], blurb: 'Walk-run return, first VO₂max intervals on the bike, lifting back to working weights (2 upper + 2 lower a week), baseline tests, station technique. Week 4 is the Christmas deload.' },
+  { id: 'build1', name: 'Build 1', weeks: [5, 6, 7, 8], blurb: 'Rønnestad 30/15s and long intervals, rowing threshold, half simulations, continuous easy running. Squat and deadlift move to 4×4. Week 8 deload and retest.' },
+  { id: 'build2', name: 'Build 2', weeks: [9, 10, 11, 12], blurb: 'Race-specific: Run 8 bricks, Karen, full simulation in week 11, 1 km run legs. Heaviest lifting of the plan (4×3). Week 12 is lighter. Calories move to maintenance.' },
+  { id: 'peak', name: 'Peak', weeks: [13, 14], blurb: 'Race-pace sharpening, lifting to 2 heavy sets at the same weights, Santiago as the final dress rehearsal on 6 March.' },
+  { id: 'taper', name: 'Taper', weeks: [15, 16], blurb: 'Volume down 40–60%, intensity kept (Bosquet 2007). One lifting day keeps strength and muscle (Rønnestad 2010). Race Buenos Aires.' },
 ];
 export const phaseFor = w => PHASES.find(p => p.weeks.includes(w)) || PHASES[0];
 export const DELOAD = new Set([4, 8, 12]);
@@ -81,7 +81,7 @@ const VO2 = {
   13: { title: 'Bike 5×4 · last big one', main: [it('5 × 4 min', '5×4', '{vo2w} · 3 min easy between.', { mode: 'bike' })], timer: T.bike44(5), purpose: 'Last high-volume VO₂max session. From here it is about freshness.' },
 };
 
-const TUE_RUN = { 1: ['Walk-run', '4×(1′/1′)', 8], 2: ['Walk-run', '5×(1′/1′)', 10], 3: ['Walk-run', '5×(2′/1′)', 15], 4: ['Easy run-walk', '10 min', 10], 5: ['Easy run off the bike', '12 min', 12], 6: ['Easy run off the bike', '15 min', 15], 7: ['Easy run off the bike', '15 min', 15], 8: ['Easy run off the bike', '10 min', 10], 9: ['Easy run off the bike', '15 min', 15], 10: ['Easy run off the bike', '20 min', 20], 11: ['Easy run off the bike', '10 min', 10], 12: ['Easy run off the bike', '15 min', 15], 13: ['Easy run off the bike', '20 min', 20] };
+const MON_RUN = { 1: ['Walk-run', '4×(1′/1′)', 8], 2: ['Walk-run', '5×(1′/1′)', 10], 3: ['Walk-run', '5×(2′/1′)', 15], 4: ['Easy run-walk', '10 min', 10], 5: ['Easy run off the bike', '12 min', 12], 6: ['Easy run off the bike', '15 min', 15], 7: ['Easy run off the bike', '15 min', 15], 8: ['Easy run off the bike', '10 min', 10], 9: ['Easy run off the bike', '15 min', 15], 10: ['Easy run off the bike', '20 min', 20], 11: ['Easy run off the bike', '10 min', 10], 12: ['Easy run off the bike', '15 min', 15], 13: ['Easy run off the bike', '20 min', 20] };
 const THU_RUN = { 1: ['Walk-run', '6×(1′/1′)', 12], 2: ['Walk-run', '5×(2′/1′)', 15], 3: ['Walk-run', '4×(4′/1′)', 20], 4: ['Easy run', '15 min', 15], 5: ['Easy run', '20 min', 20], 6: ['Easy run', '25 min', 25], 7: ['Easy run + 4 strides', '25 min', 25], 8: ['Easy run', '20 min', 20], 9: ['Easy run + 4 strides', '30 min', 30], 10: ['Easy run', '35 min', 35], 11: ['Easy run', '20 min', 20], 12: ['Easy run + 4 strides', '30 min', 30], 13: ['Easy run + 4 strides', '35 min', 35] };
 
 const ROW = {
@@ -132,7 +132,7 @@ const BBJ = {
   13: { items: [jump('80 m BBJ for time', '80 m', 'Fresh retest. Only on a green day. Log it.', { bench: 'bbj80' })] },
 };
 
-/* Hops, twice a week (Mon + Thu), before lifting. Contacts per session.
+/* Hops, twice a week (Tue + Thu), before lifting. Contacts per session.
    Low volume over many weeks works best for stiffness (<250 contacts a week incl.
    BBJ, Moran 2023); plyos + heavy strength beat either alone for running
    economy (Llanos-Lagos 2024). Drop-jump tibial strain is no higher than running (Milgrom 2000), so small
@@ -158,131 +158,217 @@ const PLYO = {
 const BALANCE = { name: 'Single-leg balance instead of hops', dose: '2×30 s/leg', detail: 'Eyes open, then eyes closed. Foot and ankle control without impact.', mode: 'mobility' };
 const hopsBlock = w => ({ title: 'Hops · 5 min', items: PLYO[w].map((h, i) => (i ? { ...h, alt: { yellow: BALANCE, red: BALANCE } } : h)) });
 
-/* Muscle work: 2 sets in weeks 1–2 (sore legs wreck the first runs), then 3;
-   week 13 back to 2. Each set ends 1–2 reps short of failure. */
-const musc = w => (w <= 2 || w >= 13 ? 2 : sets(w, 3));
-const CALF_STAND = 'Straight knee, on a step. 2 s pause in the deep stretch at the bottom; when the full reps run out, add half reps from the bottom (Kassiano 2023: more calf growth). Machine, Smith or a DB in one hand.';
-
-/* ── session builders ── */
+/* ── lifting rules ──────────────────────────────────────────────
+   Heavy sets: RPE 7–8 (2–3 reps left); when every set feels RPE 7 or easier,
+   add 2.5–5 kg next week. Week 1 is lighter (RPE 6–7) to find the weights
+   without the soreness that would spoil the first runs and Wednesday's 2k test.
+   Muscle sets: 1–2 reps short of failure. About 10 hard sets per muscle per week,
+   counting compound lifts as half a set for the smaller muscles (Pelland 2024).
+   Muscle work starts at 2 sets in weeks 1–2, is 3 sets from week 3, and drops to
+   2 in week 13. Deload weeks drop one set and keep the load. */
 const isDeload = w => DELOAD.has(w);
 const sets = (w, base) => (isDeload(w) ? Math.max(2, base - 1) : base);
+const musc = w => (w <= 2 || w >= 13 ? 2 : sets(w, 3));
+const LEG_HEAVY = w => (w <= 3 ? [3, 5] : w <= 8 ? [4, 4] : w <= 12 ? [4, 3] : [2, 3]);
+const UP_HEAVY = w => (w <= 3 ? [3, 6] : w <= 8 ? [3, 5] : w <= 12 ? [3, 4] : [2, 4]);
+const heavySets = (w, scheme) => sets(w, scheme[0]);
+const heavyDose = (w, scheme) => `${heavySets(w, scheme)}×${scheme[1]}`;
+const RPE = w => `${w === 1 ? 'Week 1: RPE 6–7 to find your working weights. ' : ''}RPE 7–8 (2–3 reps left). Every set at RPE 7 or easier? Add 2.5–5 kg next week.`;
+const CALF_STAND = 'Straight knee, on a step. 2 s pause in the deep stretch at the bottom; when the full reps run out, add half reps from the bottom (Kassiano 2023: more calf growth). Machine, Smith or a DB in one hand.';
+/* Durations are estimated from the actual sets (heavy set ≈3 min with rest, muscle
+   set ≈2 min, supersets ≈2.5–4.5 min a round), rounded to 5 min. The range is
+   without → with the optional blocks. */
+const r5 = m => Math.round(m / 5) * 5;
+const dur = (base, opt = 0) => (r5(base + opt) > r5(base) ? `${r5(base)}–${r5(base + opt)} min` : `≈${r5(base)} min`);
 
-function monStrengthA(w) {
-  const sq = w <= 3 ? '3×5' : w <= 8 ? '4×4' : w <= 12 ? '4×3' : '2×3';
-  const wb = WB[w];
+/* Minutes of each week's wall-ball and BBJ blocks, for the duration estimates. */
+const WB_MIN = { 1: 8, 2: 12, 3: 14, 4: 6, 5: 10, 6: 12, 7: 12, 8: 12, 9: 10, 10: 14, 11: 8, 12: 10, 13: 8 };
+const BBJ_MIN = { 1: 12, 2: 12, 3: 16, 4: 5, 5: 12, 6: 12, 7: 23, 8: 10, 9: 26, 10: 10, 11: 8, 12: 8, 13: 10 };
+const ROW_MIN = { 1: 32, 2: 40, 3: 40, 4: 30, 5: 51, 6: 51, 7: 47, 8: 32, 9: 47, 10: 46, 11: 41, 12: 32, 13: 47 };
+const timerMin = t => (t.steps ? t.steps.reduce((a, s) => a + s.secs, 0) / 60 - 10
+  : t.sets ? (t.sets * t.reps * (t.work + t.rest) + (t.sets - 1) * t.setRest) / 60
+  : (t.reps * t.work + (t.reps - 1) * t.rest) / 60);
+
+/* ── Monday: VO₂max bike + run off the bike + Upper A ──
+   After a rest day, so the most important engine session is done fresh. Bench
+   press is not affected by cycling intervals done just before (fatigue stays in the
+   legs, Sporer & Wenger 2003), so upper-body lifting shares the visit. */
+const upperAMin = w => 3 + heavySets(w, UP_HEAVY(w)) * 4.5 + musc(w) * 2;
+const upperAOpt = w => musc(w) * 2.5;
+function upperA(w) {
+  const m = musc(w);
+  const test = w === 1 || w === 8 || w === 12;
+  return [
+    { title: 'Upper A · heavy', lift: 'upper', items: [
+      it('Bench press', heavyDose(w, UP_HEAVY(w)), `${RPE(w)} 2 warm-up sets first. Rotate bench → pull-up → lateral raise, about 90 s between.`, { load: 'log kg', bench: 'bp1rm' }),
+      it(test ? 'Pull-ups: max-rep test, then weighted' : 'Weighted pull-up', heavyDose(w, UP_HEAVY(w)), test
+        ? 'Test week: first set is strict bodyweight pull-ups to failure (log it), then the weighted sets.'
+        : 'RPE 7–8. Belt or a DB between the feet. Under 8 strict reps at bodyweight? Do bodyweight sets (or band-assisted) for now.', { load: 'log kg', ...(test ? { bench: 'pullups' } : {}) }),
+      it('DB lateral raise', `${heavySets(w, UP_HEAVY(w))}×12–20`, 'In the rest after the pull-ups. The last reps should be a fight: side delts carry 100 wall balls overhead.'),
+    ] },
+    { title: 'Upper A · back', lift: 'upper', items: [
+      it('Seated cable row (or chest-supported row)', `${m}×8–12`, '1–2 reps short of failure, 60–90 s rest.', { load: 'log kg' }),
+    ] },
+    { title: 'Arms · superset', lift: 'upper', optional: true, items: [
+      it('EZ-bar curl', `${m}×8–12`, '1 rep short of failure. Alternate with the pushdowns, 60 s rest.'),
+      it('Triceps rope pushdown', `${m}×10–15`, '1 rep short of failure.'),
+    ] },
+  ];
+}
+
+function monVO2(w) {
+  const v = VO2[w];
+  const r = MON_RUN[w];
+  const alt = v.noWatts ? monVO2Build(w, { ...v, ...v.noWatts, noWatts: null }, r) : null;
+  return { ...monVO2Build(w, v, r), ...(alt ? { noWatts: alt } : {}) };
+}
+
+function monVO2Build(w, v, r) {
+  const mins = 10 + timerMin(v.timer) + r[2] + 3 + upperAMin(w);
   return {
-    kind: 'strength', title: `Strength A · squat, sled push, calves${isDeload(w) ? ' · deload' : ''}`, duration: '75–85 min', intensity: 'Moderate',
-    tags: ['Legs', 'Calves', 'Wall balls'],
-    purpose: 'Leg strength for sleds and lunges, <b>soleus capacity to protect the shins</b>, the wall-ball block, then leg muscle. Strength 2×/week improves running economy 2–8% (Blagrove 2018); hops plus heavy lifting beat either alone.',
+    kind: 'vo2', title: `${v.title} + Upper A`, duration: dur(mins, upperAOpt(w)), intensity: 'Hard',
+    tags: ['Bike', 'VO₂max', 'Upper body'],
+    purpose: `${v.purpose} Then Upper A: heavy bench and pull-ups, rows, shoulders, arms.`,
     blocks: [
-      { title: 'Warm-up · 10 min', optional: false, items: [
+      { title: 'Warm-up · 10 min', items: [it('Easy spin, build to moderate', '10 min', 'Last 2 min include 2 × 15 s spin-ups', { mode: 'bike' })] },
+      { title: 'Main set', items: v.main },
+      { title: 'Run off the bike', items: [run(r[0], r[1], w <= 3 ? 'Treadmill 1%, quick short steps (+5–10% cadence). Pain must stay ≤3/10.' : 'Easy, HR ≤150. Quick cadence. Feels awkward first: that is the HYROX transition.', r[2])] },
+      ...upperA(w),
+    ],
+    timers: [v.timer],
+  };
+}
+
+/* ── Tuesday: Lower A · squat + sleds ──
+   24 h after the bike intervals: leg strength is back by then (Sporer & Wenger
+   2003). Heavy legs here, not the day before the intervals, because heavy leg
+   lifting blunts endurance sessions for up to 48 h (Doma 2017). */
+function lowerA(w) {
+  const wb = WB[w];
+  const sq = LEG_HEAVY(w);
+  const n = musc(w);
+  const test = w === 3 || w === 7;
+  const nord = w <= 2 ? '2×4' : isDeload(w) || w >= 13 ? '2×5' : w >= 9 ? '3×6' : '3×5';
+  const mins = 10 + 5 + 3 + heavySets(w, sq) * 3 + sets(w, 3) * 3 + sets(w, 4) * 4 + sets(w, 3) * 2.5 + WB_MIN[w] + n * 2;
+  return {
+    kind: 'strength', title: `Lower A · squat, sleds, calves${isDeload(w) ? ' · deload' : ''}`, duration: dur(mins), intensity: 'Moderate',
+    tags: ['Legs', 'Sleds', 'Calves', 'Wall balls'],
+    purpose: 'Heavy squats and both sleds for the stations, Nordics for the hamstrings, <b>soleus and calf capacity to protect the shins</b>, then the wall-ball block. Heavy strength 2×/week improves running economy 2–8% (Blagrove 2018) and cuts sports injuries (Lauersen 2014).',
+    blocks: [
+      { title: 'Warm-up · 10 min', items: [
         it('Bike easy + ankle/hip mobility', '8 min', 'Knee-to-wall ankle rocks, 90/90 hips, glute bridges'),
-        ...([it('Heel-raise test (weekly)', 'each leg', 'Single leg to fatigue on a step, 1 rep every 2 s. Log left and right in Progress.', { bench: 'calfL', mode: 'calf' })]),
+        it('Heel-raise test (weekly)', 'each leg', 'Single leg to fatigue on a step, 1 rep every 2 s. Log left and right in Progress.', { bench: 'calfL', mode: 'calf' }),
       ] },
       hopsBlock(w),
-      { title: 'Strength', items: [
-        it('Back or front squat', sets(w, Number(sq[0])) + sq.slice(1), 'RPE 7–8 (2–3 reps in reserve). Full depth: wall balls need hips below knees.', { load: 'log kg' }),
-        it('Bulgarian split squat', `${sets(w, 3)}×8/leg`, 'Lunge durability for long femurs. DBs at sides.', { load: '2×16–24 kg' }),
-        it('Heavy sled push', `${sets(w, 4)}×12.5 m`, w === 3 || w === 7 ? 'Then test: 50 m at race weight for time (Progress → Sled push).' : 'About 110–115% of race load on your gym floor. Short powerful steps, low line.', { load: '152 kg +10–15%', ...(w === 3 || w === 7 ? { bench: 'push50' } : {}) }),
-        calf('Seated soleus raise (bent knee)', `${sets(w, 3)}×15–20`, 'Slow 2-1-2 tempo. Add load 5–10% a week if shins stay green.'),
-        it('Tibialis raises', '2×20', 'Back against a wall, heels on the floor, toes up.', { mode: 'calf' }),
+      { title: 'Heavy · legs and sleds', lift: 'lower', items: [
+        it('Back squat', heavyDose(w, sq), `${RPE(w)} 2–3 warm-up sets first. Full depth: wall balls need hips below knees. Rest 2–3 min.`, { load: 'log kg', bench: 'sq1rm' }),
+        it('Bulgarian split squat', `${sets(w, 3)}×8/leg`, '1–2 reps short of failure. Lunge durability for long femurs.', { load: '2×16–24 kg' }),
+        it('Heavy sled push', `${sets(w, 4)}×12.5 m`, test ? 'Test week: after the work sets, 50 m at race weight for time (Progress → Sled push).' : 'About 110–115% of race load on your gym floor. Short powerful steps, low line.', { load: '152 kg +10–15%', ...(test ? { bench: 'push50' } : {}) }),
+        it('Heavy sled pull', `${sets(w, 4)}×12.5 m`, test ? 'Test week: rest 5 min after the push test, then 50 m at race weight for time (Progress → Sled pull).' : 'Walk-back for the first metres, then hand-over-hand from a low, flat-footed squat. Rope to the side.', { load: '103 kg + sandbag', ...(test ? { bench: 'pull50' } : {}) }),
+      ] },
+      { title: 'Hamstrings & soleus · superset', lift: 'lower', items: [
+        it('Nordic hamstring curl', nord, w <= 3 ? 'Kneel, feet held. Lower as slowly as you can, catch yourself with your hands, push back up. Expect sore hamstrings the first week: that is why it starts small.' : 'Lower slower than last week. Hands catch you at the bottom.'),
+        calf('Seated soleus raise (bent knee)', `${sets(w, 3)}×15–20`, 'Alternate with the Nordics. Slow 2-1-2 tempo. Add load 5–10% a week if shins stay green.'),
       ] },
       { title: 'Wall-ball block', items: wb.items },
-      { title: 'Muscle · legs', items: [
-        it('Leg press (or hack squat)', `${musc(w)}×10–15`, 'Deep, controlled, 1–2 reps short of failure. Quads without loading the spine again.', { load: 'log kg' }),
-        calf('Standing calf raise, loaded', `${musc(w)}×10–15`, CALF_STAND),
+      { title: 'Calves & shins · superset', lift: 'lower', items: [
+        calf('Standing calf raise, loaded', `${n}×10–15`, CALF_STAND),
+        it('Tibialis raises', '2×20', 'Alternate with the calf raises. Back against a wall, heels down, toes up.', { mode: 'calf' }),
       ] },
     ],
     timers: wb.timer ? [wb.timer] : [],
   };
 }
 
-function tueVO2(w) {
-  const v = VO2[w];
-  const r = TUE_RUN[w];
-  const alt = v.noWatts ? tueVO2Build(w, { ...v, ...v.noWatts, noWatts: null }, r) : null;
-  return { ...tueVO2Build(w, v, r), ...(alt ? { noWatts: alt } : {}) };
-}
-
-function tueVO2Build(w, v, r) {
-  return {
-    kind: 'vo2', title: v.title, duration: v.main[0].bench ? '45 min' : '55–60 min', intensity: 'Hard',
-    tags: ['Bike', 'VO₂max'],
-    purpose: v.purpose,
-    blocks: [
-      { title: 'Warm-up · 10 min', items: [it('Easy spin, build to moderate', '10 min', 'Last 2 min include 2 × 15 s spin-ups', { mode: 'bike' })] },
-      { title: 'Main set', items: v.main },
-      { title: 'Run off the bike', items: [run(r[0], r[1], w <= 3 ? 'Treadmill 1%, quick short steps (+5–10% cadence). Pain must stay ≤3/10.' : 'Easy, HR ≤150. Quick cadence. Feels awkward first: that is the HYROX transition.', r[2])] },
-      { title: 'Cool-down', optional: true, items: [it('Easy spin + calf stretch', '5 min', '', { mode: 'bike' })] },
-    ],
-    timers: [v.timer],
-  };
+/* ── Wednesday: RowErg + Upper B ── */
+const upperBMin = w => 2 + musc(w) * 6.5;
+const upperBOpt = w => musc(w) * 3;
+function upperB(w) {
+  const m = musc(w);
+  return [
+    { title: 'Upper B · press & pull', lift: 'upper', items: [
+      it('Overhead press (barbell, or seated DB)', `${m}×6–10`, '1–2 reps short of failure. Alternate with the pulldowns, 90 s rest.', { load: 'log kg' }),
+      it('Lat pulldown (or pull-ups)', `${m}×8–12`, '1–2 reps short of failure. Lats for the sled pull and the row.', { load: 'log kg' }),
+      it('Incline DB press', `${m}×8–12`, '1–2 reps short of failure. Alternate with the face pulls.', { load: 'log kg' }),
+      it('Face pulls', `${m}×15`, 'Rear delts and shoulder health for wall balls.', { load: 'light' }),
+    ] },
+    { title: 'Dips & curls · superset', lift: 'upper', optional: true, items: [
+      it('Dips (or close-grip push-ups)', `${m}×8–12`, 'Chest and triceps. Add weight once 12 is easy.'),
+      it('Hammer curl', `${m}×10–15`, '1 rep short of failure. Also builds grip for the sled pull and farmers carry.'),
+    ] },
+  ];
 }
 
 function wedRow(w) {
   const r = ROW[w];
+  const mins = ROW_MIN[w] + 5 + 3 + upperBMin(w);
   return {
-    kind: r.intensity === 'Easy' ? 'z2' : 'threshold', title: r.title, duration: '55–60 min', intensity: r.intensity,
-    tags: ['RowErg', 'Shin prehab'],
-    purpose: r.intensity === 'Easy'
+    kind: r.intensity === 'Easy' ? 'z2' : 'threshold', title: `${r.title} + Upper B`, duration: dur(mins, upperBOpt(w)), intensity: r.intensity,
+    tags: ['RowErg', 'Upper body'],
+    purpose: `${r.intensity === 'Easy'
       ? 'Easy volume builds the aerobic base without any tibial load. 75–80% of your training should feel like this (pyramidal distribution, Rosenblat 2025).'
-      : 'Threshold work raises the pace you can hold for 90 minutes: the intensity HYROX actually lives at (≈80% of race time above 90% HRmax, Brandt 2025).',
+      : 'Threshold work raises the pace you can hold for 90 minutes: the intensity HYROX actually lives at (≈80% of race time above 90% HRmax, Brandt 2025).'} Then Upper B: shoulders, lats, upper chest, triceps and biceps.`,
     blocks: [
       { title: 'Row', items: [it('HR check: 5 min at 2:35/500 m', '5 min', 'Damper 5, about 20 strokes/min, hold 2:35 on the monitor. Note your HR at the end (Progress → HR at 2:35 row). Lower over the weeks = fitter.', { bench: 'hrRow', mode: 'row', only: 'noWatts' }), ...r.items] },
-      { title: 'Shin & hip prehab · 15 min', items: [
-        calf('Single-leg calf raise, loaded', '3×12–15/leg', 'Straight knee, on a step, DB in the same-side hand. Full stretch at the bottom, 2 s up, 2 s down.'),
-        it('Single-leg balance + reach', '3×30 s/leg', 'Foot control, arch active.', { mode: 'mobility' }),
-        it('Side-lying hip abduction', '2×15/leg', 'Glute medius. Hip external rotation range is an MTSS risk factor.', { mode: 'mobility' }),
-        it('Copenhagen plank', '2×20 s/side', 'Adductors for lunges and sled.', { mode: 'mobility' }),
-      ] },
-      { title: 'Upper · keep the muscle', items: [
-        it('DB bench press (or weighted push-ups)', '3×8–12', '1–2 reps short of failure. Chest and shoulders get no other pressing in the plan; in a calorie deficit, unused muscle is the first to go.', { load: 'log kg' }),
-        it('Face pulls', '3×15', 'Shoulder health for wall balls', { load: 'light' }),
-      ] },
+      ...upperB(w),
     ],
     timers: r.timer ? [r.timer] : [],
   };
 }
 
-function thuStrengthB(w) {
+/* ── Thursday: easy run + Lower B · deadlift + burpees ── */
+function thuLowerB(w) {
   const r = THU_RUN[w];
   const b = BBJ[w];
-  const dl = w <= 3 ? '3×5' : w <= 8 ? '4×4' : w <= 12 ? '4×3' : '2×3';
+  const dl = LEG_HEAVY(w);
+  const simWeek = w === 11; // full simulation on Saturday: lighter legs
+  const dlSets = simWeek ? 3 : heavySets(w, dl);
+  const tri = simWeek ? 2 : musc(w);
+  const mins = r[2] + 5 + 3 + dlSets * 3 + BBJ_MIN[w] + tri * 4;
+  const opt = 3; // dead hangs
   return {
-    kind: 'strength', title: `Run + Strength B · pull, hinge, hamstrings${isDeload(w) ? ' · deload' : ''}`, duration: '85–95 min', intensity: 'Moderate',
-    tags: ['Run', 'Sled pull', 'Hamstrings', 'BBJ'],
-    purpose: 'Easy run while fresh, then the posterior chain and grip for the <b>sled pull (Rio: 6:42 → target 5:10)</b>, burpee broad jumps (Rio: 10:03 → target 6:45), then hamstrings and calves. Nordic curls halve hamstring injuries (van Dyk 2019).',
+    kind: 'strength', title: `Run + Lower B · deadlift, burpees, hamstrings${isDeload(w) ? ' · deload' : ''}`, duration: dur(mins, opt), intensity: 'Moderate',
+    tags: ['Run', 'Legs', 'BBJ', 'Hamstrings'],
+    purpose: 'Easy run while fresh, hops, then the heavy hinge for the posterior chain, burpee broad jumps (Rio: 10:03 → target 6:45), and a quad-hamstring-calf circuit for leg muscle.' + (simWeek ? ' <b>Full simulation on Saturday: one set less and RPE 7.</b>' : ''),
     blocks: [
       { title: 'Easy run', items: [run(r[0], r[1], w <= 3 ? 'Treadmill 1% or flat soft surface. Quick steps. Stop if pain >3/10.' : 'HR ≤150 (Z2). Cadence +5% on your natural rhythm.', r[2])] },
       hopsBlock(w),
-      { title: 'Strength', items: [
-        it('Trap-bar deadlift (or RDL)', sets(w, Number(dl[0])) + dl.slice(1), 'RPE 7–8. Hips back, lats tight.', { load: 'log kg' }),
-        it('Heavy sled pull', `${sets(w, 4)}×12.5 m`, w === 3 || w === 7 ? 'Then test: 50 m at race weight for time (Progress → Sled pull).' : 'Walk-back for the first metres, then hand-over-hand from a low, flat-footed squat. Rope to the side.', { load: '103 kg + sandbag', ...(w === 3 || w === 7 ? { bench: 'pull50' } : {}) }),
-        it('Strict pull-ups', `${sets(w, 4)}×max−2`, 'Goal: 10 strict.'),
-        it('Farmers carry, heavy', `${sets(w, 3)}×50 m`, 'Grip and trunk. Short quick steps.', { load: '2×32 kg' }),
+      { title: 'Heavy · hinge', lift: 'lower', items: [
+        it('Trap-bar deadlift (or RDL)', `${dlSets}×${dl[1]}`, `${simWeek ? 'RPE 7 this week. ' : ''}${RPE(w)} Hips back, lats tight, 2 warm-up sets first.`, { load: 'log kg', bench: 'dl1rm' }),
       ] },
       { title: 'Burpee broad jumps', items: b.items },
-      { title: 'Muscle · hamstrings & calves', items: [
-        it('Nordic hamstring curl', w <= 2 ? '2×4' : isDeload(w) ? '2×5' : w >= 13 ? '2×5' : w >= 9 ? '3×6' : '3×5', w <= 3 ? 'Kneel, feet held. Lower as slowly as you can, catch yourself with your hands, push back up. Expect sore hamstrings the first week; that is why it starts small.' : 'Lower slower than last week. Hands catch you at the bottom.'),
-        it('Lying or seated leg curl', `${musc(w)}×10–15`, '1–2 reps short of failure. Hamstrings get only the deadlift otherwise.', { load: 'log kg' }),
-        calf('Standing calf raise, loaded', `${musc(w)}×10–15`, CALF_STAND),
+      { title: 'Leg muscle · tri-set', lift: 'lower', items: [
+        it('Leg press (or hack squat)', `${tri}×10–15`, 'Deep, controlled, 1–2 reps short of failure. Then straight to the leg curl.', { load: 'log kg' }),
+        it('Lying or seated leg curl', `${tri}×10–15`, '1–2 reps short of failure. Then the calf raise, then 60 s rest.', { load: 'log kg' }),
+        calf('Standing calf raise, loaded', `${tri}×10–15`, CALF_STAND),
       ] },
-      { title: 'Accessories', optional: true, items: [it('Single-arm DB row', '3×10/arm', '', { load: '30–36 kg' }), it('Dead hang', '2×max', 'Grip endurance for the pull')] },
+      { title: 'Grip', optional: true, items: [it('Dead hang', '2×max', 'Grip endurance for the sled pull')] },
     ],
     timers: b.timer ? [b.timer] : [],
   };
 }
 
+/* ── Friday: long Zone 2 bike + core, carries and feet ── */
 function friZ2(w) {
-  const mins = { 1: 45, 2: 60, 3: 60, 4: 45, 5: 60, 6: 70, 7: 75, 8: 50, 9: 70, 10: 75, 11: 45, 12: 60, 13: 45 }[w];
+  const mins = { 1: 45, 2: 60, 3: 60, 4: 45, 5: 60, 6: 70, 7: 70, 8: 50, 9: 70, 10: 70, 11: 45, 12: 60, 13: 45 }[w];
+  const n = sets(w, 3);
   return {
-    kind: 'z2', title: `Zone 2 bike · ${mins} min`, duration: `${mins + 15} min`, intensity: 'Easy',
-    tags: ['Bike', 'Aerobic base'],
-    purpose: 'Long, easy and boring on purpose. Builds mitochondria and capillaries, and lets you recover for Saturday. Easy means you could talk in full sentences the whole ride.',
+    kind: 'z2', title: `Zone 2 bike · ${mins} min + core`, duration: dur(mins + 20, 10), intensity: 'Easy',
+    tags: ['Bike', 'Aerobic base', 'Core', 'Shin prehab'],
+    purpose: 'Long, easy and boring on purpose: builds mitochondria and capillaries and lets you recover for Saturday. Easy means you could talk in full sentences the whole ride. Then 20 minutes of trunk, grip and foot work, the stuff that keeps you upright in carries, sleds and lunges.',
     blocks: [
       { title: 'Bike', items: [
         it('HR check: 180 W for 5 min', '5 min', 'Note HR at the end (Progress → HR at 180 W). Lower over the weeks = fitter.', { bench: 'hr180', mode: 'bike', only: 'watts' }),
-        it('Zone 2 ride', `${mins - 5} min`, 'HR {z2}. Nasal breathing possible. Light knob, smooth ~90 rpm (15 right-foot turns per 10 s).', { mode: 'bike' }),
+        it('Zone 2 ride', `${mins - 5} min`, 'HR {z2}. Nasal breathing possible. Light knob, smooth ~90 rpm (15 right-foot turns per 10 s).', { mode: 'bike', only: 'watts' }),
+        it('Zone 2 ride', `${mins} min`, 'HR {z2}. Nasal breathing possible. Light knob, smooth ~90 rpm (15 right-foot turns per 10 s).', { mode: 'bike', only: 'noWatts' }),
+      ] },
+      { title: 'Core, carries & feet · 20 min', lift: 'core', items: [
+        it('Ab wheel rollout (or dead bug)', `${n}×8–12`, 'Ribs down, no low-back sag. Alternate with the Pallof press.'),
+        it('Pallof press', `${n}×10/side`, 'Anti-rotation: the trunk job in sled pulls and farmers carries.', { load: 'cable or band' }),
+        it('Farmers carry, heavy', `${n}×50 m`, 'Grip and trunk. Short quick steps, heavier than race weight.', { load: '2×32 kg' }),
+        it('Copenhagen plank', '2×20–30 s/side', 'Adductors for lunges and sleds.', { mode: 'mobility' }),
+        calf('Single-leg calf raise, loaded', `${n}×12–15/leg`, 'Straight knee, on a step, DB in the same-side hand. Full stretch at the bottom, 2 s up, 2 s down.'),
+        it('Single-leg balance + reach', '2×30 s/leg', 'Foot control, arch active.', { mode: 'mobility' }),
       ] },
       { title: 'Mobility · 10 min', optional: true, items: [it('Hips, T-spine, calves', '10 min', 'Couch stretch, open books, calf wall stretch (bent and straight knee)', { mode: 'mobility' })] },
     ],
@@ -332,29 +418,47 @@ const WEEK0 = [
   REST(),
 ];
 
-/* ── Weeks 14–16: Santiago, recovery, Buenos Aires ── */
-const lightA = { kind: 'strength', title: 'Strength A · 2 sets, keep the load', duration: '50 min', intensity: 'Moderate', tags: ['Legs', 'Wall balls'], purpose: 'Strength maintenance: keep the weights, drop the volume (taper evidence).', blocks: [{ title: 'Strength', items: [it('Squat', '2×3', 'Same load as week 12'), it('Sled push', '2×12.5 m', '', { load: '152 kg' }), calf('Seated soleus raise', '2×15', ''), calf('Standing calf raise, loaded', '2×12', 'Same load as week 13')] }, { title: 'Wall balls', items: [it('Wall balls at race rhythm', '3×20', '10 breaths between', { load: '6 kg' })] }], timers: [] };
+/* ── Weeks 14–16: Santiago, recovery, Buenos Aires ──
+   Strength is kept with heavy loads and few sets: one session a week held cyclists'
+   strength and muscle for 13 weeks (Rønnestad 2010); intensity is what keeps it
+   (Spiering 2021). Endurance volume drops 40–60% with intensity kept (Bosquet 2007). */
+const upperKeep = (title = 'Upper · keep it (2 sets, same weights)') => ({ title, lift: 'upper', items: [
+  it('Bench press', '2×4', 'Same weight as week 13, RPE 7. Paired with the pull-ups.', { load: 'log kg' }),
+  it('Weighted pull-up', '2×4', 'Same weight as week 13, RPE 7.', { load: 'log kg' }),
+  it('Seated cable row', '2×10', '2 reps short of failure.'),
+  it('DB lateral raise', '2×15', ''),
+  it('EZ-bar curl + rope pushdown', '2×12 each', 'Superset, 2 reps short of failure.'),
+] });
+const lowerKeep = [
+  it('Back squat', '2×3', 'Same weight as week 13, RPE 7. Crisp, not grinding.', { load: 'log kg' }),
+  it('Sled push', '2×12.5 m', '', { load: '152 kg' }),
+  calf('Seated soleus raise', '2×15', ''),
+  calf('Standing calf raise, loaded', '2×12', 'Same load as week 13'),
+];
+const lightA = { kind: 'strength', title: 'Lower A · 2 sets, keep the load', duration: '45–55 min', intensity: 'Moderate', tags: ['Legs', 'Wall balls'], purpose: 'Strength maintenance: keep the weights, drop the volume.', blocks: [{ title: 'Strength', lift: 'lower', items: lowerKeep }, { title: 'Wall balls', items: [it('Wall balls at race rhythm', '3×20', '10 breaths between', { load: '6 kg' })] }], timers: [] };
 const WEEK14 = [
+  { kind: 'vo2', title: 'Bike 4×3 + easy run + Upper', duration: '60–70 min', intensity: 'Hard', tags: ['Bike', 'Upper body'], purpose: 'Short, sharp, done. Keeps the engine switched on before Santiago, then upper body at the same weights with half the sets.', blocks: [{ title: 'Warm-up · 10 min', items: [it('Easy spin, build to moderate', '10 min', '', { mode: 'bike' })] }, { title: 'Main', items: [it('4 × 3 min', '4×3', '{vo2w}', { mode: 'bike' })] }, { title: 'Run', items: [run('Easy run off the bike', '10 min', 'Easy', 10)] }, upperKeep()], timers: [T.bike44(4, 180)] },
   lightA,
-  { kind: 'vo2', title: 'Bike 4×3 + easy run', duration: '45 min', intensity: 'Hard', tags: ['Bike'], purpose: 'Short, sharp, done. Keeps the engine switched on before Santiago.', blocks: [{ title: 'Main', items: [it('4 × 3 min', '4×3', '{vo2w}', { mode: 'bike' })] }, { title: 'Run', items: [run('Easy run off the bike', '10 min', 'Easy', 10)] }], timers: [T.bike44(4, 180)] },
-  { kind: 'z2', title: 'Row Zone 2 + prehab', duration: '45 min', intensity: 'Easy', tags: ['RowErg'], purpose: 'Easy volume.', blocks: [{ title: 'Row', items: [it('Zone 2 row', '30 min', '', { mode: 'row' })] }, { title: 'Prehab', items: [calf('Straight-knee calf raise', '2×12', '')] }], timers: [] },
-  { kind: 'strength', title: 'Easy run + Strength B light', duration: '55 min', intensity: 'Moderate', tags: ['Run', 'BBJ'], purpose: 'Last loading before the rehearsal.', blocks: [{ title: 'Run', items: [run('Easy run + 4 strides', '20 min', 'Relaxed', 20)] }, { title: 'Strength', items: [it('Trap-bar deadlift', '2×3', 'Same load'), it('Sled pull', '2×12.5 m', '', { load: '103 kg' })] }, { title: 'BBJ', items: [jump('2 × 20 m BBJ', '40 m', 'Race rhythm only')] }], timers: [] },
+  { kind: 'z2', title: 'Row Zone 2 + prehab', duration: '45 min', intensity: 'Easy', tags: ['RowErg'], purpose: 'Easy volume.', blocks: [{ title: 'Row', items: [it('Zone 2 row', '30 min', '', { mode: 'row' })] }, { title: 'Prehab', items: [calf('Straight-knee calf raise', '2×12', ''), it('Copenhagen plank', '2×20 s/side', '', { mode: 'mobility' })] }], timers: [] },
+  { kind: 'strength', title: 'Easy run + Lower B light', duration: '50–60 min', intensity: 'Moderate', tags: ['Run', 'BBJ'], purpose: 'Last loading before the rehearsal: same weights, very few reps.', blocks: [{ title: 'Run', items: [run('Easy run + 4 strides', '20 min', 'Relaxed', 20)] }, { title: 'Strength', lift: 'lower', items: [it('Trap-bar deadlift', '2×3', 'Same weight, RPE 7', { load: 'log kg' }), it('Sled pull', '2×12.5 m', '', { load: '103 kg' })] }, { title: 'BBJ', items: [jump('2 × 20 m BBJ', '40 m', 'Race rhythm only')] }], timers: [] },
   { kind: 'recovery', title: 'Travel · shake-out', duration: '20 min', intensity: 'Easy', tags: [], purpose: 'Legs fresh. Carbs up (6–8 g/kg). Learn the venue map.', blocks: [{ title: 'Shake-out', items: [it('Easy spin or walk', '20 min', '+ 3 × 10 s pick-ups', { mode: 'bike' })] }], timers: [] },
   { kind: 'race', title: 'HYROX Santiago · dress rehearsal', duration: '~1:30', intensity: 'Race', tags: ['🇨🇱 Santiago'], purpose: 'Race at <b>about 95%</b>: execute the Buenos Aires pacing plan, fuelling and Roxzone habits exactly. Do not empty the tank on wall balls; you need to be fresh again in 14 days.', blocks: [{ title: 'Race', items: [it('Warm-up', '20–25 min', 'Race-day protocol (Race tab)'), it('Run your BA plan at ~95%', '1:30–1:32', 'Splits from the Race tab. Gels at Run 5 and Run 7.'), it('Log your splits', 'after', 'Update targets for Buenos Aires based on what you learn.')] }], timers: [],
     variantB: { kind: 'sim', title: 'Full simulation #2 (not racing Santiago)', duration: '100 min', intensity: 'Hard', tags: ['Race-specific'], purpose: 'If you skip Santiago, this is your final full rehearsal, 14 days out.', blocks: [{ title: '8 × (1 km + station) at 95%', items: [legRun(1), SKI_SUB, legRun(2), it('Sled push 50 m', '50 m', '', { load: '152 kg' }), legRun(3), it('Sled pull 50 m', '50 m', '', { load: '103 kg' }), legRun(4), jump('BBJ 80 m', '80 m', ''), legRun(5, 'Gel 1'), it('Row 1,000 m', '1,000 m', '', { mode: 'row' }), legRun(6), it('Farmers 200 m', '200 m', '', { load: '2×24 kg' }), legRun(7, 'Gel 2'), it('Lunges 100 m', '100 m', '', { load: '20 kg' }), legRun(8), it('Wall balls 100', '100', '', { load: '6 kg' })] }], timers: [] } },
   REST('Rest · travel home'),
 ];
+/* Week 15: runs Tue/Thu/Sat (alternate days); one lifting day for legs + upper,
+   10 days before Buenos Aires. */
 const WEEK15 = [
   { kind: 'recovery', title: 'Recovery spin + mobility', duration: '40 min', intensity: 'Easy', tags: ['Bike'], purpose: 'Two days after Santiago: flush the legs.', blocks: [{ title: 'Recovery', items: [it('Easy spin', '30 min', 'HR <135', { mode: 'bike' }), it('Mobility', '10 min', '', { mode: 'mobility' })] }], timers: [] },
-  { ...lightA, title: 'Strength A · taper', blocks: [{ title: 'Strength', items: [it('Squat', '2×3', 'Same load, crisp'), it('Sled push', '2×12.5 m', '', { load: '152 kg' }), calf('Seated soleus raise', '2×12', '')] }, { title: 'Wall balls', items: [it('Wall balls', '2×20', 'Race rhythm', { load: '6 kg' })] }] },
-  { kind: 'vo2', title: 'Bike 4×3 + easy run', duration: '45 min', intensity: 'Hard', tags: ['Bike'], purpose: 'Intensity stays, volume drops (Bosquet 2007 meta-analysis).', blocks: [{ title: 'Main', items: [it('4 × 3 min', '4×3', '{vo2w}', { mode: 'bike' })] }, { title: 'Run', items: [run('Easy run off the bike', '10 min', '', 10)] }], timers: [T.bike44(4, 180)] },
-  { kind: 'z2', title: 'Row Zone 2 + prehab', duration: '40 min', intensity: 'Easy', tags: ['RowErg'], purpose: 'Easy.', blocks: [{ title: 'Row', items: [it('Zone 2 row', '25 min', '', { mode: 'row' })] }, { title: 'Prehab', items: [calf('Calf raises', '2×12', '')] }], timers: [] },
+  { kind: 'vo2', title: 'Bike 4×3 + easy run', duration: '45 min', intensity: 'Hard', tags: ['Bike'], purpose: 'Intensity stays, volume drops (Bosquet 2007 meta-analysis).', blocks: [{ title: 'Warm-up · 10 min', items: [it('Easy spin, build to moderate', '10 min', '', { mode: 'bike' })] }, { title: 'Main', items: [it('4 × 3 min', '4×3', '{vo2w}', { mode: 'bike' })] }, { title: 'Run', items: [run('Easy run off the bike', '10 min', '', 10)] }], timers: [T.bike44(4, 180)] },
+  { ...lightA, title: 'Strength taper · legs + upper', duration: '55–65 min', purpose: 'Last lifting day before Buenos Aires (10 days out): same weights, 2 sets. Strength holds for weeks on this.', blocks: [{ title: 'Legs', lift: 'lower', items: lowerKeep }, { title: 'Wall balls', items: [it('Wall balls', '2×20', 'Race rhythm', { load: '6 kg' })] }, upperKeep('Upper · 2 sets, same weights')] },
   { kind: 'run', title: 'Easy run + race rhythm', duration: '45 min', intensity: 'Moderate', tags: ['Run', 'BBJ'], purpose: 'Keep the movements sharp.', blocks: [{ title: 'Run', items: [run('Easy run', '25 min', 'HR ≤150', 25)] }, { title: 'Rhythm', items: [jump('2 × 20 m BBJ', '40 m', 'Race rhythm'), it('Wall balls', '2×20', '', { load: '6 kg' })] }], timers: [] },
+  { kind: 'z2', title: 'Row Zone 2 + prehab', duration: '40 min', intensity: 'Easy', tags: ['RowErg'], purpose: 'Easy.', blocks: [{ title: 'Row', items: [it('Zone 2 row', '25 min', '', { mode: 'row' })] }, { title: 'Prehab', items: [calf('Calf raises', '2×12', '')] }], timers: [] },
   { kind: 'sim', title: 'Race-pace touches', duration: '50 min', intensity: 'Moderate', tags: ['Race-specific'], purpose: 'Last session with any intensity, 7 days out.', blocks: [{ title: '4 rounds, 2 min rest', items: [legRun('a', 'Race pace 5:30'), it('Short station', '1 min', 'Sled push 12.5 m / pull 12.5 m / 20 WB / 10 BBJ (rotate)', { mode: 'station' })] }], timers: [] },
   REST(),
 ];
 const WEEK16 = [
-  { kind: 'recovery', title: 'Easy spin + wall-ball rhythm', duration: '35 min', intensity: 'Easy', tags: ['Bike'], purpose: 'Race week. Nothing to gain, everything to lose: stay fresh.', blocks: [{ title: 'Session', items: [it('Easy spin', '20 min', '', { mode: 'bike' }), it('Wall balls', '3×10', 'Crisp', { load: '6 kg' })] }], timers: [] },
+  { kind: 'recovery', title: 'Easy spin + wall-ball rhythm', duration: '35 min', intensity: 'Easy', tags: ['Bike'], purpose: 'Race week. Nothing to gain, everything to lose: stay fresh.', blocks: [{ title: 'Session', items: [it('Easy spin', '20 min', '', { mode: 'bike' }), it('Wall balls', '3×10', 'Crisp', { load: '6 kg' })] }, { title: 'Upper · light pump', lift: 'upper', optional: true, items: [it('Bench press + pull-ups', '2×5 each', 'About 70% of your working weight, RPE 6. Nothing heavy in race week.'), it('Curls + pushdowns', '2×12 each', 'Easy pump, far from failure.')] }], timers: [] },
   { kind: 'vo2', title: 'Openers', duration: '35 min', intensity: 'Moderate', tags: ['Bike', 'Run'], purpose: 'Wake the engine up.', blocks: [{ title: 'Openers', items: [it('Bike 3 × 2 min', '3×2', 'At VO₂max power, 2 min easy between', { mode: 'bike' }), run('Easy run + 3 strides', '10 min', '', 10)] }], timers: [T.bike44(3, 120)] },
   REST('Rest · gear check', 'Shoes tested on a sled, gloves, gels, caffeine. Read the venue map.'),
   { kind: 'recovery', title: 'Shake-out', duration: '25 min', intensity: 'Easy', tags: [], purpose: 'Carb load starts (6–8 g/kg/day).', blocks: [{ title: 'Shake-out', items: [run('Easy jog + 3 strides', '15 min', '', 15), it('Wall balls', '10', '', { load: '6 kg' }), it('Sled push', '1×12.5 m', 'Light', { load: 'light' })] }], timers: [] },
@@ -371,7 +475,7 @@ function buildWeek(w) {
   if (w === 14) return WEEK14;
   if (w === 15) return WEEK15;
   if (w === 16) return WEEK16;
-  return [monStrengthA(w), tueVO2(w), wedRow(w), thuStrengthB(w), friZ2(w), satSession(w), REST()];
+  return [monVO2(w), lowerA(w), wedRow(w), thuLowerB(w), friZ2(w), satSession(w), REST()];
 }
 
 export const WEEKS = Array.from({ length: TOTAL_WEEKS + 1 }, (_, w) => ({
@@ -450,10 +554,11 @@ export function doSwap(w, a, b) {
 
 /* weekly load summary */
 export function weekStats(w) {
-  let runMin = 0, engineMin = 0, hard = 0, strength = 0, jumps = 0;
+  let runMin = 0, engineMin = 0, hard = 0, strength = 0, jumps = 0, lifts = 0;
   WEEKS[w].days.forEach(s => {
     if (HARD.has(s.kind) || s.kind === 'threshold') hard++;
     if (s.kind === 'strength') strength++;
+    if (s.blocks.some(b => b.lift === 'upper' || b.lift === 'lower')) lifts++;
     s.blocks.forEach(b => b.items.forEach(i => {
       if (i.mode === 'run') runMin += i.minutes || 0;
       if (i.mode === 'bike' || i.mode === 'row') {
@@ -470,7 +575,7 @@ export function weekStats(w) {
       }
     }));
   });
-  return { runMin, engineMin: Math.round(engineMin), hard, strength, jumps };
+  return { runMin, engineMin: Math.round(engineMin), hard, strength, jumps, lifts };
 }
 
 export const DOW_NAMES = DOW;

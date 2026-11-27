@@ -33,7 +33,7 @@ export const DAY_TYPES = {
     ],
   },
   training: {
-    id: 'training', label: 'Training day', short: 'Training', when: 'Mon, Wed, Thu, Fri: strength, rowing, long easy bike',
+    id: 'training', label: 'Training day', short: 'Training', when: 'Tue, Wed, Thu, Fri: legs, rowing + upper, run + legs, long easy bike',
     meals: [
       { id: 'breakfast', name: 'Breakfast', time: 'Morning', items: [EGGS, OATS(100), BANANA] },
       { id: 'pre', name: 'Before training', time: '60–90 min before', items: [...TOAST_HONEY] },
@@ -44,7 +44,7 @@ export const DAY_TYPES = {
     ],
   },
   big: {
-    id: 'big', label: 'Big day', short: 'Big day', when: 'Tue (bike intervals) and Sat (HYROX session)',
+    id: 'big', label: 'Big day', short: 'Big day', when: 'Mon (bike intervals + upper) and Sat (HYROX session)',
     meals: [
       { id: 'breakfast', name: 'Breakfast', time: 'Morning', items: [EGGS, OATS(100), BANANA] },
       { id: 'pre', name: 'Before training', time: '60–90 min before', items: [...TOAST_HONEY, BANANA] },

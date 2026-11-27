@@ -73,7 +73,7 @@ function garminDone(day, key, kind) {
   if (!acts.length) return '';
   const max = store.profile.maxHR;
   return `<div class="garmin-list">${acts.map(a => {
-    const hit = kind === 'vo2' && a.maxHr ? (a.maxHr >= Math.round(max * 0.9) ? `<span class="chip green">reached ${Math.round(max * 0.9)}+</span>` : `<span class="chip amber">peak ${a.maxHr}, target ${Math.round(max * 0.9)}+</span>`) : '';
+    const hit = kind === 'vo2' && /ride/i.test(a.type) && a.maxHr ? (a.maxHr >= Math.round(max * 0.9) ? `<span class="chip green">reached ${Math.round(max * 0.9)}+</span>` : `<span class="chip amber">peak ${a.maxHr}, target ${Math.round(max * 0.9)}+</span>`) : '';
     const bits = [a.mins ? `${a.mins} min` : '', a.km ? `${a.km} km` : '', a.avgHr ? `avg ${a.avgHr} bpm` : '', a.maxHr ? `max ${a.maxHr}` : '', a.watts ? `${Math.round(a.watts)} W` : '', runSteps(a) ? `${runSteps(a)} spm` : ''].filter(Boolean).join(' · ');
     const cad = runSteps(a) ? cadenceInfo() : null;
     const cadNote = cad && runSteps(a) < cad.target[0] ? `<span class="chip amber">cadence ${runSteps(a)}: aim ${cad.target[0]}+ to ease the shins</span>` : '';

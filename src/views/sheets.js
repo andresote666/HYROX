@@ -11,6 +11,7 @@ import { wellnessOn, syncNow, syncAgo } from '../logic/sync.js';
 import { RPE_LABELS, suggestedMinutes } from '../logic/load.js';
 import { sessionFor } from '../data/plan.js';
 import { autoGarmin } from '../actions.js';
+import { parseSet } from '../logic/lifts.js';
 
 const tone = (v, [g, y]) => (v <= g ? 'g' : v <= y ? 'y' : 'r');
 
@@ -102,7 +103,7 @@ function benchSheet(ui) {
     <p class="body-2" style="margin-bottom:14px">${esc(b.how)}</p>
     <div class="input-row">
       <div class="field grow"><label for="b-in">${b.unit === 'time' ? 'Time (m:ss)' : esc(b.unitLabel || b.unit)}</label>
-        <input id="b-in" class="input" ${b.unit === 'time' ? 'inputmode="numeric" placeholder="4:05"' : 'type="number" inputmode="decimal" step="any"'}></div>
+        <input id="b-in" class="input" ${b.unit === 'time' ? 'inputmode="numeric" placeholder="4:05"' : b.unit === 'e1rm' ? 'inputmode="text" placeholder="100 x 5" autocomplete="off"' : 'type="number" inputmode="decimal" step="any"'}></div>
       <div class="field" style="width:150px"><label for="b-date">Date</label><input id="b-date" class="input" type="date" value="${dayKey()}" style="font-size:14px"></div>
     </div>
     <div class="err" id="b-err"></div>
@@ -311,13 +312,15 @@ export function handleSheetAction(act, el, ui) {
     case 'save-bench': {
       const b = BENCHMARKS.find(x => x.id === el.dataset.id);
       const raw = document.getElementById('b-in').value;
-      const value = b.unit === 'time' ? parseTime(raw) : Number(raw);
+      const set = b.unit === 'e1rm' ? parseSet(raw) : null;
+      const value = b.unit === 'time' ? parseTime(raw) : b.unit === 'e1rm' ? set?.e1rm : Number(raw);
       if (!Number.isFinite(value) || value <= 0) {
-        document.getElementById('b-err').textContent = b.unit === 'time' ? 'Use minutes:seconds, for example 4:05.' : 'Enter a number.';
+        document.getElementById('b-err').textContent = b.unit === 'time' ? 'Use minutes:seconds, for example 4:05.'
+          : b.unit === 'e1rm' ? 'Use weight x reps, for example 100 x 5 (1–10 reps).' : 'Enter a number.';
         return true;
       }
       const date = document.getElementById('b-date').value || dayKey();
-      store.benchmarks.push({ id: b.id, date, value });
+      store.benchmarks.push({ id: b.id, date, value, ...(set ? { set: `${set.kg} × ${set.reps}` } : {}) });
       save();
       ui.sheet = null; render(); toast('Result saved');
       return true;

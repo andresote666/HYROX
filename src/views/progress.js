@@ -13,7 +13,7 @@ import { resolveDay } from '../logic/day.js';
 import { sessionFor } from '../data/plan.js';
 import { hrvStatus, runLoad, syncAgo, syncConfigured, vo2Trend, loadForm, cadenceInfo, intensityMix, latestBodyFat } from '../logic/sync.js';
 
-const fmtVal = (b, v) => (v === null || v === undefined ? '—' : b.unit === 'time' ? fmtSec(v) : b.unit === 'watts' ? `${Math.round(v)} W` : b.unit === 'bpm' ? `${Math.round(v)} bpm` : `${Math.round(v * 10) / 10}`);
+const fmtVal = (b, v) => (v === null || v === undefined ? '—' : b.unit === 'time' ? fmtSec(v) : b.unit === 'watts' ? `${Math.round(v)} W` : b.unit === 'bpm' ? `${Math.round(v)} bpm` : b.unit === 'e1rm' ? `${Math.round(v)} kg` : `${Math.round(v * 10) / 10}`);
 const shortDate = k => parseDay(k).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 
 function weightCard() {
