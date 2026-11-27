@@ -203,7 +203,7 @@ function upperA(w) {
   const m = musc(w);
   const test = w === 1 || w === 8 || w === 12;
   return [
-    { title: 'Upper A · heavy', lift: 'upper', items: [
+    { title: 'Upper A · heavy', lift: 'upper', groups: [3], items: [
       it('Bench press', heavyDose(w, UP_HEAVY(w)), `${RPE(w)} 2 warm-up sets first. Rotate bench → pull-up → lateral raise, about 90 s between.`, { load: 'log kg', bench: 'bp1rm' }),
       it(test ? 'Pull-ups: max-rep test, then weighted' : 'Weighted pull-up', heavyDose(w, UP_HEAVY(w)), test
         ? 'Test week: first set is strict bodyweight pull-ups to failure (log it), then the weighted sets.'
@@ -213,7 +213,7 @@ function upperA(w) {
     { title: 'Upper A · back', lift: 'upper', items: [
       it('Seated cable row (or chest-supported row)', `${m}×8–12`, '1–2 reps short of failure, 60–90 s rest.', { load: 'log kg' }),
     ] },
-    { title: 'Arms · superset', lift: 'upper', optional: true, items: [
+    { title: 'Arms · superset', lift: 'upper', optional: true, groups: [2], items: [
       it('EZ-bar curl', `${m}×8–12`, '1 rep short of failure. Alternate with the pushdowns, 60 s rest.'),
       it('Triceps rope pushdown', `${m}×10–15`, '1 rep short of failure.'),
     ] },
@@ -270,12 +270,12 @@ function lowerA(w) {
         it('Heavy sled push', `${sets(w, 4)}×12.5 m`, test ? 'Test week: after the work sets, 50 m at race weight for time (Progress → Sled push).' : 'About 110–115% of race load on your gym floor. Short powerful steps, low line.', { load: '152 kg +10–15%', ...(test ? { bench: 'push50' } : {}) }),
         it('Heavy sled pull', `${sets(w, 4)}×12.5 m`, test ? 'Test week: rest 5 min after the push test, then 50 m at race weight for time (Progress → Sled pull).' : 'Walk-back for the first metres, then hand-over-hand from a low, flat-footed squat. Rope to the side.', { load: '103 kg + sandbag', ...(test ? { bench: 'pull50' } : {}) }),
       ] },
-      { title: 'Hamstrings & soleus · superset', lift: 'lower', items: [
+      { title: 'Hamstrings & soleus · superset', lift: 'lower', groups: [2], items: [
         it('Nordic hamstring curl', nord, w <= 3 ? 'Kneel, feet held. Lower as slowly as you can, catch yourself with your hands, push back up. Expect sore hamstrings the first week: that is why it starts small.' : 'Lower slower than last week. Hands catch you at the bottom.'),
         calf('Seated soleus raise (bent knee)', `${sets(w, 3)}×15–20`, 'Alternate with the Nordics. Slow 2-1-2 tempo. Add load 5–10% a week if shins stay green.'),
       ] },
       { title: 'Wall-ball block', items: wb.items },
-      { title: 'Calves & shins · superset', lift: 'lower', items: [
+      { title: 'Calves & shins · superset', lift: 'lower', groups: [2], items: [
         calf('Standing calf raise, loaded', `${n}×10–15`, CALF_STAND),
         it('Tibialis raises', '2×20', 'Alternate with the calf raises. Back against a wall, heels down, toes up.', { mode: 'calf' }),
       ] },
@@ -290,13 +290,13 @@ const upperBOpt = w => musc(w) * 3;
 function upperB(w) {
   const m = musc(w);
   return [
-    { title: 'Upper B · press & pull', lift: 'upper', items: [
+    { title: 'Upper B · press & pull', lift: 'upper', groups: [2, 2], items: [
       it('Overhead press (barbell, or seated DB)', `${m}×6–10`, '1–2 reps short of failure. Alternate with the pulldowns, 90 s rest.', { load: 'log kg' }),
       it('Lat pulldown (or pull-ups)', `${m}×8–12`, '1–2 reps short of failure. Lats for the sled pull and the row.', { load: 'log kg' }),
       it('Incline DB press', `${m}×8–12`, '1–2 reps short of failure. Alternate with the face pulls.', { load: 'log kg' }),
       it('Face pulls', `${m}×15`, 'Rear delts and shoulder health for wall balls.', { load: 'light' }),
     ] },
-    { title: 'Dips & curls · superset', lift: 'upper', optional: true, items: [
+    { title: 'Dips & curls · superset', lift: 'upper', optional: true, groups: [2], items: [
       it('Dips (or close-grip push-ups)', `${m}×8–12`, 'Chest and triceps. Add weight once 12 is easy.'),
       it('Hammer curl', `${m}×10–15`, '1 rep short of failure. Also builds grip for the sled pull and farmers carry.'),
     ] },
@@ -343,7 +343,7 @@ function thuLowerB(w) {
         it('Trap-bar deadlift (or RDL)', `${dlSets}×${dl[1]}`, `${simWeek ? 'RPE 7 this week. ' : ''}${RPE(w)} Hips back, lats tight, 2 warm-up sets first.`, { load: 'log kg', bench: 'dl1rm' }),
       ] },
       { title: 'Burpee broad jumps', items: b.items },
-      { title: 'Leg muscle · tri-set', lift: 'lower', items: [
+      { title: 'Leg muscle · tri-set', lift: 'lower', groups: [3], items: [
         it('Leg press (or hack squat)', `${tri}×10–15`, 'Deep, controlled, 1–2 reps short of failure. Then straight to the leg curl.', { load: 'log kg' }),
         it('Lying or seated leg curl', `${tri}×10–15`, '1–2 reps short of failure. Then the calf raise, then 60 s rest.', { load: 'log kg' }),
         calf('Standing calf raise, loaded', `${tri}×10–15`, CALF_STAND),
@@ -368,7 +368,7 @@ function friZ2(w) {
         it('Zone 2 ride', `${mins - 5} min`, 'HR {z2}. Nasal breathing possible. Light knob, smooth ~90 rpm (15 right-foot turns per 10 s).', { mode: 'bike', only: 'watts' }),
         it('Zone 2 ride', `${mins} min`, 'HR {z2}. Nasal breathing possible. Light knob, smooth ~90 rpm (15 right-foot turns per 10 s).', { mode: 'bike', only: 'noWatts' }),
       ] },
-      { title: 'Core, carries & feet · 20 min', lift: 'core', items: [
+      { title: 'Core, carries & feet · 20 min', lift: 'core', groups: [2, 1, 1, 1, 1], items: [
         it('Ab wheel rollout (or dead bug)', `${n}×8–12`, 'Ribs down, no low-back sag. Alternate with the Pallof press.'),
         it('Pallof press', `${n}×10/side`, 'Anti-rotation: the trunk job in sled pulls and farmers carries.', { load: 'cable or band' }),
         it('Farmers carry, heavy', `${n}×50 m`, 'Grip and trunk. Short quick steps, heavier than race weight.', { load: '2×32 kg' }),
@@ -428,7 +428,7 @@ const WEEK0 = [
    Strength is kept with heavy loads and few sets: one session a week held cyclists'
    strength and muscle for 13 weeks (Rønnestad 2010); intensity is what keeps it
    (Spiering 2021). Endurance volume drops 40–60% with intensity kept (Bosquet 2007). */
-const upperKeep = (title = 'Upper · keep it (2 sets, same weights)') => ({ title, lift: 'upper', items: [
+const upperKeep = (title = 'Upper · keep it (2 sets, same weights)') => ({ title, lift: 'upper', groups: [2, 1, 1, 1], items: [
   it('Bench press', '2×4', 'Same weight as week 13, RPE 7. Paired with the pull-ups.', { load: 'log kg' }),
   it('Weighted pull-up', '2×4', 'Same weight as week 13, RPE 7.', { load: 'log kg' }),
   it('Seated cable row', '2×10', '2 reps short of failure.'),
