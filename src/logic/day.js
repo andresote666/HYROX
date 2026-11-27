@@ -39,10 +39,12 @@ export function resolveDay(key, { express = false } = {}) {
     if (capNote) notes.push(capNote);
   }
 
-  // 10% rule on the longest run in the last 30 days (Frandsen 2025)
+  // 10% rule on the longest run in the last 30 days (Frandsen 2025). Walk-runs
+  // (weeks 1–4) follow the return-to-run protocol instead: +1–2 running minutes a
+  // session, only while pain-free (research/02, R1).
   const load = runLoad(key);
   if (load.capMins && gate.allow && status !== 'red') {
-    const over = session.blocks.flatMap(b => b.items).find(i => i.mode === 'run' && !i.adapted && !i.hard && (i.minutes || 0) > load.capMins);
+    const over = session.blocks.flatMap(b => b.items).find(i => i.mode === 'run' && !i.adapted && !i.hard && !/walk/i.test(i.name) && (i.minutes || 0) > load.capMins);
     if (over) notes.push(`Longest run in the last 30 days was ${load.longestMins} min, so cap continuous running at ${load.capMins} min today (no run more than 10% longer).`);
   }
 

@@ -41,6 +41,7 @@ export const SOURCES = [
   ['Zhang et al. 2025, Sports Med: supersets vs traditional sets (meta-analysis)', 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12011898/'],
   ['Rønnestad, Hansen & Raastad 2010, EJAP: one strength session a week maintains gains', 'https://pubmed.ncbi.nlm.nih.gov/20799042/'],
   ['Brandt et al. 2025, Front Physiol: HYROX physiological demands', 'https://pmc.ncbi.nlm.nih.gov/articles/PMC11994925/'],
+  ['Warden et al. 2016 (adapted, BJSM blog): graded return-to-run for bone stress injury', 'https://blogs.bmj.com/bjsm/files/2019/05/Table-D-Graded-Return-to-Run-Program-for-Bone-Stress-Injury-adapted-from-Warden-et-al-2016.pdf'],
   ['Hybrid Fitness Media: HYROX competition standards 2026/27', 'https://hybridfitnessmedia.com/2026/06/24/hyrox-competition-standards-2026-27-season/'],
   ['Bosquet et al. 2007, MSSE: effects of tapering (meta-analysis)', 'https://pubmed.ncbi.nlm.nih.gov/17762369/'],
   ['Moen et al. 2009 review & 2012 RCT: medial tibial stress syndrome', 'https://pubmed.ncbi.nlm.nih.gov/22464032/'],

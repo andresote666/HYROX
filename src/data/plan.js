@@ -8,7 +8,7 @@
    Mon  VO₂max bike + short run off the bike + Upper A (heavy)  ← run 1
    Tue  Hops + Lower A: squat, both sleds, Nordics, calves + wall balls
    Wed  RowErg: Zone 2 (base) → threshold (build) + Upper B
-   Thu  Easy run + hops + Lower B: deadlift, BBJ, leg circuit   ← run 2
+   Thu  Long run (outdoors OK) + hops + Lower B: deadlift, BBJ   ← run 2
    Fri  Long Zone 2 bike + core, carries and feet
    Sat  HYROX compromised session / simulation                  ← run 3
    Sun  Rest
@@ -82,7 +82,11 @@ const VO2 = {
 };
 
 const MON_RUN = { 1: ['Walk-run', '4×(1′/1′)', 8], 2: ['Walk-run', '5×(1′/1′)', 10], 3: ['Walk-run', '5×(2′/1′)', 15], 4: ['Easy run-walk', '10 min', 10], 5: ['Easy run off the bike', '12 min', 12], 6: ['Easy run off the bike', '15 min', 15], 7: ['Easy run off the bike', '15 min', 15], 8: ['Easy run off the bike', '10 min', 10], 9: ['Easy run off the bike', '15 min', 15], 10: ['Easy run off the bike', '20 min', 20], 11: ['Easy run off the bike', '10 min', 10], 12: ['Easy run off the bike', '15 min', 15], 13: ['Easy run off the bike', '20 min', 20] };
-const THU_RUN = { 1: ['Walk-run', '6×(1′/1′)', 12], 2: ['Walk-run', '5×(2′/1′)', 15], 3: ['Walk-run', '4×(4′/1′)', 20], 4: ['Easy run', '15 min', 15], 5: ['Easy run', '20 min', 20], 6: ['Easy run', '25 min', 25], 7: ['Easy run + 4 strides', '25 min', 25], 8: ['Easy run', '20 min', 20], 9: ['Easy run + 4 strides', '30 min', 30], 10: ['Easy run', '35 min', 35], 11: ['Easy run', '20 min', 20], 12: ['Easy run + 4 strides', '30 min', 30], 13: ['Easy run + 4 strides', '35 min', 35] };
+/* Thursday = the long run: the longest run of the week, outdoors OK from week 4.
+   Each step stays within 10% of the longest run in the previous 30 days: bigger
+   single-run jumps raised overuse injuries 1.5–2.3× in 5,200 runners (Frandsen
+   2025). From a walk-run restart, that lands at about 33 min by week 13. */
+const THU_RUN = { 1: ['Walk-run', '6×(1′/1′)', 12], 2: ['Walk-run', '5×(2′/1′)', 15], 3: ['Walk-run', '4×(4′/1′)', 20], 4: ['Long run · first continuous', '15 min', 15], 5: ['Long run', '20 min', 20], 6: ['Long run', '22 min', 22], 7: ['Long run + 4 strides', '24 min', 24], 8: ['Long run · deload', '20 min', 20], 9: ['Long run + 4 strides', '26 min', 26], 10: ['Long run', '28 min', 28], 11: ['Easy run · sim week', '20 min', 20], 12: ['Long run + 4 strides', '30 min', 30], 13: ['Long run + 4 strides', '33 min', 33] };
 
 const ROW = {
   1: { title: 'Row 2,000 m test', items: [it('Row 2,000 m time trial', '2k', 'Damper 5–6. Even split, empty it over the last 300 m. Log the time.', { bench: 'row2k', mode: 'row' }), it('Zone 2 row', '15 min', 'Very easy, 18–20 spm', { mode: 'row' })], intensity: 'Hard' },
@@ -327,11 +331,13 @@ function thuLowerB(w) {
   const mins = r[2] + 5 + 3 + dlSets * 3 + BBJ_MIN[w] + tri * 4;
   const opt = 3; // dead hangs
   return {
-    kind: 'strength', title: `Run + Lower B · deadlift, burpees, hamstrings${isDeload(w) ? ' · deload' : ''}`, duration: dur(mins, opt), intensity: 'Moderate',
+    kind: 'strength', title: `${w <= 3 || w === 11 ? 'Run' : 'Long run'} + Lower B · deadlift, burpees${isDeload(w) ? ' · deload' : ''}`, duration: dur(mins, opt), intensity: 'Moderate',
     tags: ['Run', 'Legs', 'BBJ', 'Hamstrings'],
-    purpose: 'Easy run while fresh, hops, then the heavy hinge for the posterior chain, burpee broad jumps (Rio: 10:03 → target 6:45), and a quad-hamstring-calf circuit for leg muscle.' + (simWeek ? ' <b>Full simulation on Saturday: one set less and RPE 7.</b>' : ''),
+    purpose: `${w <= 3 ? 'Walk-run' : 'Long run'} while fresh, hops, then the heavy hinge for the posterior chain, burpee broad jumps (Rio: 10:03 → target 6:45), and a quad-hamstring-calf circuit for leg muscle.` + (simWeek ? ' <b>Full simulation on Saturday: one set less and RPE 7.</b>' : ''),
     blocks: [
-      { title: 'Easy run', items: [run(r[0], r[1], w <= 3 ? 'Treadmill 1% or flat soft surface. Quick steps. Stop if pain >3/10.' : 'HR ≤150 (Z2). Cadence +5% on your natural rhythm.', r[2])] },
+      { title: w <= 3 || w === 11 ? 'Easy run' : 'Long run · outdoors OK', items: [run(r[0], r[1], w <= 3
+        ? 'Treadmill 1% or flat soft surface. Quick steps. Stop if pain >3/10.'
+        : `Your longest run of the week. Outside is fine: even, flat-ish route, easy pace (HR ≤150, full sentences). Easy pace matters most: shinbone strain rises with speed. Cadence +5%. Never more than 10% longer than your longest run in the last 30 days (the app checks your Garmin runs).${w >= 9 ? ' Buenos Aires summer: go early and drink after.' : ''}`, r[2])] },
       hopsBlock(w),
       { title: 'Heavy · hinge', lift: 'lower', items: [
         it('Trap-bar deadlift (or RDL)', `${dlSets}×${dl[1]}`, `${simWeek ? 'RPE 7 this week. ' : ''}${RPE(w)} Hips back, lats tight, 2 warm-up sets first.`, { load: 'log kg', bench: 'dl1rm' }),
@@ -402,7 +408,7 @@ function satSession(w) {
   }
 }
 
-const REST = (title = 'Rest', note = 'Sleep 8+ h. Walk 20–30 min if you like. Protein still 1.8–2.2 g/kg.') => ({
+const REST = (title = 'Rest', note = 'Sleep 8+ h. An easy walk outside (20–45 min) is fine; no running: this is the shins\' day off between Saturday and Monday. Protein still 1.8–2.2 g/kg.') => ({
   kind: 'rest', title, duration: '—', intensity: 'Rest', tags: [], purpose: 'Adaptation happens here. Do the check-in anyway: it keeps the shin trend honest.',
   blocks: [{ title: 'Recovery', items: [it('Easy walk', '20–30 min', note, { mode: 'mobility' }), it('Mobility', '10 min', 'Calves, hips, T-spine', { mode: 'mobility' })] }], timers: [],
 });

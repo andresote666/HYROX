@@ -90,6 +90,20 @@ Weeks 1–2 start lower (7–10) so soreness doesn't spoil the first runs. Deloa
 - Same walk-run → continuous progression and 3 runs a week (research/02). The 10% longest-run rule, the run lock and your learned shin limit all still apply.
 - Running is deliberately the smallest part of the engine work because of the MTSS history. The bike and rower carry the aerobic load.
 
+## 5b. The long run (added 26 Nov after "can I have a Sunday long run?")
+
+**Decision:** no Sunday long run in this block. Thursday's run *is* the long run (the longest run of the week, outdoors allowed from week 4) and grows as fast as the evidence allows.
+
+- **What drives overuse injury is single-run spikes.** In 5,205 runners, a session more than 10% longer (by distance) than the longest of the previous 30 days raised the overuse-injury rate. Hazard rate ratios: 1.64 for a 10–30% spike, 1.52 for 30–100%, 2.28 for more than double. Week-to-week change was not significantly associated [EVIDENCE, Frandsen 2025; observational, self-reported injury].
+- **The old Thursday progression broke that rule** three times: 20 → 25, 25 → 30 and 30 → 35 min, steps of +17–25%. It now goes 15 → 20 → 22 → 24 → (20 deload) → 26 → 28 → (20 sim week) → 30 → 33 min. Each step stays within 10% of the longest run in the previous 30 days, checked by script. From a walk-run restart, about 33 min by week 13 is the honest ceiling, whatever day the run is on.
+- **Why not Sunday:**
+  1. Runs are on Mon, Thu and Sat, so a Sunday run makes Sat–Sun–Mon three running days in a row. Return-to-run programmes after tibial bone stress start with alternate days. Back-to-back days come as a later stage, "if appropriate" [EVIDENCE level: expert-opinion protocols; Warden 2016 adapted; Warden 2021].
+  2. Sunday is the only full rest day in a 6-day week with 4 lifting sessions.
+  3. The day after the HYROX session the calves and quads are tired. Fatigue increased tibial strain in vivo after a 2 km run or march [EVIDENCE, Milgrom 2007], though findings after much longer runs are mixed.
+- **Outdoor cues:** an easy pace matters most, because modelled tibial strain is sensitive to running speed more than to slope (2023 modelling preprint). Use an even route. The app's learned shin limit already splits treadmill and road runs, so it will show whether outdoor runs lead to amber mornings.
+- **Known spike [ANALYSIS]:** the full simulation in week 11 runs 8 × 1 km, about 8 km against a long run of about 28 min (≈4.5 km). It is the one deliberate spike before the races. Its amber rule (legs 2, 4 and 6 on the bike) stays, and having done 8 km in week 11 means Santiago in week 14 is not a spike.
+- **Next block (after Buenos Aires):** with settled shins and consecutive-day running tolerated, a Sunday long run can return.
+
 ## 6. Plyometrics (from the first pass, now Tue + Thu)
 - Small hops before lifting, green days only. Two-foot pogos first, single-leg pogos from week 6. At most 240 contacts a week including burpee broad jumps.
 - Plyometric training gives a small gain in leg stiffness. Under 250 jumps a week for more than 7 weeks worked best [EVIDENCE, Moran 2023].
@@ -144,4 +158,8 @@ Creatine monohydrate (3–5 g/day) is the best-supported supplement for adding s
 - Warden et al., bone loading review: https://pmc.ncbi.nlm.nih.gov/articles/PMC8316280/
 - Milgrom et al. 2000, BJSM, tibial strain in jumping vs running: https://pmc.ncbi.nlm.nih.gov/articles/PMC1763261/
 - van Dyk et al. 2019, BJSM, Nordic hamstring exercise: https://bjsm.bmj.com/content/53/21/1362.info
+- Frandsen et al. 2025, BJSM, high-risk running sessions (5,205 runners): https://pmc.ncbi.nlm.nih.gov/articles/PMC12421110
+- Warden et al. 2016, graded return-to-run (adapted table): https://blogs.bmj.com/bjsm/files/2019/05/Table-D-Graded-Return-to-Run-Program-for-Bone-Stress-Injury-adapted-from-Warden-et-al-2016.pdf
+- Milgrom et al. 2007, J Biomech 40:845–850, muscle fatigue and in vivo tibial strain (findings as summarised in: https://pmc.ncbi.nlm.nih.gov/articles/PMC11235695)
+- Tibial strains are sensitive to speed, but not grade (2023 preprint): https://arxiv.org/html/2305.04139v5
 - Kreider et al. 2017, JISSN, creatine position stand: https://jissn.biomedcentral.com/articles/10.1186/s12970-017-0173-z
