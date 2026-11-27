@@ -41,6 +41,8 @@ export const SOURCES = [
   ['Zhang et al. 2025, Sports Med: supersets vs traditional sets (meta-analysis)', 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12011898/'],
   ['Rønnestad, Hansen & Raastad 2010, EJAP: one strength session a week maintains gains', 'https://pubmed.ncbi.nlm.nih.gov/20799042/'],
   ['Brandt et al. 2025, Front Physiol: HYROX physiological demands', 'https://pmc.ncbi.nlm.nih.gov/articles/PMC11994925/'],
+  ['Stanley, Peake & Buchheit 2013, Sports Med: cardiac parasympathetic recovery after exercise', 'https://link.springer.com/doi/10.1007/s40279-013-0083-4'],
+  ['Díaz-Lara et al. 2024: delaying post-exercise carbohydrate impairs next-day high-intensity capacity', 'https://acuresearchbank.acu.edu.au/download/d852bdb103cd728debcfa7aed46b651425516cf9f7a234b4d3c390d18b4b89e6/6643287/OA_D%C3%ADaz-Lara_2024_Delaying_post-exercise_carbohydrate_intake_impairs.pdf'],
   ['Warden et al. 2016 (adapted, BJSM blog): graded return-to-run for bone stress injury', 'https://blogs.bmj.com/bjsm/files/2019/05/Table-D-Graded-Return-to-Run-Program-for-Bone-Stress-Injury-adapted-from-Warden-et-al-2016.pdf'],
   ['Hybrid Fitness Media: HYROX competition standards 2026/27', 'https://hybridfitnessmedia.com/2026/06/24/hyrox-competition-standards-2026-27-season/'],
   ['Bosquet et al. 2007, MSSE: effects of tapering (meta-analysis)', 'https://pubmed.ncbi.nlm.nih.gov/17762369/'],

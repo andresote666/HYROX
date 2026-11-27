@@ -19,7 +19,7 @@ export function reviewFor(todayKey) {
 export function buildReview(week, todayKey) {
   const last = weekDays(week - 1);
   const keys = new Set(last.map(d => d.key));
-  const planned = last.filter(d => d.session && !['rest'].includes(d.session.kind));
+  const planned = last.filter(d => d.session && d.session.kind !== 'rest' && (!d.session.optionalDay || store.done[d.key]?.complete));
   const done = planned.filter(d => store.done[d.key]?.complete).length;
 
   const checks = last.map(d => store.checkins[d.key]).filter(Boolean);

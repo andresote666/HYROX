@@ -23,7 +23,7 @@ const SALAD = F('Salad', 'leaves, tomato, cucumber', 50, 2, 10, 0);
 
 export const DAY_TYPES = {
   rest: {
-    id: 'rest', label: 'Rest day', short: 'Rest', when: 'Sunday and light recovery days',
+    id: 'rest', label: 'Rest day', short: 'Rest', when: 'Saturday, and Monday when you skip the optional ride',
     meals: [
       { id: 'breakfast', name: 'Breakfast', time: 'Morning', items: [EGGS, OATS(80), BANANA] },
       { id: 'lunch', name: 'Lunch', time: 'Midday', items: [CHICKEN(180), RICE(150), VEG, OIL] },
@@ -33,7 +33,7 @@ export const DAY_TYPES = {
     ],
   },
   training: {
-    id: 'training', label: 'Training day', short: 'Training', when: 'Tue, Wed, Thu, Fri: legs, rowing + upper, run + legs, long easy bike',
+    id: 'training', label: 'Training day', short: 'Training', when: 'Wed, Thu, Sun (+ Monday if you ride): legs, rowing + upper, long run + legs, easy bike',
     meals: [
       { id: 'breakfast', name: 'Breakfast', time: 'Morning', items: [EGGS, OATS(100), BANANA] },
       { id: 'pre', name: 'Before training', time: '60–90 min before', items: [...TOAST_HONEY] },
@@ -44,11 +44,11 @@ export const DAY_TYPES = {
     ],
   },
   big: {
-    id: 'big', label: 'Big day', short: 'Big day', when: 'Mon (bike intervals + upper) and Sat (HYROX session)',
+    id: 'big', label: 'Big day', short: 'Big day', when: 'Tue (bike intervals + upper) and Fri (HYROX session)',
     meals: [
       { id: 'breakfast', name: 'Breakfast', time: 'Morning', items: [EGGS, OATS(100), BANANA] },
       { id: 'pre', name: 'Before training', time: '60–90 min before', items: [...TOAST_HONEY, BANANA] },
-      { id: 'during', name: 'During (Saturday only)', time: 'Sessions over 75 min', items: [F('Sports drink', '500 ml', 120, 0, 30, 0, 'From week 9, practise your race gels here instead')], satOnly: true },
+      { id: 'during', name: 'During (HYROX session only)', time: 'Sessions over 75 min', items: [F('Sports drink', '500 ml', 120, 0, 30, 0, 'From week 9, practise your race gels here instead')], hyroxOnly: true },
       { id: 'lunch', name: 'Lunch', time: 'Midday', items: [CHICKEN(200), RICE(350), VEG, OIL] },
       { id: 'post', name: 'After training', time: 'Within 1 hour', items: [...SHAKE, F('Rice cakes + honey', '2 cakes, 1 tbsp', 134, 2, 32, 0)] },
       { id: 'snack', name: 'Afternoon', time: 'Afternoon', items: [...YOGURT, BANANA] },
@@ -57,10 +57,10 @@ export const DAY_TYPES = {
   },
 };
 
-export function totals(type, { saturday = true } = {}) {
+export function totals(type, { hyroxDay = true } = {}) {
   const t = { kcal: 0, p: 0, c: 0, f: 0 };
   DAY_TYPES[type].meals.forEach(m => {
-    if (m.satOnly && !saturday) return;
+    if (m.hyroxOnly && !hyroxDay) return;
     m.items.forEach(i => { t.kcal += i.kcal; t.p += i.p; t.c += i.c; t.f += i.f; });
   });
   return t;
@@ -120,7 +120,7 @@ export const SHOPPING = [
     ['bread', 'Whole-wheat bread', '1 loaf'],
     ['ricecakes', 'Rice cakes', '1 pack'],
     ['honey', 'Honey', '1 jar'],
-    ['sports', 'Sports drink', '1 bottle (Saturday)'],
+    ['sports', 'Sports drink', '1 bottle (Friday HYROX session)'],
   ] },
   { group: 'Fruit & veg', items: [
     ['banana', 'Bananas', '18'],

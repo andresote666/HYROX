@@ -18,28 +18,47 @@ Evidence labels: **[EVIDENCE]** peer-reviewed, **[ANALYSIS]** my reasoning from 
 
 The engine work (VO₂max, threshold, Zone 2), the running build-up for the shins and the Saturday HYROX sessions were already well supported (research/02 and /03). They are unchanged apart from their day.
 
-## 2. How the week is ordered, and why
+## 2. How the week is ordered, and why (final layout, 26 Nov)
+
+Andy doesn't train on Saturdays, wants a Sunday long run outdoors, and wants a second, optional rest day midweek. So the week has 5 key days, 1 optional day and Saturday off.
 
 | Day | Session | Run? |
 |---|---|---|
-| Mon | VO₂max bike + short run off the bike → **Upper A** (heavy bench + weighted pull-ups, lateral raises, cable row, arms) | ✓ |
-| Tue | Hops → **Lower A** (heavy squat, Bulgarian split squat, heavy sled push + pull, Nordic curl + soleus, wall-ball block, calves + tibialis) | |
-| Wed | RowErg (Zone 2 → threshold → 2k tests) → **Upper B** (overhead press + pulldown, incline press + face pull, dips + hammer curl) | |
-| Thu | Easy run → hops → **Lower B** (heavy trap-bar deadlift, BBJ block, leg press → leg curl → calf raise circuit) | ✓ |
-| Fri | Long Zone 2 bike → core, carries and feet (ab wheel, Pallof press, heavy farmers carry, Copenhagen, single-leg calf raise, balance) | |
-| Sat | HYROX compromised session / simulation | ✓ |
-| Sun | Rest | |
+| Mon | **Optional:** long Zone 2 bike → core, carries and feet (ab wheel, Pallof press, heavy farmers carry, Copenhagen, single-leg calf raise, balance). Skip it = 2 rest days. | |
+| Tue | VO₂max bike + short run off the bike → **Upper A** (heavy bench + weighted pull-ups, lateral raises, cable row, arms) | ✓ |
+| Wed | Hops → **Lower A** (heavy squat, Bulgarian split squat, heavy sled push + pull, Nordic curl + soleus, wall-ball block, calves + tibialis) | |
+| Thu | RowErg (Zone 2 → threshold → 2k tests) → **Upper B** (overhead press + pulldown, incline press + face pull, dips + hammer curl) | |
+| Fri | HYROX compromised session / simulation | ✓ |
+| Sat | Rest | |
+| Sun | Long run (outdoors) → hops → **Lower B** (heavy trap-bar deadlift, BBJ block, leg press → leg curl → calf raise circuit) | ✓ |
+
+The session contents are identical to the previous layout; only the days moved. A script checks every day of weeks 0–16, including Sunday→Monday boundaries. The checks: no back-to-back running days, no heavy legs the day before the intervals or a HYROX session, leg days ≥48 h apart, no back-to-back upper days, and Saturday always off.
 
 The order rests on these findings:
 
-- **Heavy leg lifting impairs endurance sessions for several hours to about 48 h**: soreness, poorer movement efficiency, less glycogen [EVIDENCE, Doma, Deakin & Bentley 2017 review]. So heavy legs are never the day before the bike intervals. The intervals come on Monday after the Sunday rest; the first heavy leg day is Tuesday.
-- **Cardio before lifting only weakens the muscles that did the cardio, and only for a few hours.** After cycling intervals, leg-press reps were down at 4 and 8 h and back to normal at 24 h. Bench press was not affected at all [EVIDENCE, Sporer & Wenger 2003]. So upper-body lifting can come straight after the bike (Mon) or the row (Wed), and Tuesday's squats come 24 h after the bike.
-- **Interference with muscle and max strength is small.** Concurrent training did not reduce gains in muscle size or max strength. Only explosive strength was blunted, mainly when both were done in the same session [EVIDENCE, Schumann 2022 meta-analysis, 43 studies]. An older meta-analysis found running interfered more than cycling [EVIDENCE, Wilson 2012]. Most of your engine work is on the bike and rower, which helps.
-- **When lifting and endurance share a session, lift first** if lower-body strength is the goal (+~7% dynamic strength); order did not change aerobic gains [EVIDENCE, Eddens 2018; Murlasits 2018]. Thursday therefore puts the easy run first: an easy 15–35 min run costs little, and the hops need warm legs. The deadlift comes before the burpees.
-- **Runs stay on alternate days** (Mon, Thu, Sat) for the shins (research/02).
-- **Hard days stay apart.** Leg days are 48 h apart. The Saturday simulation is 48 h after the deadlift. In the full-simulation week (11), Thursday drops a set and goes to RPE 7.
+- **Heavy leg lifting impairs endurance sessions for several hours to about 48 h**: soreness, poorer movement efficiency, less glycogen [EVIDENCE, Doma, Deakin & Bentley 2017 review]. So heavy legs are never the day before the intervals (Tue) or the HYROX session (Fri). Leg days are Wednesday and Sunday, 3–4 days apart.
+- **Cardio before lifting only weakens the muscles that did the cardio, and only for a few hours.** After cycling intervals, leg-press reps were down at 4 and 8 h and back to normal at 24 h. Bench press was not affected at all [EVIDENCE, Sporer & Wenger 2003]. So upper-body lifting comes straight after the bike (Tue) or the row (Thu), and Wednesday's squats come 24 h after the bike.
+- **Interference with muscle and max strength is small.** Concurrent training did not reduce gains in muscle size or max strength. Only explosive strength was blunted, mainly when both were done in the same session [EVIDENCE, Schumann 2022 meta-analysis, 43 studies]. An older meta-analysis found running interfered more than cycling [EVIDENCE, Wilson 2012]. Most engine work is on the bike and rower.
+- **When lifting and endurance share a session, lift first** if lower-body strength is the goal (+~7% dynamic strength); order did not change aerobic gains [EVIDENCE, Eddens 2018; Murlasits 2018]. Sunday still puts the easy run first: the run needs fresh legs for the shins, an easy 15–33 min run costs little, and the hops need warm legs.
+- **Runs stay on alternate days** (Tue, Fri, Sun) for the shins (research/02). Saturday and Monday have no running.
+- **The long run comes 48 h after the HYROX session, with a rest day between.** Tired calves may load the shinbone more [EVIDENCE, Milgrom 2007; mixed after longer runs].
+- **The optional day is the least essential session**: easy aerobic volume, the third calf day and direct core work. Skipping it leaves every key stimulus in place. Doing it adds endurance volume, which went with faster HYROX times [EVIDENCE, Brandt 2025, correlation, n=11]. The app does not count a skipped optional day as missed.
 
-**Known compromise [ANALYSIS]:** Wednesday's threshold row is 24 h after Tuesday's squats, so it may feel a little harder. That beats the old order, which put the VO₂max session 24 h after squats. Rowing threshold is paced by effort (RPE 7), and leg soreness from a familiar routine fades within a few weeks (the repeated-bout effect).
+**Why every other order is worse [ANALYSIS]:** with Sat off, Sun long run and one free weekday, the 5 demanding sessions (VO₂max, Lower A, threshold row, HYROX, Lower B) have to sit on Sun and Tue–Fri. Four demanding days in a row (Tue–Fri) are unavoidable, so the question is which pairings come back to back.
+- Good pairings: VO₂max → squats (strength is back by 24 h) and threshold row → lifting.
+- Pairings to avoid: squats → intervals or HYROX (Doma), two upper days in a row, and VO₂max → threshold.
+- Only one order meets all the hard rules: Tue VO₂max, Wed Lower A, Thu row, Fri HYROX.
+
+**Known compromises [ANALYSIS]:**
+1. Thursday's threshold row is 24 h after Wednesday's squats. This is the same compromise as before.
+2. **New:** Friday's HYROX session is 24 h after Thursday's threshold row.
+   - After threshold work, heart-rate variability takes 24–48 h to recover [EVIDENCE, Stanley, Peake & Buchheit 2013 review].
+   - Residual leg fatigue at 24 h is common, but there is little direct evidence that next-day performance drops [EVIDENCE, 2022–2026 small studies].
+   - Eating carbs straight after a session protects next-day high-intensity capacity when recovery is under 24 h [EVIDENCE, Díaz-Lara 2024].
+   - So Thursday's row says: RPE 7, never harder, carbs within an hour after.
+   - In 2k test weeks (1, 8, 12), Friday is a no-run circuit, a technique deload or the lighter half simulation.
+3. **The HYROX session is on a weekday.** It runs 75–95 min, and 100–110 min in weeks 11 and 13 (full simulation, race-pace half). "Move day" in the Plan tab can shift it if a Friday doesn't work, and the app warns if a swap breaks spacing.
+4. **Sunday is a gym day** after the long run.
 
 ## 3. Lifting
 
@@ -81,46 +100,46 @@ Weeks 1–2 start lower (7–10) so soreness doesn't spoil the first runs. Deloa
 - **Week 15:** one combined day on Wednesday, 10 days before Buenos Aires. This also fixes runs that used to fall on back-to-back days (now Tue, Thu, Sat).
 - **Week 16:** an optional light upper pump only.
 
-## 4. Engine (unchanged, moved to Monday)
+## 4. Engine (unchanged, now on Tuesday and Thursday)
 - **VO₂max on the bike:** 4×4, 5×4, 30/15s and 4×6 [EVIDENCE, Helgerud 2007; Rønnestad 2015/2020; Wen 2019] (research/02). The app still adds a rep after two good sessions.
 - **Rowing:** threshold work plus 2k tests in weeks 1, 8 and 12 (research/02). HYROX is endurance-dominant: about 80% of race time at "very hard" heart rates, with faster finishers having higher VO₂max, more endurance volume and less body fat [EVIDENCE, Brandt 2025, n=11].
 - **Intensity mix:** mostly easy work (pyramidal), as before [EVIDENCE, Rosenblat 2025].
 
 ## 5. Running and shins (unchanged)
-- Same walk-run → continuous progression and 3 runs a week (research/02). The 10% longest-run rule, the run lock and your learned shin limit all still apply.
+- Same walk-run → continuous progression and 3 runs a week (research/02): Tuesday off the bike, Friday in the HYROX session (from week 5), Sunday long run. The 10% longest-run rule, the run lock and your learned shin limit all still apply.
 - Running is deliberately the smallest part of the engine work because of the MTSS history. The bike and rower carry the aerobic load.
 
-## 5b. The long run (added 26 Nov after "can I have a Sunday long run?")
+## 5b. The long run (now on Sunday)
 
-**Decision:** no Sunday long run in this block. Thursday's run *is* the long run (the longest run of the week, outdoors allowed from week 4) and grows as fast as the evidence allows.
+**History:** first answered "no Sunday long run" while the HYROX session was on Saturday, because Sat–Sun–Mon would have been three running days in a row. Once Saturday became a rest day, the long run moved to Sunday: it is now 48 h after the HYROX session, with Saturday off before it. Same progression, outdoors allowed from week 4.
 
 - **What drives overuse injury is single-run spikes.** In 5,205 runners, a session more than 10% longer (by distance) than the longest of the previous 30 days raised the overuse-injury rate. Hazard rate ratios: 1.64 for a 10–30% spike, 1.52 for 30–100%, 2.28 for more than double. Week-to-week change was not significantly associated [EVIDENCE, Frandsen 2025; observational, self-reported injury].
 - **The old Thursday progression broke that rule** three times: 20 → 25, 25 → 30 and 30 → 35 min, steps of +17–25%. It now goes 15 → 20 → 22 → 24 → (20 deload) → 26 → 28 → (20 sim week) → 30 → 33 min. Each step stays within 10% of the longest run in the previous 30 days, checked by script. From a walk-run restart, about 33 min by week 13 is the honest ceiling, whatever day the run is on.
-- **Why not Sunday:**
-  1. Runs are on Mon, Thu and Sat, so a Sunday run makes Sat–Sun–Mon three running days in a row. Return-to-run programmes after tibial bone stress start with alternate days. Back-to-back days come as a later stage, "if appropriate" [EVIDENCE level: expert-opinion protocols; Warden 2016 adapted; Warden 2021].
-  2. Sunday is the only full rest day in a 6-day week with 4 lifting sessions.
-  3. The day after the HYROX session the calves and quads are tired. Fatigue increased tibial strain in vivo after a 2 km run or march [EVIDENCE, Milgrom 2007], though findings after much longer runs are mixed.
+- **Why it fits on Sunday now:**
+  1. Runs are Tue, Fri and Sun, all on alternate days. Return-to-run programmes after tibial bone stress start with alternate days [EVIDENCE level: expert-opinion protocols; Warden 2016 adapted; Warden 2021].
+  2. Saturday is a full rest day before it, and the next run is Tuesday.
+  3. It is 48 h after the HYROX session, not 24 h. Fatigue increased tibial strain in vivo after a 2 km run or march [EVIDENCE, Milgrom 2007], though findings after much longer runs are mixed.
 - **Outdoor cues:** an easy pace matters most, because modelled tibial strain is sensitive to running speed more than to slope (2023 modelling preprint). Use an even route. The app's learned shin limit already splits treadmill and road runs, so it will show whether outdoor runs lead to amber mornings.
 - **Known spike [ANALYSIS]:** the full simulation in week 11 runs 8 × 1 km, about 8 km against a long run of about 28 min (≈4.5 km). It is the one deliberate spike before the races. Its amber rule (legs 2, 4 and 6 on the bike) stays, and having done 8 km in week 11 means Santiago in week 14 is not a spike.
 - **Next block (after Buenos Aires):** with settled shins and consecutive-day running tolerated, a Sunday long run can return.
 
-## 6. Plyometrics (from the first pass, now Tue + Thu)
+## 6. Plyometrics (from the first pass, now Wed + Sun)
 - Small hops before lifting, green days only. Two-foot pogos first, single-leg pogos from week 6. At most 240 contacts a week including burpee broad jumps.
 - Plyometric training gives a small gain in leg stiffness. Under 250 jumps a week for more than 7 weeks worked best [EVIDENCE, Moran 2023].
 - Combined with heavy strength, plyometrics improve running economy more than either method alone [EVIDENCE, Llanos-Lagos 2024].
 - Bone responds to quick, varied impacts in small doses [EVIDENCE, Warden review]. Drop jumps did not strain the shinbone more than running [EVIDENCE, Milgrom 2000].
 - No trial shows hops prevent shin bone injuries. That use is **[ANALYSIS]**.
 - Amber mornings swap hops for calf raises and balance; red mornings or the return-to-run lock swap them for calf holds.
-- Nordic curls (now Tuesday) cut hamstring injuries by up to ~51% [EVIDENCE, van Dyk 2019].
+- Nordic curls (now Wednesday) cut hamstring injuries by up to ~51% [EVIDENCE, van Dyk 2019].
 
 ## 7. Time budget (estimated from the actual sets)
 
-| | Mon | Tue | Wed | Thu | Fri | Sat |
-|---|---|---|---|---|---|---|
-| Typical build week | 85–95 | ≈80 | 80–90 | 70–90 | 90 | 75–95 |
-| Deload week | 55–65 | 60–65 | 55–60 | 45–60 | 65–80 | 75–95 |
+| | Mon (optional) | Tue | Wed | Thu | Fri | Sat | Sun |
+|---|---|---|---|---|---|---|---|
+| Typical build week | 80–100 | 85–95 | ≈80 | 75–90 | 75–95 (100–110 in weeks 11, 13) | rest | 65–85 |
+| Deload week | 65–80 | 55–65 | 60–65 | 55–60 | 75–95 | rest | 45–60 |
 
-The first number is without the optional blocks. The longest Mondays (weeks 6, 9, 10) reach ~95 min with the arm superset; Fridays reach 100 with the optional mobility. On a short day, use "short on time" on Today, which drops only the optional blocks.
+The first number is without the optional blocks (arms on Tuesday, dips and curls on Thursday, mobility on Monday). The longest Tuesdays (weeks 6, 9, 10) reach ~95 min with the arm superset. On a short day, use "short on time" on Today, which drops only the optional blocks.
 
 ## 8. Optional: creatine
 Creatine monohydrate (3–5 g/day) is the best-supported supplement for adding strength and lean mass on top of lifting [EVIDENCE, Kreider 2017 ISSN position stand].
@@ -129,6 +148,9 @@ Creatine monohydrate (3–5 g/day) is the best-supported supplement for adding s
 
 ## Sources
 
+- Stanley, Peake & Buchheit 2013, Sports Med, cardiac parasympathetic reactivation after exercise: https://link.springer.com/doi/10.1007/s40279-013-0083-4
+- Díaz-Lara et al. 2024, delaying post-exercise carbohydrate impairs next-day high-intensity capacity: https://acuresearchbank.acu.edu.au/download/d852bdb103cd728debcfa7aed46b651425516cf9f7a234b4d3c390d18b4b89e6/6643287/OA_D%C3%ADaz-Lara_2024_Delaying_post-exercise_carbohydrate_intake_impairs.pdf
+- Residual fatigue 24 h after different HIIT formats (2026, Biology of Sport): https://www.termedia.pl/Repeated-sprint-training-induces-prolonged-residual-fatigue-r-ncompared-to-other-high-intensity-interval-training-modalities-r-nin-middle-distance-runners,78,57115,1,0.html
 - Doma, Deakin & Bentley 2017, Sports Med, impaired endurance after resistance training: https://researchonline.jcu.edu.au/49494/1/49494%20Doma%20et%20al%202017%20accepted.pdf
 - Sporer & Wenger 2003, JSCR, aerobic exercise before strength at 4/8/24 h: https://pubmed.ncbi.nlm.nih.gov/14636098/
 - Schumann et al. 2022, Sports Med, concurrent training compatibility: https://link.springer.com/article/10.1007/s40279-021-01587-7

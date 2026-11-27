@@ -198,7 +198,8 @@ function garminCard() {
 function adherenceCard() {
   const w = currentWeek();
   const days = weekDays(w);
-  const planned = days.filter(d => d.session.kind !== 'rest').length;
+  // the optional Monday only counts when you did it
+  const planned = days.filter(d => d.session.kind !== 'rest' && (!d.session.optionalDay || store.done[d.key]?.complete)).length;
   const done = days.filter(d => store.done[d.key]?.complete).length;
   const total = Object.values(store.done).filter(d => d.complete).length;
   return `

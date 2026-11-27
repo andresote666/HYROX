@@ -76,8 +76,8 @@ export function personalize(session) {
    match the menu. Deficit through week 11, +300 kcal from week 12. */
 export function fuelFor(session, week) {
   const type = dayTypeFor(session);
-  const sat = session?.dow === 5;
-  const t = totals(type, { saturday: sat });
+  const hyroxDay = ['sim', 'station'].includes(session?.kind);
+  const t = totals(type, { hyroxDay });
   const maint = week >= 12 || session?.kind === 'race';
   const learned = maint ? { delta: 0 } : calorieAdjust(week);
   const kcal = t.kcal + (maint ? 300 : 0) + learned.delta;

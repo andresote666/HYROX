@@ -15,13 +15,13 @@ export const BENCHMARKS = [
   },
   {
     id: 'hr180', requires: 'watts', why: 'Aerobic fitness: same effort, lower heart rate = fitter.', name: 'HR at 180 W (5 min)', unit: 'bpm', unitLabel: 'Heart rate at the end (bpm)', lowerBetter: true, goalPct: 5,
-    group: 'Engine', weeks: 'Every Friday',
-    how: 'At the start of the Friday Zone 2 ride, hold exactly 180 W for 5 minutes and note your heart rate at the end. A falling number means your aerobic engine is improving (Buchheit 2014).',
+    group: 'Engine', weeks: 'Every Monday (optional ride)',
+    how: 'At the start of the Monday Zone 2 ride, hold exactly 180 W for 5 minutes and note your heart rate at the end. A falling number means your aerobic engine is improving (Buchheit 2014).',
   },
   {
     id: 'hrRow', requires: 'noWatts', why: 'Aerobic fitness: same pace, lower heart rate = fitter.', name: 'HR at 2:35 row (5 min)', unit: 'bpm', unitLabel: 'Heart rate at the end (bpm)', lowerBetter: true, goalPct: 5,
-    group: 'Engine', weeks: 'Every Wednesday',
-    how: 'At the start of Wednesday\'s row: damper 5, about 20 strokes per minute, hold 2:35/500 m on the monitor for 5 minutes. Note your heart rate at the end (watch or chest strap). Same pace with a lower heart rate over the weeks = a stronger engine (Buchheit 2014).',
+    group: 'Engine', weeks: 'Every Thursday',
+    how: 'At the start of Thursday\'s row: damper 5, about 20 strokes per minute, hold 2:35/500 m on the monitor for 5 minutes. Note your heart rate at the end (watch or chest strap). Same pace with a lower heart rate over the weeks = a stronger engine (Buchheit 2014).',
   },
   {
     id: 'wb100', why: 'Wall-ball speed when fresh (Rio: 9:04 in the race).', name: '100 wall balls (fresh)', unit: 'time', lowerBetter: true, target: 270,
@@ -55,32 +55,32 @@ export const BENCHMARKS = [
   },
   {
     id: 'calfL', why: 'Calf and soleus endurance: protects the shins.', name: 'Single-leg heel raise, left', unit: 'reps', unitLabel: 'Reps to fatigue', lowerBetter: false, target: 30,
-    group: 'Shin capacity', weeks: 'Every Tuesday',
+    group: 'Shin capacity', weeks: 'Every Wednesday',
     how: 'Barefoot on the edge of a step, fingertips on the wall for balance. Full range, 1 rep every 2 s, until you can\'t reach full height. Shin-splint athletes average about 23, healthy runners about 33 (Madeley 2007). Goal: 30 per side, less than 10% difference between legs.',
   },
   {
     id: 'calfR', why: 'Calf and soleus endurance: protects the shins.', name: 'Single-leg heel raise, right', unit: 'reps', unitLabel: 'Reps to fatigue', lowerBetter: false, target: 30,
-    group: 'Shin capacity', weeks: 'Every Tuesday',
+    group: 'Shin capacity', weeks: 'Every Wednesday',
     how: 'Same protocol as the left leg. Test the weaker side first next time.',
   },
   {
     id: 'sq1rm', why: 'Leg strength for sleds, lunges and wall balls.', name: 'Back squat · estimated max', unit: 'e1rm', unitLabel: 'Heaviest set: weight x reps', lowerBetter: false, goalPct: 5,
-    group: 'Strength', weeks: 'Any Tuesday: your heaviest work set',
+    group: 'Strength', weeks: 'Any Wednesday: your heaviest work set',
     how: 'Type your heaviest work set as weight x reps, for example 100 x 5. Only sets with 2+ reps left (RPE 8 or less). The app turns it into an estimated 1-rep max (Epley formula), so 3×5, 4×4 and 4×3 weeks compare fairly. Goal: +5% by March while losing weight.',
   },
   {
     id: 'dl1rm', why: 'Posterior chain for the sled pull and the hinge in every station.', name: 'Trap-bar deadlift · estimated max', unit: 'e1rm', unitLabel: 'Heaviest set: weight x reps', lowerBetter: false, goalPct: 5,
-    group: 'Strength', weeks: 'Any Thursday: your heaviest work set',
+    group: 'Strength', weeks: 'Any Sunday: your heaviest work set',
     how: 'Same as the squat: heaviest work set as weight x reps (RPE 8 or less). Estimated 1-rep max, so different rep schemes compare fairly.',
   },
   {
     id: 'bp1rm', why: 'Upper-body strength: the muscle you keep while you diet.', name: 'Bench press · estimated max', unit: 'e1rm', unitLabel: 'Heaviest set: weight x reps', lowerBetter: false, goalPct: 5,
-    group: 'Strength', weeks: 'Any Monday: your heaviest work set',
+    group: 'Strength', weeks: 'Any Tuesday: your heaviest work set',
     how: 'Heaviest work set as weight x reps (RPE 8 or less), for example 90 x 6. Holding or raising this while the scale drops means you are keeping muscle.',
   },
   {
     id: 'pullups', why: 'Relative pulling strength: rises as you get stronger and lighter.', name: 'Strict pull-ups, max reps', unit: 'reps', unitLabel: 'Strict reps', lowerBetter: false, goalPct: 20,
-    group: 'Strength', weeks: 'Weeks 1, 8, 12 (Monday)',
+    group: 'Strength', weeks: 'Weeks 1, 8, 12 (Tuesday)',
     how: 'Dead hang, chin over the bar, full lockout at the bottom, no kipping. First set of Upper A in the test weeks, before the weighted sets.',
   },
   {

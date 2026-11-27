@@ -1,4 +1,4 @@
-import { store, dayKey, parseDay } from '../store.js';
+import { store, dayKey } from '../store.js';
 import { icons } from '../ui/icons.js';
 import { esc } from '../ui/components.js';
 import { DAY_TYPES, totals, mealTotals, dayTypeFor, MAINTENANCE_ADD, LAST_YEAR, SWAPS, SHOPPING, PREP, RACE_FOOD } from '../data/meals.js';
@@ -18,8 +18,8 @@ function menu(ui) {
   const todayType = dayTypeFor(session);
   const type = ui.foodType || todayType;
   const d = DAY_TYPES[type];
-  const isSat = parseDay(today).getDay() === 6;
-  const t = totals(type, { saturday: type === 'big' ? isSat : false });
+  const hyroxDay = ['sim', 'station'].includes(session?.kind);
+  const t = totals(type, { hyroxDay: type === 'big' ? hyroxDay : false });
   const { week } = weekOf(today);
   const maint = week >= 12;
   const adj = maint ? { delta: 0 } : calorieAdjust(week);
@@ -110,7 +110,7 @@ function swaps() {
 function why() {
   const s = LAST_YEAR.said, a = LAST_YEAR.actual;
   const row = (label, x, y, z) => `<div class="cmp-row"><span>${label}</span><span class="num faint">${x}</span><span class="num faint">${y}</span><span class="num">${z}</span></div>`;
-  const r = totals('rest'), tr = totals('training'), b = totals('big', { saturday: false });
+  const r = totals('rest'), tr = totals('training'), b = totals('big', { hyroxDay: false });
   return `
     <section class="card guide-card rise" style="--i:1">
       <div class="eyebrow">Your 2025 "45 Days Challenge" diet</div>

@@ -210,7 +210,7 @@ function simWorkout(s) {
   return w.empty ? [] : [w];
 }
 
-/* Other days: each stretch of bike, run or row becomes its own workout (Monday = bike, then the run off the bike).
+/* Other days: each stretch of bike, run or row becomes its own workout (Tuesday = bike, then the run off the bike).
    Lifting stays in the app. The watch name drops the " + Upper A" part of the title. */
 function cardioWorkouts(s) {
   const out = [];
